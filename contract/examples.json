@@ -1,0 +1,411 @@
+{
+  "_note": "Contract examples. All repos and numbers are fictional. Each case must validate against outputSchema (test_contract.py).",
+  "suspicious": {
+    "contract_version": "1.1",
+    "repo": {
+      "full_name": "example-owner/claude-mcp-installer",
+      "in_scope": true,
+      "scope_rule": {
+        "keyword_version": "kw-v1",
+        "matched": [
+          "claude",
+          "mcp"
+        ]
+      }
+    },
+    "verdict": "suspicious",
+    "recommendation": "review_before_install",
+    "summary": "2 of 3 popularity signals fired: most stars came from near-inactive accounts that starred in lockstep. Review before installing.",
+    "signals": [
+      {
+        "name": "low_activity_accounts",
+        "status": "computed",
+        "fired": true,
+        "score": 0.82,
+        "evidence": {
+          "stargazers": 412,
+          "low_activity": 338,
+          "ratio": 0.82,
+          "threshold": 0.5
+        },
+        "window": {
+          "start": "2025-09-01T00:00:00Z",
+          "end": "2025-09-30T23:59:59Z"
+        },
+        "rule_version": "sa-v1",
+        "definition": "Share of stargazers in the window whose accounts have almost no other public activity; fires above the threshold.",
+        "owner": "gh-maintainer"
+      },
+      {
+        "name": "lockstep",
+        "status": "computed",
+        "fired": true,
+        "score": 0.71,
+        "evidence": {
+          "group_size": 290,
+          "shared_repos": 14,
+          "time_window_hours": 6
+        },
+        "window": {
+          "start": "2025-09-01T00:00:00Z",
+          "end": "2025-09-30T23:59:59Z"
+        },
+        "rule_version": "sb-v1",
+        "definition": "Groups of accounts that starred the same set of repositories within a few hours; fires when a large group includes this repo.",
+        "owner": "gh-maintainer"
+      },
+      {
+        "name": "name_imitation",
+        "status": "computed",
+        "fired": false,
+        "score": 0.12,
+        "evidence": {
+          "closest": null,
+          "edit_distance": null
+        },
+        "window": {
+          "start": "2025-09-01T00:00:00Z",
+          "end": "2025-09-30T23:59:59Z"
+        },
+        "rule_version": "sc-v1",
+        "definition": "Edit distance from the repository name to well-known repositories; fires when the name is a near-copy.",
+        "owner": "gh-maintainer"
+      }
+    ],
+    "data_health": {
+      "status": "ok",
+      "coverage": {
+        "window_start": "2025-09-01T00:00:00Z",
+        "window_end": "2025-09-30T23:59:59Z",
+        "hours_expected": 720,
+        "hours_ok": 720
+      },
+      "issues": []
+    },
+    "provenance": {
+      "rule_version": "verdict-v1",
+      "input_snapshot": "manifest:3f9a1c",
+      "code_version": "git:a1b2c3d",
+      "decided_at": "2025-10-01T03:00:00Z",
+      "sources": [
+        {
+          "table": "dim_actor",
+          "columns": [
+            "actor_id",
+            "non_star_event_count"
+          ]
+        },
+        {
+          "table": "dim_repo",
+          "columns": [
+            "repo_name"
+          ]
+        },
+        {
+          "table": "fact_star_event",
+          "columns": [
+            "actor_id",
+            "repo_id",
+            "starred_at"
+          ]
+        }
+      ]
+    }
+  },
+  "no_signal": {
+    "contract_version": "1.1",
+    "repo": {
+      "full_name": "example-owner/mcp-weather",
+      "in_scope": true,
+      "scope_rule": {
+        "keyword_version": "kw-v1",
+        "matched": [
+          "mcp"
+        ]
+      }
+    },
+    "verdict": "no_signal",
+    "recommendation": "no_known_issue",
+    "summary": "No fake-popularity signal fired. This says nothing about whether the code is safe.",
+    "signals": [
+      {
+        "name": "low_activity_accounts",
+        "status": "computed",
+        "fired": false,
+        "score": 0.08,
+        "evidence": {
+          "stargazers": 95,
+          "low_activity": 8,
+          "ratio": 0.08,
+          "threshold": 0.5
+        },
+        "window": {
+          "start": "2025-09-01T00:00:00Z",
+          "end": "2025-09-30T23:59:59Z"
+        },
+        "rule_version": "sa-v1",
+        "definition": "Share of stargazers in the window whose accounts have almost no other public activity; fires above the threshold.",
+        "owner": "gh-maintainer"
+      },
+      {
+        "name": "lockstep",
+        "status": "failed",
+        "fired": false,
+        "score": null,
+        "evidence": {
+          "error": "job timeout"
+        },
+        "window": {
+          "start": "2025-09-01T00:00:00Z",
+          "end": "2025-09-30T23:59:59Z"
+        },
+        "rule_version": "sb-v1",
+        "definition": "Groups of accounts that starred the same set of repositories within a few hours; fires when a large group includes this repo.",
+        "owner": "gh-maintainer"
+      }
+    ],
+    "data_health": {
+      "status": "degraded",
+      "coverage": {
+        "window_start": "2025-09-01T00:00:00Z",
+        "window_end": "2025-09-30T23:59:59Z",
+        "hours_expected": 720,
+        "hours_ok": 719
+      },
+      "issues": [
+        {
+          "check": "row_count_baseline",
+          "target": "fact_repo_event/dt=2025-09-20",
+          "detail": "ForkEvent count 41% below baseline",
+          "affects": []
+        }
+      ]
+    },
+    "provenance": {
+      "rule_version": "verdict-v1",
+      "input_snapshot": "manifest:3f9a1c",
+      "code_version": "git:a1b2c3d",
+      "decided_at": "2025-10-01T03:00:00Z",
+      "sources": [
+        {
+          "table": "dim_actor",
+          "columns": [
+            "actor_id",
+            "non_star_event_count"
+          ]
+        },
+        {
+          "table": "fact_star_event",
+          "columns": [
+            "actor_id",
+            "repo_id",
+            "starred_at"
+          ]
+        }
+      ]
+    }
+  },
+  "untrusted": {
+    "contract_version": "1.1",
+    "repo": {
+      "full_name": "example-owner/agent-skills-pack",
+      "in_scope": true,
+      "scope_rule": {
+        "keyword_version": "kw-v1",
+        "matched": [
+          "skills+agent"
+        ]
+      }
+    },
+    "verdict": "no_signal",
+    "recommendation": "cannot_assess",
+    "summary": "No signal fired, but 5 source hours behind the lockstep signal are missing, so this result should not be trusted.",
+    "signals": [
+      {
+        "name": "low_activity_accounts",
+        "status": "computed",
+        "fired": false,
+        "score": 0.21,
+        "evidence": {
+          "stargazers": 120,
+          "low_activity": 25,
+          "ratio": 0.21,
+          "threshold": 0.5
+        },
+        "window": {
+          "start": "2025-09-01T00:00:00Z",
+          "end": "2025-09-30T23:59:59Z"
+        },
+        "rule_version": "sa-v1",
+        "definition": "Share of stargazers in the window whose accounts have almost no other public activity; fires above the threshold.",
+        "owner": "gh-maintainer"
+      },
+      {
+        "name": "lockstep",
+        "status": "computed",
+        "fired": false,
+        "score": 0.3,
+        "evidence": {
+          "group_size": 18,
+          "shared_repos": 3,
+          "time_window_hours": 6
+        },
+        "window": {
+          "start": "2025-09-01T00:00:00Z",
+          "end": "2025-09-30T23:59:59Z"
+        },
+        "rule_version": "sb-v1",
+        "definition": "Groups of accounts that starred the same set of repositories within a few hours; fires when a large group includes this repo.",
+        "owner": "gh-maintainer"
+      }
+    ],
+    "data_health": {
+      "status": "untrusted",
+      "coverage": {
+        "window_start": "2025-09-01T00:00:00Z",
+        "window_end": "2025-09-30T23:59:59Z",
+        "hours_expected": 720,
+        "hours_ok": 715
+      },
+      "issues": [
+        {
+          "check": "hourly_files_complete",
+          "target": "raw/dt=2025-09-14",
+          "detail": "hours 03-07 source_missing",
+          "affects": [
+            "lockstep",
+            "low_activity_accounts"
+          ]
+        }
+      ]
+    },
+    "provenance": {
+      "rule_version": "verdict-v1",
+      "input_snapshot": "manifest:3f9a1c",
+      "code_version": "git:a1b2c3d",
+      "decided_at": "2025-10-01T03:00:00Z",
+      "sources": [
+        {
+          "table": "dim_actor",
+          "columns": [
+            "actor_id",
+            "non_star_event_count"
+          ]
+        },
+        {
+          "table": "fact_star_event",
+          "columns": [
+            "actor_id",
+            "repo_id",
+            "starred_at"
+          ]
+        }
+      ]
+    }
+  },
+  "insufficient_data": {
+    "contract_version": "1.1",
+    "repo": {
+      "full_name": "example-owner/cursor-rules-kit",
+      "in_scope": true,
+      "scope_rule": {
+        "keyword_version": "kw-v1",
+        "matched": [
+          "cursorrules"
+        ]
+      }
+    },
+    "verdict": "insufficient_data",
+    "recommendation": "cannot_assess",
+    "summary": "Only 4 stars in the window; too little activity to judge.",
+    "signals": [
+      {
+        "name": "low_activity_accounts",
+        "status": "skipped",
+        "fired": false,
+        "score": null,
+        "evidence": {
+          "stargazers": 4,
+          "min_required": 20
+        },
+        "window": {
+          "start": "2025-09-01T00:00:00Z",
+          "end": "2025-09-30T23:59:59Z"
+        },
+        "rule_version": "sa-v1",
+        "definition": "Share of stargazers in the window whose accounts have almost no other public activity; fires above the threshold.",
+        "owner": "gh-maintainer"
+      }
+    ],
+    "data_health": {
+      "status": "ok",
+      "coverage": {
+        "window_start": "2025-09-01T00:00:00Z",
+        "window_end": "2025-09-30T23:59:59Z",
+        "hours_expected": 720,
+        "hours_ok": 720
+      },
+      "issues": []
+    },
+    "provenance": {
+      "rule_version": "verdict-v1",
+      "input_snapshot": "manifest:3f9a1c",
+      "code_version": "git:a1b2c3d",
+      "decided_at": "2025-10-01T03:00:00Z",
+      "sources": [
+        {
+          "table": "dim_actor",
+          "columns": [
+            "actor_id",
+            "non_star_event_count"
+          ]
+        },
+        {
+          "table": "fact_star_event",
+          "columns": [
+            "actor_id",
+            "repo_id",
+            "starred_at"
+          ]
+        }
+      ]
+    }
+  },
+  "not_tracked": {
+    "contract_version": "1.1",
+    "repo": {
+      "full_name": "example-owner/todo-app",
+      "in_scope": false,
+      "scope_rule": null
+    },
+    "verdict": "not_tracked",
+    "recommendation": "cannot_assess",
+    "summary": "This repository is outside the tracked scope (AI skills and MCP servers), so no signals were computed.",
+    "signals": [],
+    "data_health": {
+      "status": "ok",
+      "coverage": {
+        "window_start": "2025-09-01T00:00:00Z",
+        "window_end": "2025-09-30T23:59:59Z",
+        "hours_expected": 720,
+        "hours_ok": 720
+      },
+      "issues": []
+    },
+    "provenance": {
+      "rule_version": "verdict-v1",
+      "input_snapshot": "manifest:3f9a1c",
+      "code_version": "git:a1b2c3d",
+      "decided_at": "2025-10-01T03:00:00Z",
+      "sources": [
+        {
+          "table": "dim_repo",
+          "columns": [
+            "in_scope",
+            "repo_name"
+          ]
+        }
+      ]
+    }
+  }
+}

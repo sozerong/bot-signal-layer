@@ -1,0 +1,179 @@
+{
+  "name": "check_popularity_signals",
+  "title": "Check GitHub popularity signals before install",
+  "description": "Before installing an AI skill or MCP server from GitHub, ask whether its popularity (stars) shows signs of being faked. Returns a verdict, the signals behind it, and whether the data behind the verdict can be trusted. Scope and limits: it judges only popularity signals, never whether the code is malicious; 'no_signal' does not mean safe; data comes from GH Archive public events for a fixed past window shown in data_health.coverage, not from live GitHub. A verdict is a suspicion signal, not an accusation.",
+  "annotations": {
+    "readOnlyHint": true,
+    "idempotentHint": true,
+    "openWorldHint": false
+  },
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "repo": {
+        "type": "string",
+        "description": "owner/name or https://github.com/owner/name",
+        "pattern": "^(https?://github\\.com/)?[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})/[A-Za-z0-9._-]{1,100}/?$"
+      }
+    },
+    "required": ["repo"],
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["contract_version", "repo", "verdict", "recommendation", "summary", "signals", "data_health", "provenance"],
+    "additionalProperties": false,
+    "properties": {
+      "contract_version": {
+        "description": "Minor bump = fields added (old clients keep working). Major bump = field removed or meaning changed.",
+        "type": "string",
+        "pattern": "^1\\.[0-9]+$"
+      },
+      "repo": {
+        "type": "object",
+        "required": ["full_name", "in_scope", "scope_rule"],
+        "additionalProperties": false,
+        "properties": {
+          "full_name": {"type": "string", "description": "Normalized owner/name"},
+          "in_scope": {"type": "boolean", "description": "Matched the target-repo keyword rule (D5)"},
+          "scope_rule": {
+            "type": ["object", "null"],
+            "required": ["keyword_version", "matched"],
+            "additionalProperties": false,
+            "properties": {
+              "keyword_version": {"type": "string"},
+              "matched": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        }
+      },
+      "verdict": {
+        "description": "suspicious: at least one signal fired. no_signal: signals computed, none fired (NOT 'safe'). insufficient_data: tracked but too little activity to judge. not_tracked: outside target scope or never seen.",
+        "enum": ["suspicious", "no_signal", "insufficient_data", "not_tracked"]
+      },
+      "recommendation": {
+        "description": "What the calling agent should do. Derived from verdict and data_health; see allOf rules.",
+        "enum": ["review_before_install", "no_known_issue", "cannot_assess"]
+      },
+      "summary": {"type": "string", "maxLength": 300, "description": "One sentence an agent can relay to the user."},
+      "signals": {
+        "description": "One entry per signal. Names are open (adding a signal must not change this contract).",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["name", "definition", "owner", "status", "fired", "score", "evidence", "window", "rule_version"],
+          "additionalProperties": false,
+          "properties": {
+            "name": {"type": "string"},
+            "definition": {"type": "string", "maxLength": 200, "description": "One sentence: what this signal measures and when it fires. From the rule ledger (D16). Added in 1.1."},
+            "owner": {"type": "string", "description": "Who answers for this rule. From the rule ledger (D16). Added in 1.1."},
+            "status": {"enum": ["computed", "failed", "skipped"]},
+            "fired": {"type": "boolean"},
+            "score": {"type": ["number", "null"]},
+            "evidence": {"type": "object", "description": "Signal-specific numbers behind the score."},
+            "window": {
+              "type": "object",
+              "required": ["start", "end"],
+              "additionalProperties": false,
+              "properties": {"start": {"type": "string", "format": "date-time"}, "end": {"type": "string", "format": "date-time"}}
+            },
+            "rule_version": {"type": "string"}
+          }
+        }
+      },
+      "data_health": {
+        "type": "object",
+        "required": ["status", "coverage", "issues"],
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "description": "ok: no failed checks. degraded: checks failed but lineage says they do not reach this verdict. untrusted: a failed check reaches at least one signal used here.",
+            "enum": ["ok", "degraded", "untrusted"]
+          },
+          "coverage": {
+            "type": "object",
+            "required": ["window_start", "window_end", "hours_expected", "hours_ok"],
+            "additionalProperties": false,
+            "properties": {
+              "window_start": {"type": "string", "format": "date-time"},
+              "window_end": {"type": "string", "format": "date-time", "description": "Data is as of this time. Nothing after it is known."},
+              "hours_expected": {"type": "integer", "minimum": 0},
+              "hours_ok": {"type": "integer", "minimum": 0}
+            }
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["check", "target", "detail", "affects"],
+              "additionalProperties": false,
+              "properties": {
+                "check": {"type": "string"},
+                "target": {"type": "string", "description": "Table or partition that failed"},
+                "detail": {"type": "string"},
+                "affects": {"type": "array", "items": {"type": "string"}, "description": "Signal names in the lineage blast radius"}
+              }
+            }
+          }
+        }
+      },
+      "provenance": {
+        "description": "Same input_snapshot + rule_version + code_version must give the same response (D8).",
+        "type": "object",
+        "required": ["rule_version", "input_snapshot", "code_version", "decided_at", "sources"],
+        "additionalProperties": false,
+        "properties": {
+          "sources": {
+            "description": "Tables and columns this verdict was computed from, found by walking lineage upstream (D14). Added in 1.1.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["table", "columns"],
+              "additionalProperties": false,
+              "properties": {
+                "table": {"type": "string"},
+                "columns": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+              }
+            }
+          },
+          "rule_version": {"type": "string"},
+          "input_snapshot": {"type": "string"},
+          "code_version": {"type": "string"},
+          "decided_at": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "allOf": [
+      {
+        "if": {"properties": {"verdict": {"const": "suspicious"}}},
+        "then": {
+          "properties": {
+            "recommendation": {"const": "review_before_install"},
+            "signals": {"contains": {"properties": {"fired": {"const": true}}}}
+          }
+        }
+      },
+      {
+        "if": {"properties": {"verdict": {"const": "no_signal"}, "data_health": {"properties": {"status": {"enum": ["ok", "degraded"]}}}}},
+        "then": {"properties": {"recommendation": {"const": "no_known_issue"}}}
+      },
+      {
+        "if": {"properties": {"verdict": {"const": "no_signal"}, "data_health": {"properties": {"status": {"const": "untrusted"}}}}},
+        "then": {"properties": {"recommendation": {"const": "cannot_assess"}}}
+      },
+      {
+        "if": {"properties": {"verdict": {"enum": ["insufficient_data", "not_tracked"]}}},
+        "then": {"properties": {"recommendation": {"const": "cannot_assess"}}}
+      },
+      {
+        "if": {"properties": {"verdict": {"const": "not_tracked"}}},
+        "then": {"properties": {"signals": {"maxItems": 0}}}
+      },
+      {
+        "if": {"properties": {"verdict": {"const": "no_signal"}}},
+        "then": {"properties": {"signals": {"minItems": 1, "items": {"properties": {"fired": {"const": false}}}}}}
+      }
+    ]
+  }
+}
