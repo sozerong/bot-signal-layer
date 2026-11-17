@@ -1,0 +1,17 @@
+# 로컬용: bot-job 컨테이너 하나. 레포를 /work로 붙인다 (implementation_design.md 8절 L1-2).
+#   docker compose run --rm bot-job pytest
+#   Spark UI를 볼 때: docker compose run --rm --service-ports bot-job python -m ...  (run은 포트를 기본으로 열지 않는다)
+services:
+  bot-job:
+    build: .
+    image: bot-job:4.1.2
+    volumes:
+      - ./:/work
+    # ponytail: 하루치(압축 2.6GB) 기준 첫 값. L3에서 실제 사용량을 보고 고친다
+    mem_limit: 24g
+    memswap_limit: 24g
+    environment:
+      BOT_CATALOG: local
+      SPARK_DRIVER_MEMORY: 16g
+    ports:
+      - "4040:4040"

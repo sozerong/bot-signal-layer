@@ -1,0 +1,8 @@
+# 근거마다 계열과 지금 쓰는 규칙 버전 (implementation_design.md 4.2절).
+# SQL은 sql/evidence/<이름>/<버전>.sql. 옛 버전 파일은 지우지 않는다 (평가에서 버전끼리 비교).
+# lockstep_ratio가 v2로 시작하는 이유: 사전 실험 v1(절대 수)은 트렌딩 저장소 오탐으로 버렸다.
+declared_app:   {family: self_report,  current: v1, entity: gh_account}
+always_on:      {family: behavior,     current: v1, entity: gh_account}
+low_activity:   {family: coordination, current: v1, entity: [gh_account, gh_repo]}
+lockstep_ratio: {family: coordination, current: v2, entity: gh_repo}
+burst_5m:       {family: coordination, current: v1, entity: gh_repo}
