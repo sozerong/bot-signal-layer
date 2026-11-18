@@ -1,0 +1,185 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1190" viewBox="0 0 2000 1190"><defs><marker id="ah7A8494" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7A8494"/></marker><marker id="ahE07B39" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#E07B39"/></marker><marker id="ah7C5CC4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7C5CC4"/></marker><marker id="ah3B82F6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#3B82F6"/></marker><marker id="ah2E9E6B" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2E9E6B"/></marker><marker id="ahD04A4A" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#D04A4A"/></marker><marker id="ah1A9AA0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1A9AA0"/></marker></defs><rect x="0" y="0" width="2000" height="1190" fill="#fff"/><text x="50" y="44" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="24" font-weight="700" fill="#1F2329" text-anchor="start">컬럼 리니지 구조</text>
+<text x="50" y="72" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="400" fill="#6B7280" text-anchor="start">위: 층마다 컬럼을 역할로 묶은 지도 (선은 묶음 사이의 흐름)   아래: 규칙 하나를 바꿨을 때 다시 계산할 범위를 정하는 순서</text>
+<rect x="40" y="95" width="1920" height="640" rx="14" fill="#F4F5F7" stroke="none" stroke-width="1.5"/>
+<text x="58" y="125" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="16.5" font-weight="700" fill="#4B5563" text-anchor="start">A. 컬럼 지도</text>
+<text x="70" y="150" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#1F2329" text-anchor="start">Bronze</text>
+<text x="70" y="172" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13" font-weight="400" fill="#6B7280" text-anchor="start">소스별 원본 필드</text>
+<rect x="70" y="190" width="300" height="84" rx="10" fill="#F4F5F7" stroke="#7A8494" stroke-width="1.8"/>
+<text x="84" y="216" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1F2329" text-anchor="start">GH Archive</text>
+<text x="84" y="240" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">type · actor.id · actor.login</text>
+<text x="84" y="262" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">repo.name · created_at</text>
+<rect x="70" y="290" width="300" height="84" rx="10" fill="#F4F5F7" stroke="#7A8494" stroke-width="1.8"/>
+<text x="84" y="316" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1F2329" text-anchor="start">Zanbil (nginx)</text>
+<text x="84" y="340" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">ip · time · request</text>
+<text x="84" y="362" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">status · referrer · user_agent</text>
+<rect x="70" y="390" width="300" height="84" rx="10" fill="#F4F5F7" stroke="#7A8494" stroke-width="1.8"/>
+<text x="84" y="416" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1F2329" text-anchor="start">EClog (CSV)</text>
+<text x="84" y="440" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">UserId · TimeStamp</text>
+<text x="84" y="462" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">Uri · UserAgent</text>
+<text x="450" y="150" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#1F2329" text-anchor="start">Silver · events</text>
+<text x="450" y="172" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13" font-weight="400" fill="#6B7280" text-anchor="start">공통 이벤트 모델</text>
+<rect x="450" y="190" width="300" height="84" rx="10" fill="#F4F5F7" stroke="#7A8494" stroke-width="1.8"/>
+<text x="464" y="216" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1F2329" text-anchor="start">누가</text>
+<text x="464" y="240" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">actor_key · actor_name</text>
+<text x="464" y="262" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">session_key</text>
+<rect x="450" y="288" width="300" height="62" rx="10" fill="#F4F5F7" stroke="#7A8494" stroke-width="1.8"/>
+<text x="464" y="314" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1F2329" text-anchor="start">언제</text>
+<text x="464" y="338" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">event_ts</text>
+<rect x="450" y="364" width="300" height="62" rx="10" fill="#F4F5F7" stroke="#7A8494" stroke-width="1.8"/>
+<text x="464" y="390" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1F2329" text-anchor="start">무엇을</text>
+<text x="464" y="414" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">action · target</text>
+<rect x="450" y="440" width="300" height="84" rx="10" fill="#F4F5F7" stroke="#7A8494" stroke-width="1.8"/>
+<text x="464" y="466" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1F2329" text-anchor="start">어떻게 (클라이언트)</text>
+<text x="464" y="490" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">client_ua · client_ip</text>
+<text x="464" y="512" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">referrer · status</text>
+<rect x="450" y="538" width="300" height="62" rx="10" fill="#F4F5F7" stroke="#7A8494" stroke-width="1.8"/>
+<text x="464" y="564" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1F2329" text-anchor="start">출처</text>
+<text x="464" y="588" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">source (gh / zanbil / eclog)</text>
+<text x="830" y="150" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#1F2329" text-anchor="start">Silver · entity_features</text>
+<text x="830" y="172" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13" font-weight="400" fill="#6B7280" text-anchor="start">대상 × 날짜, 한 번만 집계</text>
+<rect x="830" y="190" width="300" height="62" rx="10" fill="#F4F5F7" stroke="#7A8494" stroke-width="1.8"/>
+<text x="844" y="216" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1F2329" text-anchor="start">양</text>
+<text x="844" y="240" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">n_events</text>
+<rect x="830" y="266" width="300" height="84" rx="10" fill="#F4F5F7" stroke="#7A8494" stroke-width="1.8"/>
+<text x="844" y="292" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1F2329" text-anchor="start">시간 모양</text>
+<text x="844" y="316" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">active_hours · gap_gini</text>
+<text x="844" y="338" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">max_5m_share</text>
+<rect x="830" y="364" width="300" height="62" rx="10" fill="#F4F5F7" stroke="#7A8494" stroke-width="1.8"/>
+<text x="844" y="390" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1F2329" text-anchor="start">요청 모양</text>
+<text x="844" y="414" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">asset_share</text>
+<rect x="830" y="440" width="300" height="84" rx="10" fill="#F4F5F7" stroke="#7A8494" stroke-width="1.8"/>
+<text x="844" y="466" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1F2329" text-anchor="start">관계</text>
+<text x="844" y="490" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">low_activity</text>
+<text x="844" y="512" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">co_star_with_target</text>
+<rect x="830" y="538" width="300" height="84" rx="10" fill="#F4F5F7" stroke="#7A8494" stroke-width="1.8"/>
+<text x="844" y="564" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1F2329" text-anchor="start">그대로 전달 (집계 안 함)</text>
+<text x="844" y="588" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">actor_name · client_ua</text>
+<text x="844" y="610" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">client_ip · action</text>
+<text x="1210" y="150" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#1F2329" text-anchor="start">Silver · evidence</text>
+<text x="1210" y="172" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13" font-weight="400" fill="#6B7280" text-anchor="start">evidence_id별 행, 계열마다 색</text>
+<rect x="1210" y="190" width="300" height="62" rx="10" fill="#E9F6EF" stroke="#2E9E6B" stroke-width="1.8"/>
+<text x="1224" y="216" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#2E9E6B" text-anchor="start">자기 신고</text>
+<text x="1224" y="240" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">declared_app · declared_ua</text>
+<rect x="1210" y="266" width="300" height="62" rx="10" fill="#E6F5F6" stroke="#1A9AA0" stroke-width="1.8"/>
+<text x="1224" y="292" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1A9AA0" text-anchor="start">인프라</text>
+<text x="1224" y="316" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">ip_verified_crawler</text>
+<rect x="1210" y="342" width="300" height="62" rx="10" fill="#EAF1FE" stroke="#3B82F6" stroke-width="1.8"/>
+<text x="1224" y="368" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#3B82F6" text-anchor="start">행동</text>
+<text x="1224" y="392" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">always_on · assetless_browser</text>
+<rect x="1210" y="418" width="300" height="62" rx="10" fill="#F1ECFB" stroke="#7C5CC4" stroke-width="1.8"/>
+<text x="1224" y="444" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#7C5CC4" text-anchor="start">조직</text>
+<text x="1224" y="468" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">lockstep_ratio · burst_5m</text>
+<rect x="1210" y="494" width="300" height="62" rx="10" fill="#FCEFE6" stroke="#E07B39" stroke-width="1.8"/>
+<text x="1224" y="520" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#E07B39" text-anchor="start">확정 사람</text>
+<text x="1224" y="544" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">purchase</text>
+<text x="1590" y="150" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#1F2329" text-anchor="start">Gold</text>
+<text x="1590" y="172" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13" font-weight="400" fill="#6B7280" text-anchor="start">분석팀이 쓰는 컬럼</text>
+<rect x="1590" y="190" width="340" height="106" rx="10" fill="#F4F5F7" stroke="#7A8494" stroke-width="1.8"/>
+<text x="1604" y="216" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1F2329" text-anchor="start">실유저 판정 (정책별)</text>
+<text x="1604" y="240" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">real_user_lenient.is_real_user</text>
+<text x="1604" y="262" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">real_user_balanced.is_real_user</text>
+<text x="1604" y="284" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">real_user_strict.is_real_user</text>
+<rect x="1590" y="310" width="340" height="106" rx="10" fill="#F4F5F7" stroke="#7A8494" stroke-width="1.8"/>
+<text x="1604" y="336" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1F2329" text-anchor="start">지표</text>
+<text x="1604" y="360" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">impact.star_count_real  (GH)</text>
+<text x="1604" y="382" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">impact.view_count_real  (웹)</text>
+<text x="1604" y="404" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">impact.conversion_real  (웹)</text>
+<rect x="1590" y="430" width="340" height="84" rx="10" fill="#F4F5F7" stroke="#7A8494" stroke-width="1.8"/>
+<text x="1604" y="456" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="700" fill="#1F2329" text-anchor="start">평가</text>
+<text x="1604" y="480" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">evaluation.precision · recall</text>
+<text x="1604" y="502" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#374151" text-anchor="start">모든 근거 × truth (검증 구조 그림)</text>
+<path d="M372,232.0 C408.5,232.0 408.5,232.0 445,232.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M372,232.0 C408.5,232.0 408.5,319.0 445,319.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M372,232.0 C408.5,232.0 408.5,395.0 445,395.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M372,332.0 C408.5,332.0 408.5,232.0 445,232.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M372,332.0 C408.5,332.0 408.5,319.0 445,319.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M372,332.0 C408.5,332.0 408.5,395.0 445,395.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M372,432.0 C408.5,432.0 408.5,232.0 445,232.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M372,432.0 C408.5,432.0 408.5,319.0 445,319.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M372,432.0 C408.5,432.0 408.5,395.0 445,395.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M372,332.0 C408.5,332.0 408.5,482.0 445,482.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M372,432.0 C408.5,432.0 408.5,482.0 445,482.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M752,232.0 C788.5,232.0 788.5,221.0 825,221.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M752,319.0 C788.5,319.0 788.5,308.0 825,308.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M752,395.0 C788.5,395.0 788.5,395.0 825,395.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M752,395.0 C788.5,395.0 788.5,482.0 825,482.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M752,232.0 C788.5,232.0 788.5,580.0 825,580.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M752,482.0 C788.5,482.0 788.5,580.0 825,580.0" fill="none" stroke="#7A8494" stroke-width="2.2" opacity="0.55" marker-end="url(#ah7A8494)"/>
+<path d="M1132,580.0 C1168.5,580.0 1168.5,221.0 1205,221.0" fill="none" stroke="#2E9E6B" stroke-width="2.2" opacity="0.8" marker-end="url(#ah2E9E6B)"/>
+<path d="M1132,580.0 C1168.5,580.0 1168.5,297.0 1205,297.0" fill="none" stroke="#1A9AA0" stroke-width="2.2" opacity="0.8" marker-end="url(#ah1A9AA0)"/>
+<path d="M1132,221.0 C1168.5,221.0 1168.5,373.0 1205,373.0" fill="none" stroke="#3B82F6" stroke-width="2.2" opacity="0.8" marker-end="url(#ah3B82F6)"/>
+<path d="M1132,308.0 C1168.5,308.0 1168.5,373.0 1205,373.0" fill="none" stroke="#3B82F6" stroke-width="2.2" opacity="0.8" marker-end="url(#ah3B82F6)"/>
+<path d="M1132,395.0 C1168.5,395.0 1168.5,373.0 1205,373.0" fill="none" stroke="#3B82F6" stroke-width="2.2" opacity="0.8" marker-end="url(#ah3B82F6)"/>
+<path d="M1132,482.0 C1168.5,482.0 1168.5,449.0 1205,449.0" fill="none" stroke="#7C5CC4" stroke-width="2.2" opacity="0.8" marker-end="url(#ah7C5CC4)"/>
+<path d="M1132,308.0 C1168.5,308.0 1168.5,449.0 1205,449.0" fill="none" stroke="#7C5CC4" stroke-width="2.2" opacity="0.8" marker-end="url(#ah7C5CC4)"/>
+<path d="M1132,580.0 C1168.5,580.0 1168.5,525.0 1205,525.0" fill="none" stroke="#E07B39" stroke-width="2.2" opacity="0.8" marker-end="url(#ahE07B39)"/>
+<path d="M1512,221.0 C1548.5,221.0 1548.5,243.0 1585,243.0" fill="none" stroke="#2E9E6B" stroke-width="2.2" opacity="0.8" marker-end="url(#ah2E9E6B)"/>
+<path d="M1512,297.0 C1548.5,297.0 1548.5,243.0 1585,243.0" fill="none" stroke="#1A9AA0" stroke-width="2.2" opacity="0.8" marker-end="url(#ah1A9AA0)"/>
+<path d="M1512,373.0 C1548.5,373.0 1548.5,243.0 1585,243.0" fill="none" stroke="#3B82F6" stroke-width="2.2" opacity="0.8" marker-end="url(#ah3B82F6)"/>
+<path d="M1512,449.0 C1548.5,449.0 1548.5,243.0 1585,243.0" fill="none" stroke="#7C5CC4" stroke-width="2.2" opacity="0.8" marker-end="url(#ah7C5CC4)"/>
+<path d="M1512,525.0 C1548.5,525.0 1548.5,243.0 1585,243.0" fill="none" stroke="#E07B39" stroke-width="2.2" opacity="0.8" marker-end="url(#ahE07B39)"/>
+<polyline points="1760.0,296 1760.0,307" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
+<polyline points="1512,525.0 1555,525.0 1555,472.0 1585,472.0" fill="none" stroke="#7A8494" stroke-width="1.8" marker-end="url(#ah7A8494)"/>
+<text x="1950" y="150" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="1" font-weight="500" fill="#1F2329" text-anchor="start"></text>
+<text x="1590" y="613" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="700" fill="#4B5563" text-anchor="start">정책이 쓰는 근거 계열 (초안)</text>
+<text x="1718" y="637" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="#2E9E6B" text-anchor="middle">자기 신고</text>
+<text x="1782" y="637" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="#1A9AA0" text-anchor="middle">인프라</text>
+<text x="1846" y="637" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="#7C5CC4" text-anchor="middle">조직</text>
+<text x="1910" y="637" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="11.5" font-weight="600" fill="#3B82F6" text-anchor="middle">행동</text>
+<text x="1590" y="665" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="600" fill="#374151" text-anchor="start">lenient</text>
+<circle cx="1718" cy="660" r="8" fill="#2E9E6B"/>
+<circle cx="1782" cy="660" r="8" fill="none" stroke="#C4C9D2" stroke-width="1.5"/>
+<circle cx="1846" cy="660" r="8" fill="none" stroke="#C4C9D2" stroke-width="1.5"/>
+<circle cx="1910" cy="660" r="8" fill="none" stroke="#C4C9D2" stroke-width="1.5"/>
+<text x="1590" y="691" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="600" fill="#374151" text-anchor="start">balanced</text>
+<circle cx="1718" cy="686" r="8" fill="#2E9E6B"/>
+<circle cx="1782" cy="686" r="8" fill="#1A9AA0"/>
+<circle cx="1846" cy="686" r="8" fill="#7C5CC4"/>
+<circle cx="1910" cy="686" r="8" fill="none" stroke="#C4C9D2" stroke-width="1.5"/>
+<text x="1590" y="717" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="600" fill="#374151" text-anchor="start">strict</text>
+<circle cx="1718" cy="712" r="8" fill="#2E9E6B"/>
+<circle cx="1782" cy="712" r="8" fill="#1A9AA0"/>
+<circle cx="1846" cy="712" r="8" fill="#7C5CC4"/>
+<circle cx="1910" cy="712" r="8" fill="#3B82F6"/>
+<rect x="40" y="760" width="1920" height="400" rx="14" fill="#F4F5F7" stroke="none" stroke-width="1.5"/>
+<text x="58" y="790" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="16.5" font-weight="700" fill="#7C5CC4" text-anchor="start">B. 예시: lockstep_ratio 규칙을 v2 → v3로 바꾸면</text>
+<rect x="70" y="815" width="440" height="315" rx="10" fill="#fff" stroke="#7C5CC4" stroke-width="2"/>
+<text x="90" y="852" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#7C5CC4" text-anchor="start">1. 바뀐 컬럼</text>
+<text x="90" y="880" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14" font-weight="400" fill="#6B7280" text-anchor="start">evidence.lockstep_ratio</text>
+<text x="90" y="902" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14" font-weight="400" fill="#6B7280" text-anchor="start">rule_version: v2 → v3</text>
+<text x="90" y="946" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#374151" text-anchor="start">입력(위쪽 계보):</text>
+<text x="90" y="972" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#374151" text-anchor="start">events.actor_key · target · event_ts</text>
+<text x="90" y="998" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#374151" text-anchor="start">→ features.low_activity</text>
+<text x="90" y="1024" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#374151" text-anchor="start">→ features.co_star_with_target</text>
+<polyline points="514,972 536,972" fill="none" stroke="#7C5CC4" stroke-width="2.5" marker-end="url(#ah7C5CC4)"/>
+<rect x="540" y="815" width="440" height="315" rx="10" fill="#fff" stroke="#7C5CC4" stroke-width="2"/>
+<text x="560" y="852" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#7C5CC4" text-anchor="start">2. 컬럼 리니지로 범위 찾기</text>
+<text x="560" y="880" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14" font-weight="400" fill="#6B7280" text-anchor="start">아래쪽 계보를 따라감</text>
+<text x="560" y="924" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="600" fill="#7C5CC4" text-anchor="start">O real_user_balanced</text>
+<text x="560" y="950" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="600" fill="#7C5CC4" text-anchor="start">O real_user_strict</text>
+<text x="560" y="976" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="600" fill="#9AA1AD" text-anchor="start">X real_user_lenient (조직 근거 안 씀)</text>
+<text x="560" y="1002" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="600" fill="#7C5CC4" text-anchor="start">O impact.star_count_real</text>
+<text x="560" y="1028" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="600" fill="#7C5CC4" text-anchor="start">O impact.view_count_real</text>
+<text x="560" y="1054" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="600" fill="#7C5CC4" text-anchor="start">O impact.conversion_real</text>
+<text x="560" y="1080" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="600" fill="#7C5CC4" text-anchor="start">O evaluation (lockstep 행)</text>
+<polyline points="984,972 1006,972" fill="none" stroke="#7C5CC4" stroke-width="2.5" marker-end="url(#ah7C5CC4)"/>
+<rect x="1010" y="815" width="440" height="315" rx="10" fill="#fff" stroke="#7C5CC4" stroke-width="2"/>
+<text x="1030" y="852" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#7C5CC4" text-anchor="start">3. source 파티션으로 좁히기</text>
+<text x="1030" y="880" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14" font-weight="400" fill="#6B7280" text-anchor="start">lockstep_ratio는 source = gh</text>
+<text x="1030" y="902" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14" font-weight="400" fill="#6B7280" text-anchor="start">행에만 값이 있음</text>
+<text x="1030" y="946" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="600" fill="#7C5CC4" text-anchor="start">O real_user_balanced  (gh만)</text>
+<text x="1030" y="972" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="600" fill="#7C5CC4" text-anchor="start">O real_user_strict  (gh만)</text>
+<text x="1030" y="998" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="600" fill="#7C5CC4" text-anchor="start">O impact.star_count_real</text>
+<text x="1030" y="1024" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="600" fill="#9AA1AD" text-anchor="start">X impact.view_count_real (웹)</text>
+<text x="1030" y="1050" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="600" fill="#9AA1AD" text-anchor="start">X impact.conversion_real (웹)</text>
+<text x="1030" y="1076" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="600" fill="#7C5CC4" text-anchor="start">O evaluation (lockstep 행)</text>
+<polyline points="1454,972 1476,972" fill="none" stroke="#7C5CC4" stroke-width="2.5" marker-end="url(#ah7C5CC4)"/>
+<rect x="1480" y="815" width="440" height="315" rx="10" fill="#fff" stroke="#7C5CC4" stroke-width="2"/>
+<text x="1500" y="852" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#7C5CC4" text-anchor="start">4. rule_backfill 실행</text>
+<text x="1500" y="880" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14" font-weight="400" fill="#6B7280" text-anchor="start">지정 날짜 × gh 파티션만</text>
+<text x="1500" y="924" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#374151" text-anchor="start">evidence에 v3 행 추가 (v2는 남김)</text>
+<text x="1500" y="950" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#374151" text-anchor="start">→ 남은 Gold 컬럼만 재생성</text>
+<text x="1500" y="976" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#374151" text-anchor="start">→ manifest 규칙 버전 갱신</text>
+<text x="1500" y="1002" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#374151" text-anchor="start">→ 1단계 대비 줄어든 범위를</text>
+<text x="1500" y="1028" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#374151" text-anchor="start">   measurements.md에 기록</text>
+<text x="70" y="1150" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="start">O 다시 계산 · X 건드리지 않음.  컬럼 리니지는 행 조건을 모르므로 2단계가 넓게 잡히고, 3단계에서 파티션으로 좁힌다. 추출기는 서울 동네 찾기의 sqlglot 기반 추출기를 재사용한다.</text></svg>
