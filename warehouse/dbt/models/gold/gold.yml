@@ -1,6 +1,9 @@
 version: 2
 # 분석팀에 주는 표(real_user_*, impact)는 모델 계약을 건다 (4.3절). 컬럼 이름이나 형이 바뀌면 빌드가 실패한다.
 # 형 이름은 DuckDB 기준이다. 이식 때(C3) BigQuery 이름으로 바꾸는 곳이 여기다.
+# meta evidence_families: 이 모델의 결과를 바꿀 수 있는 근거 계열. 정책이 계열을 고르는 조인은 컬럼 리니지가 모르므로 사람이 적는다.
+# lineage/impact.py가 바뀐 근거의 계열과 겹치지 않는 모델을 다시 만들지 않는다. 적지 않은 모델은 모든 계열을 쓴다고 본다.
+# 정책 뷰의 계열은 seeds/policy_family.csv와 같아야 한다. tests/test_gold_meta.py가 SQL, 시드와 대조한다 (결정 15)
 
 x-event-columns: &event_columns
   - {name: source,      data_type: varchar}
@@ -31,13 +34,13 @@ models:
       - {name: is_real_balanced, data_type: boolean}
       - {name: is_real_strict,   data_type: boolean}
   - name: real_user_lenient
-    config: {contract: {enforced: true}}
+    config: {contract: {enforced: true}, meta: {evidence_families: [self_report]}}
     columns: *event_columns
   - name: real_user_balanced
-    config: {contract: {enforced: true}}
+    config: {contract: {enforced: true}, meta: {evidence_families: [self_report, infrastructure, coordination]}}
     columns: *event_columns
   - name: real_user_strict
-    config: {contract: {enforced: true}}
+    config: {contract: {enforced: true}, meta: {evidence_families: [self_report, infrastructure, behavior, coordination]}}
     columns: *event_columns
   - name: impact
     config: {contract: {enforced: true}}
@@ -56,6 +59,11 @@ models:
       - name: category
         data_tests:
           - accepted_values: {arguments: {values: [human, declared_bot, suspected_bot]}}
+  - name: fake_star_repo
+    config: {meta: {evidence_families: [coordination]}}
+  - name: disagreement
+    config: {meta: {evidence_families: [coordination]}}
   - name: eval_pairs
     description: 시험 대상. 행마다 판정 시각 <= 정답 확인 시각
   - name: evaluation
+    description: 근거 x 버전 x 정답 출처 x 판정 구간. window_end가 NULL인 행은 구간을 합친 전체 (결정 14)

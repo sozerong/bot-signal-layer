@@ -9,6 +9,8 @@ dbt 소스는 manifest의 relation_name(로컬은 iceberg_scan(...), 클라우�
 Gold 방언은 manifest의 adapter_type에서 읽는다. 로컬과 클라우드에서 이 파일의 추출 논리는 그대로다 (implementation_design.md 2절).
 저장 위치(GOLD)만 로컬 DuckDB다. ponytail: C3에서 BigQuery 표로 바꿀 때 main()의 저장 부분만 바꾼다
 저장: gold.duckdb의 lineage.run 한 행 + lineage.edge (회차마다 새 스냅샷).
+SQL이 아닌 간선 하나: rules/registry.yml -> 시드 evidence_current (warehouse/dbt_build.py가 만든다). registry 한 줄을 바꾸면
+무엇이 다시 도는지를 리니지가 직접 답하게 (지시서 J3-1).
 
 사용 (bot-job 컨테이너 안): python -m lineage.extract
 """
@@ -98,6 +100,17 @@ def build_schema(manifest):
     return schema, models
 
 
+REGISTRY = "rules.registry"  # 원천 노드 이름. 컬럼 = 시드 컬럼 (근거 이름, 지금 버전, 계열)
+
+
+def registry_edges(manifest):
+    """registry -> 시드 evidence_current. 시드 csv를 registry에서 만드는 일은 SQL이 아니라 dbt_build.py라 파서가 못 본다"""
+    seed = next(n for n in manifest["nodes"].values() if n["resource_type"] == "seed" and n["name"] == "evidence_current")
+    return [{"sql_file": "rules/registry.yml", "file_kind": "registry", "target_table": f"{seed['database']}.{seed['schema']}.{seed['alias']}",
+             "target_column": c, "source_table": REGISTRY, "source_column": c, "kind": "DIRECT", "subkind": "IDENTITY",
+             "status": "ok", "detail": "warehouse/dbt_build.py write_evidence_current"} for c in ("evidence_id", "rule_version", "family")]
+
+
 def git(*args):
     return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True).stdout.strip()
 
@@ -114,6 +127,7 @@ def main():
     for name, rel, sql in models:
         edges += [{**e, "sql_file": f"warehouse/dbt/{rel}", "file_kind": "dbt_model"}
                   for e in extract_edges(sql, name, schema, dialect=manifest["metadata"]["adapter_type"])]
+    edges += registry_edges(manifest)
     con = duckdb.connect(str(GOLD))
     con.sql("CREATE SCHEMA IF NOT EXISTS lineage")
     con.sql("""CREATE TABLE IF NOT EXISTS lineage.run (run_id INTEGER, created_at TIMESTAMPTZ, git_commit VARCHAR, git_dirty BOOLEAN,
@@ -126,8 +140,8 @@ def main():
     bad = sum(e["status"] != "ok" for e in edges)
     con.execute("INSERT INTO lineage.run VALUES (?, now(), ?, ?, ?, ?, ?, ?)",
                 [run_id, git("rev-parse", "HEAD"), bool(git("status", "--porcelain")), sqlglot.__version__,
-                 len(silver_files()) + len(models), len(edges), bad])
-    print(f"lineage 회차 {run_id}: SQL 파일 {len(silver_files()) + len(models)}개, 간선 {len(edges)}개 (ok 아님 {bad}), "
+                 len(silver_files()) + len(models) + 1, len(edges), bad])
+    print(f"lineage 회차 {run_id}: SQL 파일 {len(silver_files()) + len(models)}개 + registry, 간선 {len(edges)}개 (ok 아님 {bad}), "
           f"{time.perf_counter() - started:.2f}초")
     for e in edges:
         if e["status"] != "ok":
