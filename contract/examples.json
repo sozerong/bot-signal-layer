@@ -33,8 +33,7 @@
           "end": "2025-09-30T23:59:59Z"
         },
         "rule_version": "sa-v1",
-        "definition": "Share of stargazers in the window whose accounts have almost no other public activity; fires above the threshold.",
-        "owner": "gh-maintainer"
+        "definition": "Share of stargazers in the window whose accounts have almost no other public activity; fires above the threshold."
       },
       {
         "name": "lockstep",
@@ -51,8 +50,7 @@
           "end": "2025-09-30T23:59:59Z"
         },
         "rule_version": "sb-v1",
-        "definition": "Groups of accounts that starred the same set of repositories within a few hours; fires when a large group includes this repo.",
-        "owner": "gh-maintainer"
+        "definition": "Groups of accounts that starred the same set of repositories within a few hours; fires when a large group includes this repo."
       },
       {
         "name": "name_imitation",
@@ -68,8 +66,7 @@
           "end": "2025-09-30T23:59:59Z"
         },
         "rule_version": "sc-v1",
-        "definition": "Edit distance from the repository name to well-known repositories; fires when the name is a near-copy.",
-        "owner": "gh-maintainer"
+        "definition": "Edit distance from the repository name to well-known repositories; fires when the name is a near-copy."
       }
     ],
     "data_health": {
@@ -144,8 +141,7 @@
           "end": "2025-09-30T23:59:59Z"
         },
         "rule_version": "sa-v1",
-        "definition": "Share of stargazers in the window whose accounts have almost no other public activity; fires above the threshold.",
-        "owner": "gh-maintainer"
+        "definition": "Share of stargazers in the window whose accounts have almost no other public activity; fires above the threshold."
       },
       {
         "name": "lockstep",
@@ -160,8 +156,7 @@
           "end": "2025-09-30T23:59:59Z"
         },
         "rule_version": "sb-v1",
-        "definition": "Groups of accounts that starred the same set of repositories within a few hours; fires when a large group includes this repo.",
-        "owner": "gh-maintainer"
+        "definition": "Groups of accounts that starred the same set of repositories within a few hours; fires when a large group includes this repo."
       }
     ],
     "data_health": {
@@ -237,8 +232,7 @@
           "end": "2025-09-30T23:59:59Z"
         },
         "rule_version": "sa-v1",
-        "definition": "Share of stargazers in the window whose accounts have almost no other public activity; fires above the threshold.",
-        "owner": "gh-maintainer"
+        "definition": "Share of stargazers in the window whose accounts have almost no other public activity; fires above the threshold."
       },
       {
         "name": "lockstep",
@@ -255,8 +249,7 @@
           "end": "2025-09-30T23:59:59Z"
         },
         "rule_version": "sb-v1",
-        "definition": "Groups of accounts that starred the same set of repositories within a few hours; fires when a large group includes this repo.",
-        "owner": "gh-maintainer"
+        "definition": "Groups of accounts that starred the same set of repositories within a few hours; fires when a large group includes this repo."
       }
     ],
     "data_health": {
@@ -333,8 +326,7 @@
           "end": "2025-09-30T23:59:59Z"
         },
         "rule_version": "sa-v1",
-        "definition": "Share of stargazers in the window whose accounts have almost no other public activity; fires above the threshold.",
-        "owner": "gh-maintainer"
+        "definition": "Share of stargazers in the window whose accounts have almost no other public activity; fires above the threshold."
       }
     ],
     "data_health": {

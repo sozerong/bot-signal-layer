@@ -14,7 +14,6 @@ import gzip
 import hashlib
 import json
 import os
-import shutil
 import sys
 import time
 import urllib.error
@@ -24,7 +23,10 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 BASE_URL = "https://data.gharchive.org"
-TIMEOUT = 60
+TIMEOUT = 60  # 소켓 하나의 recv가 이만큼 아무것도 못 받으면 끊는다. 조금씩 오는 연결은 이걸로 안 끊긴다
+# 2026-11-12 사건: 연결 4개가 초당 약 4KB씩 50분 넘게 흘렀는데 TIMEOUT이 한 번도 안 걸렸다.
+# 같은 시각 새 연결은 초당 131KB였다. 그래서 받은 양이 너무 적으면 끊고 새로 연결한다.
+STALL_WINDOW, STALL_MIN_BYTES = 60, 1 << 20  # 60초 동안 1MB 미만(약 17KB/s)이면 멈춘 것으로 본다
 USER_AGENT = "gh-ingest/0.1"  # 원천이 Python 기본 User-Agent를 403으로 막는다
 MANIFEST = "_manifest.json"
 
@@ -62,6 +64,19 @@ def inspect(path):
     return sha.hexdigest(), lines
 
 
+def copy_or_stall(src, dst, window=STALL_WINDOW, min_bytes=STALL_MIN_BYTES, clock=time.monotonic):
+    """src를 dst로 복사한다. window초 동안 min_bytes 미만이면 TimeoutError(OSError라 재시도 대상)."""
+    start, got = clock(), 0
+    # read1: 지금 와 있는 만큼만 돌려준다. read(n)은 n바이트가 찰 때까지 기다려서 검사가 늦어진다
+    for chunk in iter(lambda: src.read1(1 << 16), b""):
+        dst.write(chunk)
+        got += len(chunk)
+        if clock() - start >= window:
+            if got < min_bytes:
+                raise TimeoutError(f"{window}초 동안 {got}바이트만 받았다")
+            start, got = clock(), 0
+
+
 def is_done(d, m):
     # ponytail: 크기만 비교한다. 체크섬 전체 대조는 check 명령이 한다
     return bool(m) and m["status"] == "ok" and (d / m["file"]).exists() \
@@ -83,7 +98,7 @@ def fetch_hour(root, hour, base_url=BASE_URL, retries=4):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
             with urllib.request.urlopen(req, timeout=TIMEOUT) as r, open(tmp, "wb") as f:
-                shutil.copyfileobj(r, f, 1 << 20)
+                copy_or_stall(r, f)
             sha, lines = inspect(tmp)
             os.replace(tmp, d / name)  # 데이터 파일 먼저, 기록은 그 다음. 기록이 있으면 완료다
             write_manifest(d, {**base, "status": "ok", "file": name, "bytes": (d / name).stat().st_size,

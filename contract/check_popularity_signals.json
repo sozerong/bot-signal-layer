@@ -62,16 +62,15 @@
         "type": "array",
         "items": {
           "type": "object",
-          "required": ["name", "definition", "owner", "status", "fired", "score", "evidence", "window", "rule_version"],
+          "required": ["name", "definition", "status", "fired", "score", "evidence", "window", "rule_version"],
           "additionalProperties": false,
           "properties": {
             "name": {"type": "string"},
-            "definition": {"type": "string", "maxLength": 200, "description": "One sentence: what this signal measures and when it fires. From the rule ledger (D16). Added in 1.1."},
-            "owner": {"type": "string", "description": "Who answers for this rule. From the rule ledger (D16). Added in 1.1."},
+            "definition": {"type": "string", "maxLength": 200, "description": "One sentence the agent can relay: what this signal measures and when it fires. From the rule ledger (D16). Added in 1.1."},
             "status": {"enum": ["computed", "failed", "skipped"]},
             "fired": {"type": "boolean"},
             "score": {"type": ["number", "null"]},
-            "evidence": {"type": "object", "description": "Signal-specific numbers behind the score."},
+            "evidence": {"type": "object", "description": "Signal-specific numbers behind the score. Counts are as observed in GH Archive, which misses part of the real events (about 30-40% of burst stars even in healthy periods), so real counts are at least this large."},
             "window": {
               "type": "object",
               "required": ["start", "end"],

@@ -1,6 +1,7 @@
 """ingest.py 자체 검사. 네트워크 없이 file:// 가짜 원천으로 돈다. 실행: python test_ingest.py"""
 import datetime as dt
 import gzip
+import io
 import tempfile
 from pathlib import Path
 
@@ -47,6 +48,22 @@ def main():
         assert s[2][0] == "not_fetched" and s[3][0] == "source_missing" and s[23][0] == "not_fetched"
         (d0 / "2025-01-15-0.json.gz").write_bytes(gzip.compress(b'{"a":9}\n{"a":2}\n{"a":3}\n'))
         assert ingest.check_day(raw, "2025-01-15")[0][0] == "corrupt"
+
+    # 조금씩 오는 연결: 청크 하나에 10초, 10바이트. 30초 창에 100바이트 미만이면 끊는다
+    class Slow(io.BytesIO):
+        def read1(self, n=-1):
+            clock.t += 10
+            return super().read1(10)
+    clock = lambda: clock.t
+    clock.t = 0
+    try:
+        ingest.copy_or_stall(Slow(b"x" * 1000), io.BytesIO(), window=30, min_bytes=100, clock=clock)
+        raise AssertionError("멈춘 연결이 통과했다")
+    except TimeoutError:
+        pass
+    out = io.BytesIO()  # 빠른 연결은 그대로 끝까지 복사된다
+    ingest.copy_or_stall(Slow(b"x" * 1000), out, window=30, min_bytes=20, clock=clock)
+    assert out.getvalue() == b"x" * 1000
     print("ok")
 
 

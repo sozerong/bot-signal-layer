@@ -61,11 +61,10 @@ def main():
     d["malicious"] = True
     assert bad(d)
 
-    # v1.1: 신호마다 정의와 오너, 판정마다 근거 표·열이 있어야 한다 (D16)
-    for field in ["definition", "owner"]:
-        d = copy.deepcopy(examples["suspicious"])
-        del d["signals"][0][field]
-        assert bad(d), field
+    # v1.1: 신호마다 정의, 판정마다 근거 표·열이 있어야 한다 (D16)
+    d = copy.deepcopy(examples["suspicious"])
+    del d["signals"][0]["definition"]
+    assert bad(d)
     d = copy.deepcopy(examples["suspicious"])
     d["signals"][0]["definition"] = "x" * 201  # 정의는 한 문장
     assert bad(d)
