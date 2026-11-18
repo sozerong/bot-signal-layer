@@ -67,6 +67,7 @@ def run(spark, sql_path, params):
         df = (df.join(old, ["entity_type", "entity_key"], "left")
               .withColumn("judged_at", F.when(same, F.col("_judged")).otherwise(F.col("judged_at")))
               .drop("_hit", "_sha", "_judged"))
+    save_plan(spark, df, sql_path, params)
     spark.sparkContext.setJobDescription(f"write {table} <- {Path(sql_path).as_posix()}")
     # 결과에 들어 있는 파티션만 바꾼다. 같은 날을 다시 돌려도 같은 결과(멱등).
     # ponytail: 결과가 0행이면 아무 파티션도 안 바뀌어 옛 행이 남는다. 근거는 대상 전부에 행을 내서 0행이 안 나온다
@@ -80,6 +81,23 @@ def run(spark, sql_path, params):
     if not got:
         raise SystemExit(f"{table}: 커밋이 표에 없다 (write-id {write_id}). 다른 커밋에 덮였다 (F-7)")
     print(f"{Path(sql_path).as_posix()} -> {table}: {got[0][0]}행")
+
+
+def save_plan(spark, df, sql_path, params):
+    """실행 계획(EXPLAIN FORMATTED)을 spark-events/plans/<앱 id>__<SQL 파일>.txt로 남긴다 (지시서 J4).
+    이벤트 로그와 같은 앱 id라 히스토리 서버의 SQL 탭(최종 계획, 스테이지 번호)과 손으로 맞춰 볼 수 있다.
+    ponytail: 실행 전 계획이다(AQE가 바꾸기 전). AQE가 합친 파티션 수는 SQL 탭의 최종 계획에서 본다. 자동 짝짓기는 만들지 않았다"""
+    import contextlib
+    import io
+
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        df.explain("formatted")
+    plans = ROOT / "spark-events" / "plans"
+    plans.mkdir(parents=True, exist_ok=True)
+    name = Path(sql_path).as_posix().split("sql/", 1)[-1].replace("/", "_")
+    (plans / f"{spark.sparkContext.applicationId}__{name}.txt").write_text(
+        f"-- {Path(sql_path).as_posix()} {params}\n{out.getvalue()}", encoding="utf-8")
 
 
 def parse_params(pairs):
