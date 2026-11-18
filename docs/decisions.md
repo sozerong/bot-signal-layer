@@ -151,3 +151,25 @@ L8을 하며 Claude가 근거를 붙여 정했다. 지시서에 없는 빈칸이
 - **잃는 것:** 바깥 몫 25%만큼 힙이 줄었다 (예: 4g → 3g). 계정 피처 작업이 조금 무거워졌다 (2분 42초, 6.09GiB / 12g).
 - **되돌리는 법:** registry에서 multi_repo_burst를 v1로 (v1 파티션은 남아 있다, Gold만 다시). 힙은 `heap()`의 비율 한 곳.
 - **다시 볼 조건:** 클라우드(C4)에서 `job()`이 클러스터 연산자로 바뀔 때 힙은 클러스터 설정이 정한다. 로컬 25%는 상한 대비 최대 55%(M-17)라 줄일 여지가 있지만 근거가 생기면 줄인다.
+
+## 결정 14. 채점은 정답을 고른 판정 구간의 판정과만 짝짓는다 [확정] (2026-11-18, 사용자 선택)
+
+지시서 J2의 사용자 결정 자리. 사용자가 "J2는 A"로 골랐다.
+
+- **결정:** truth에 `target_window`(이 대상을 어느 판정 구간을 위해 골랐는지)를 두고, `eval_pairs`는 (대상, 구간)으로 짝짓는다. `evaluation`은 구간마다 한 행과 구간을 합친 전체 행(`window_end` NULL)을 낸다.
+- **지시서와 다른 점 하나:** 지시서는 "repo_alive가 target_window를 적고, 예전 truth_raw에는 값이 없으니 pick_targets 구간으로 채운다"고 했다. 실제로는 repo_alive가 L4부터 확인 줄마다 `window_end`를 적고 있었다 (옛 파일 4개 2,216줄 모두 2024-07-15). 그래서 repo_alive와 raw는 고치지 않고, `truth.sql`이 그 값을 `target_window`로 옮긴다. 컬럼을 더하기 전에 넣은 truth 1,108행은 `build_truth`의 MERGE가 같은 확인 줄에서 한 번 채운다 (`WHEN MATCHED AND target_window IS NULL`).
+- **MERGE 키:** (truth_source, entity_key, target_window, known_at 날짜). 같은 날 같은 저장소를 두 구간을 위해 확인하면 두 행이 남는다.
+- **잃는 것:** 07-15를 위해 확인한 저장소가 다른 날 판정되어도 그 판정은 채점되지 않는다 (전에는 됐다). 구간마다 확인을 따로 해야 숫자가 생긴다.
+- **되돌리는 법:** eval_pairs의 구간 조건 한 줄과 evaluation의 grouping sets. truth 컬럼은 남겨도 해가 없다.
+- **같이 드러난 것:** F-13 (대상 고르기가 규칙 버전을 거르지 않음). 이 결정과 별개로 사용자 결정이 필요하다.
+
+## 결정 15. registry를 리니지 원천으로, Gold는 meta 근거 계열로 좁힌다 [확정] (2026-11-18, 사용자 선택)
+
+지시서 J3. (1)은 필수, (2)는 사용자가 "J3 (2)는 한다"로 골랐다.
+
+- **결정 (1):** `lineage/extract.py`가 `rules.registry` → 시드 `evidence_current` 간선 세 개(evidence_id, rule_version, family)를 더한다. `lineage/impact.py`는 근거 파일을 바꿨거나 `--change rules/registry.yml`이면 registry에서도 출발한다. registry만 바꿨으면 바뀐 항목은 마지막으로 만든 시드 csv와 비교해 찾는다. `dbt_build.py`의 `evidence_current+` 늘-더하기는 지시서대로 안전장치로 남겼다.
+- **결정 (2):** Gold 모델의 dbt `config.meta.evidence_families`에 그 모델 결과를 바꿀 수 있는 근거 계열을 적는다. impact.py가 바뀐 근거의 계열과 겹치지 않는 모델을 뺀다. `tests/test_gold_meta.py`가 meta를 SQL과 정책 시드에 대조한다.
+- **지시서와 다른 점 하나:** 지시서는 "모델 13개에 meta 한 줄씩"이라 했다. meta는 좁힐 수 있는 5개(fake_star_repo, disagreement, real_user_lenient, real_user_balanced, real_user_strict)에만 적고, 적지 않은 모델은 "모든 계열"로 본다. 잊으면 빠지는 쪽이 아니라 다시 도는 쪽이 되게.
+- **잃는 것:** 사람이 적는 값이 하나 늘었다. 정책 시드를 바꾸면 meta도 바꿔야 한다 (시험이 잡는다).
+- **확인한 한계 (M-19):** 보고서는 좁혀지지만, `dbt_build.py`가 `evidence_current+`를 늘 더해서 rule_backfill의 실제 Gold 빌드는 좁혀지지 않는다. 좁혀도 줄어드는 시간은 약 0.7초(3%)다. 늘-더하기를 "시드만 더하기"로 바꿀지는 새 사용자 결정이다 (아래 그림 문장도 이것에 따라 달라진다).
+- **그림 `docs/img/lineage.png` B 패널 (J3-3):** (2)를 했으므로 "Gold를 정책으로 좁힌다"는 그림은 영향 보고서와 맞다. 다만 실제 빌드가 좁혀지지 않는 지금은 그림 아래에 다음 문장을 더하는 것을 제안한다: "보고서는 정책(meta 근거 계열)으로 Gold 모델을 좁힌다. 빌드는 안전장치(`evidence_current+`) 때문에 시드 아래를 모두 다시 만든다." 그림 스크립트는 사용자가 가지고 있다.

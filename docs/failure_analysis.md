@@ -194,3 +194,44 @@
   - B: 계정 피처에 `max_repos_per_hour`를 더하고 `multi_repo_burst` v2가 그것을 읽는다. v1 파일은 남겼다.
   - 확인: 일주일 한 번 실행(`j1_week`)이 끝까지 성공, `dbt build` ERROR 0 (M-17). 같은 4g 컨테이너에서 힙을 512m로 일부러 줄이면 이제 `java.lang.OutOfMemoryError: Java heap space`로 끝나고 컨테이너는 죽지 않는다 (OOMKilled=false). 원인이 보이는 오류다.
   - 남은 [확인 필요] "Airflow 컨테이너의 OOM이 `docker events`에 안 보인 이유"는 풀지 않았다. 이제 태스크가 끝날 때 로그에 `[mem.peak]`를 남겨 다음에는 상한에 닿았는지 로그만으로 본다.
+
+## F-13. 생존 확인 대상 고르기가 규칙 버전을 거르지 않는다 [미해결, 기록만]
+
+- 태그: `정답`, `설계 가정`
+- 언제·어디: 2026-11-18, 지시서 J2. truth에 target_window를 더한 뒤 07-15 구간 채점을 M-8과 맞춰 보다가 발견.
+- 증상: 07-15 구간 fake_star_repo 정밀도 262/276 = 94.9%는 M-8과 같은데, 대조군이 274개에서 282개로 늘었다 (양성 11개는 같음, 3.9% 대 4.0%). 11-18에 다시 확인한 파일(`checked_date=2026-11-18/part-000.jsonl`)이 의심 280 + 대조군 280이다 (11-17 파일 세 개는 276 + 276).
+- 관찰:
+  - `sql/truth/pick_targets.sql`이 `evidence_id IN ('low_activity', 'lockstep_ratio', 'burst_5m')`로만 거르고 `rule_version`을 보지 않는다. Silver에는 lockstep_ratio v2와 v3이 7일 모두 있다 (L8, M-11에서 v3을 남김). 그래서 의심 = v2 ∪ v3 조합이 되었다.
+  - 11-18 의심 280개 중 Gold(v2) fake_star_repo가 아닌 4개: Anmol-Baranwal/Cool-GIFs-For-GitHub, ruucm/shadergradient, veltman/flubber, krahets/LeetCode-Book. 모두 200(살아 있음). 채점에서 이들은 "fake_star_repo에 안 걸렸는데 정답이 있는 대상", 즉 대조군으로 세어진다. 여기에 대조군도 280개로 4개 더 뽑혔다 → 274 + 8 = 282.
+  - 주석은 "suspect: 그 판정 구간의 fake_star_repo (... Gold와 같은 식)"이라 적혀 있다. Gold는 registry의 지금 버전만 본다. 주석과 SQL이 어긋난다.
+- 원인: pick_targets는 registry를 모른다 (Silver SQL은 registry를 읽지 않는다). L4에서 만들 때는 근거 버전이 하나씩이라 드러나지 않았다. L8에서 옛 버전 파티션을 남기기로 하면서(결정 9) 생긴 틈이다.
+- 영향: 07-16 ~ 07-21 생존 확인(J2, `j2_truth_0716_0721`)도 같은 SQL로 골랐다. v3에만 걸린 저장소가 의심 묶음에 들어가 확인되고, 채점에서는 대조군으로 세어진다. 날짜별 몫은 measurements.md M-18에 센다.
+- 처방 후보 (고르지 않음, 사용자 결정): (A) repo_alive가 registry의 지금 버전을 읽어 pick_targets에 파라미터로 넘긴다 (B) pick_targets가 Gold `fake_star_repo`를 읽는다 (Silver가 Gold에 기대게 되어 방향이 거꾸로) (C) 채점(evaluation)에서 대조군을 "생존 확인에서 control로 고른 것"(raw의 grp)으로 한정한다 (truth에 grp를 옮겨야 한다).
+
+## F-14. 새로 받은 레포에서 dbt 컴파일이 실패하고 방언 시험이 조용히 건너뛰어진다 [해결, README]
+
+- 태그: `운영`, `문서`
+- 언제·어디: 2026-11-18, 지시서 J6 README 따라 하기. 레포를 스크래치 폴더에 새로 받고(HEAD 56fc962 + 커밋 전 변경) README대로 `.env` → `docker compose --profile jobs build` → `pytest`.
+- 증상: README의 시험 명령이 "6 passed, 1 skipped"로 끝났다 (지금 레포는 21개). 건너뛴 것은 `tests/test_gold_dialect.py` 전체: `dbt compile 결과가 없다`. 컴파일을 먼저 돌리자 `IO Error: Cannot open file "/work/warehouse_local/gold.duckdb": No such file or directory`.
+- 원인: `warehouse_local/`은 git에서 빠져 있다. 평소에는 Spark(create_tables)가 Silver를 만들며 이 폴더를 만들어 두지만, 새 레포에서 시험만 돌리면 폴더가 없다. DuckDB는 없는 폴더에 파일을 만들지 않는다. 방언 시험은 컴파일 결과가 없으면 실패가 아니라 skip이라 빠진 것이 눈에 띄지 않았다.
+- 해결 (지시서 J6 "막힌 곳을 README에 고친다"): README 시험 절에 `mkdir -p warehouse_local` → `python -m warehouse.dbt_build compile` → `pytest`와 기대 결과(21개 중 20개 통과, F-5 하나 실패)를 적었다. 고친 순서로 새 레포에서 20 passed, 1 failed.
+- 한계: 이미지 빌드는 이 PC의 Docker 캐시를 썼다(5초). 캐시 없는 첫 빌드(내려받기 포함)는 이번에 보지 않았다.
+
+## F-15. 엿새치 생존 확인을 한 번에 하자 GitHub가 429로 막았다 [미해결, 기록만]
+
+- 태그: `정답`, `바깥 의존`
+- 언제·어디: 2026-11-18 04:25 ~ 04:49Z, 지시서 J2, `late_truth` 한 번에 07-16 ~ 07-21 (`j2_truth_0716_0721`).
+- 증상: repo_alive가 성공으로 끝났지만 확인 실패가 많다. 429(요청 너무 많음)가 07-16 340, 07-17 572, 07-18 982(전부), 07-19 434, 07-20 137, 07-21 0. 확인 실패는 truth에 넣지 않으므로 07-18은 정답이 없고, 07-16, 07-17, 07-19의 대조군이 0 ~ 81개로 줄었다 (M-18).
+- 관찰:
+  - 요청 수가 전보다 약 9배다 (약 5,000번 / 25분, 전에는 한 번에 약 560번). repo_alive는 동시 4개, 실패만 30초와 60초 쉬고 다시 묻는다. 그날 안의 재시도 간격이 GitHub의 제한이 풀리는 시간보다 짧았다 [확인 필요: GitHub 웹(github.com HEAD)의 제한 규칙은 공개되지 않았다].
+  - 07-18은 6초 만에 982개가 모두 429였다. 앞 날의 요청으로 이미 막힌 상태에서 시작했다.
+  - 대상 순서가 의심 먼저라(pick_targets의 UNION ALL) 막히면 대조군이 먼저 빈다. 대조군 삭제율이 정밀도보다 더 흔들린 이유 중 하나다.
+  - 태스크는 성공(초록)이라 Airflow 화면에서는 보이지 않는다. 확인 실패 수는 로그 줄(`확인 실패=`)에만 있다.
+- 막힌 것: J2 체크포인트의 "7일 구간별 정밀도와 대조군 삭제율 표" 중 07-18 전체와 07-16, 07-17, 07-19의 대조군.
+- 막히지 않은 것: 07-15 구간 비교(94.9% 대 3.9%), 판정 시각과 독립성 시험, truth 멱등.
+- 처방 후보 (고르지 않음, 사용자 결정. 바깥에 다시 요청을 보내는 일이라 이 세션에서 다시 돌리지 않았다):
+  (A) 실패한 대상만 나중에 다시 확인한다. 같은 날 다시 하면 MERGE가 이미 확인한 대상을 건너뛰고 실패한 것만 더한다.
+  (B) repo_alive가 429를 받으면 길게 쉰다 (응답의 Retry-After를 따르거나 분 단위로).
+  (C) late_truth가 하루치씩 나눠 돈다 (날 사이에 쉼).
+  (D) 대상 순서를 의심과 대조군이 번갈아 오게 해서, 막혀도 두 묶음이 같이 줄게 한다.
+  (E) 확인 실패 비율이 문턱을 넘으면 태스크를 실패로 끝내 화면에 드러나게 한다.

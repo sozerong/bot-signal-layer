@@ -31,7 +31,14 @@
 | 근거 하나를 더할 때 DAG와 시드를 고치지 않아도 된다 | registry, DAG, `dbt_build.py` | `multi_repo_burst` v1을 더하고 `rule_backfill` | 바뀐 코드 5개 파일(새 SQL 16줄 + 7줄 정도), DAG 태스크가 저절로 생김 (M-15) | 기존 계열(behavior)의 근거 | ① | Gold `evidence_flags`에 컬럼, 판정식에 이름을 손으로 더해야 한다 (결정 8) |
 | 힙이 컨테이너 상한 안이라 넘쳐도 원인이 보이는 오류로 끝난다 | `dags/jobs.py heap()` | 같은 4g 컨테이너, 같은 계산(multi_repo_burst v1)에 힙 16g, 3072m, 512m | 16g: OOMKilled, 원인 없는 py4j 오류. 3072m: 성공. 512m: `java.lang.OutOfMemoryError: Java heap space`, OOMKilled=false (M-17, 2026-11-18) | 로컬 bot-job, cgroup v1 | ① | 힙 바깥(Python, 다이렉트 버퍼)이 25%를 넘는 일은 시험하지 않았다 |
 | 피처에 컬럼을 더해도 기존 값과 판정이 그대로다 | `features_account.sql` 두 단계 집계, multi_repo_burst v1 → v2 | 바꾸기 앞뒤 기존 13개 컬럼 지문, v1과 v2의 (entity, hit, score, metrics) 지문을 7일 비교 | 14줄 같음, v1 = v2 7일 모두 (hit 323) (M-17, 2026-11-18) | 피처 버전 f1 | ② | 지문 스크립트는 스크래치에 있다. 표본 시험 `tests/test_sql.py`가 v2 hit를 Python과 매번 맞춘다 |
+| 분석팀 표의 모델 계약이 형 변경과 컬럼 빠짐을 막는다 | `gold.yml` contract (real_user_events 표, real_user_lenient 뷰) | (1) real_user_events의 `event_date`를 `cast(... as varchar)`로 (2) real_user_lenient에서 `target_name`을 뺌. 각각 `dbt build --select`, 끝나고 SQL 파일 되돌림 | (1) ERROR 1, `event_date VARCHAR / DATE data type mismatch`, Gold 표의 형은 DATE 그대로 (2) ERROR 1, `target_name missing in definition` (지시서 J5, 2026-11-18) | DuckDB, dbt 1.12.6 | ③ | BigQuery로 옮기면 형 이름을 바꿔 다시 확인해야 한다 (gold.yml 머리 주석). 계약이 없는 모델(entity_verdict 등)은 막지 않는다 |
+| Gold 모델의 meta 근거 계열이 SQL과 정책 시드에 맞는다 | `gold.yml` meta `evidence_families`, `tests/test_gold_meta.py` | 정책 뷰는 meta = policy_family 시드, 근거 컬럼을 읽는 모델은 SQL의 근거 이름 계열 ⊆ meta, 읽는 ref가 검사된 둘뿐인지. 거꾸로: fake_star_repo를 behavior로, balanced에서 coordination을 빼 봄 | 통과. 거꾸로 두 경우 모두 실패 (2026-11-18) | | ② | 근거 이름을 문자열로 찾는다. 이름 없이 근거를 읽는 새 모델(예: `select *`)은 ref 검사가 막는다. pytest라 dbt build가 강제하지 않는다 |
+| registry 한 줄만 바꿔도 리니지 영향 범위에 시드와 그 아래가 든다 | `lineage/extract.py registry_edges`, `lineage/impact.py` | lockstep_ratio만 v3으로 바꾸고 `impact --change rules/registry.yml`, 되돌림 | Gold 목록 맨 앞에 evidence_current, Silver는 v3.sql 하나 (M-19, 2026-11-18) | 시드 csv가 마지막 빌드 상태일 때 | ① | 바뀐 항목은 시드 csv와 비교해 찾는다. 시드 csv를 손으로 고치면 틀린다 |
+| 실행 계획에서 스테이지와 연산을 짝지을 수 있다 | `run_sql.save_plan`, 히스토리 서버 SQL 탭 | features_repo 하루, 계획 파일과 SQL 탭 노드 지표의 stage 번호 | 가장 긴 스테이지 25 = 자기 조인, AQE 200 → 13~16 (M-20, 2026-11-18) | | ① | 짝짓기는 손이다. 계획 파일은 AQE 전 계획 |
+| 채점은 정답을 고른 구간의 판정과만 짝짓는다 | `eval_pairs`의 (대상, target_window) 조인, `evaluation` 구간별 행 | 07-15 구간 숫자를 M-8과 비교, 6일 더 확인 뒤 구간별 표 | 07-15 정밀도 262/276 = 94.9% (M-8과 같음), 대조군 차이 8개는 F-13로 설명됨 (M-18, 2026-11-18) | | ② | 구간에 정답이 없으면(07-18, F-15) 그 구간 행이 없다. 전체 행은 정답 있는 구간만의 합이다 |
+| 구간을 더해도 truth에 중복이 생기지 않고 옛 행이 한 번 채워진다 | `build_truth`의 MERGE (키에 target_window), `truth.sql` | (1) 컬럼을 더한 뒤 build_truth (2) 엿새치 추가 뒤 한 번 더 | (1) 1,108 → 1,108, 빈 target_window 0 (2) 3,704 → 3,704, 키 중복 0 (M-18, 2026-11-18) | | ① | 같은 날 같은 저장소를 두 구간을 위해 확인하면 두 행이 된다 (의도) |
 
 ## 2. 아직 증명하지 않은 성질
 
-- 분석팀 표의 모델 계약이 형 변경을 막는다: 계약은 걸었고 빌드는 통과했지만, 일부러 형을 바꿔 실패하는지는 보지 않았다
+- 07-18 구간 채점과 07-16, 07-17, 07-19 대조군: 생존 확인이 429로 막혀 정답이 없거나 적다 (F-15)
+- 생존 확인 대상이 Gold의 지금 규칙 버전과 같다: 지금은 아니다 (F-13)
