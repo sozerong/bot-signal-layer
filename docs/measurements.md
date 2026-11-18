@@ -472,3 +472,43 @@ payload 키는 24개 시간 모두 같았다: WatchEvent `[action]`, ForkEvent `
 - 94.9% 대 4.0%(M-7, M-8)와 숫자가 다른 이유: 그때는 07-15 하루 판정만 있었다. 지금 Gold는 7일 판정이 있고, eval_pairs는 대상(저장소)으로만 정답과 맞추므로 07-15에 확인한 저장소가 다른 날 판정과도 짝이 된다. 같은 기준끼리 비교한 것이 아니다.
 - **v3을 바꾼 날 v3 줄이 비는지:** 지시서 기대와 다르게 비지 않았다. registry를 v3으로 두고 Gold만 다시 만들자 lockstep_ratio v3 줄이 나왔다 (판정 1,130, 정답 있는 판정 122, 삭제 91, 정밀도 74.6%, 대조군 양성률 13.2%). v3 판정은 어제(11-17 12:21Z, L8과 H3, H4-2 때) 한 것이라 오늘 확인한 정답보다 앞선다. 규칙대로라면 채점되는 것이 맞다. "새 규칙 버전은 그날 채점이 빈다"는 새 버전을 정답 확인 **뒤에** 처음 판정했을 때만이다. registry는 v2로 되돌렸고 Gold도 되돌렸다.
 - v3 대 v2: 판정 135개 더(995 → 1,130), 정밀도 77.6% → 74.6%, 대조군 양성률 거의 같음 (13.2%). v3으로 바꿀 근거는 이 숫자로는 없다.
+
+## M-17. 메모리 설정 바로잡은 뒤 일주일 한 번 실행 (지시서 J1 체크포인트, F-12)
+
+**조건** 2026-11-18 01:29:20Z ~ 01:46:42Z. 로컬 Airflow, `bot_build`를 `{"days": "2024-07-15 ... 2024-07-21"}`로 한 번(`j1_week`). 처방 A(힙 = 상한 − max(상한 25%, 1GB), `dags/jobs.py heap()`)와 B(multi_repo_burst v2가 계정 피처 `max_repos_per_hour`를 읽음) 뒤 첫 일주일. 태스크 13개 모두 성공, 재시도 0, `dbt build` PASS 22 WARN 1(설계상 경고 type_share_shift) ERROR 0. 전체 17분 22초.
+
+**태스크별 상한, 힙, 실제 최대 메모리** (최대 메모리 = 태스크가 끝날 때 컨테이너 cgroup v1 `memory.max_usage_in_bytes`. 표본이 아니라 꼭짓점이다. 페이지 캐시를 함께 센다)
+
+| 태스크 (7일을 차례로) | 상한 | 힙 | 최대 메모리 | 상한 대비 | 시간 |
+|---|---|---|---|---|---|
+| create_tables | 4g | 3072m | 0.49GiB | 12% | 7초 |
+| load_events | 8g | 6144m | 1.73GiB | 22% | 4분 11초 |
+| features_account (두 단계 집계로 바뀜) | 12g | 9216m | 6.09GiB | 51% | 2분 42초 |
+| features_repo | 12g | 9216m | 5.73GiB | 48% | 1분 47초 |
+| evidence_declared_app | 4g | 3072m | 1.94GiB | 49% | 1분 23초 |
+| evidence_always_on | 4g | 3072m | 1.97GiB | 49% | 1분 20초 |
+| evidence_low_activity | 4g | 3072m | 2.18GiB | 55% | 1분 26초 |
+| evidence_lockstep_ratio | 4g | 3072m | 0.95GiB | 24% | 1분 9초 |
+| evidence_burst_5m | 4g | 3072m | 0.82GiB | 21% | 1분 8초 |
+| evidence_multi_repo_burst (v2) | 4g | 3072m | 0.94GiB | 24% | 1분 15초 |
+| dbt_build (DuckDB, 상한의 80%를 스스로 잡음) | 8g | (Spark 아님) | 3.62GiB | 45% | 22초 |
+| record_build | 2g | 1024m | 0.37GiB | 18% | 4초 |
+
+- M-10 표본(features_account 4.8 ~ 7.18GiB, 근거 0.5 ~ 1.0GiB)보다 근거 쪽이 크게 찍혔다. 표본이 꼭짓점을 놓친 것과, 이번 값이 페이지 캐시를 세는 것 둘 다 이유일 수 있다 [확인 필요: 둘의 몫을 나누지 않았다].
+- DuckDB는 컨테이너 상한을 안다: `-m 8g` 컨테이너에서 `memory_limit` = 6.3GiB (80%).
+- 계정 피처가 두 단계 집계가 되어도 상한 12g의 절반 정도다. 25% 바깥 몫을 줄일 근거는 아직 없다(가장 높은 비율 55%).
+
+**힙을 바꿔 같은 일을 4g 컨테이너에서** (multi_repo_burst v1 계산을 그대로, 결과는 `noop` 싱크로 버림. 07-15, 스크래치 `j1_neg.py`)
+
+| 힙 | 결과 | 컨테이너 OOMKilled | 최대 메모리 |
+|---|---|---|---|
+| 16g (F-12 재현, 2026-11-17) | `Py4JNetworkError: Answer from Java side is empty` | true | 4g에서 죽음 |
+| 3072m (`heap("4g")`) | 성공, 14초 | false | 2.75GiB |
+| 512m (일부러 작게) | exit 1, `java.lang.OutOfMemoryError: Java heap space` | false | 1.26GiB |
+
+- 힙이 상한 안에 있으면 넘칠 때 JVM이 먼저 원인 이름(Java heap space)을 내고 끝난다. A만으로도 v1이 4g에서 돈다.
+
+**multi_repo_burst v1 대 v2, 계정 피처 기존 컬럼** (스크래치 `j1_fp.py`, 바꾸기 앞뒤)
+- v1과 v2: 7일 모두 날짜별 행 수, hit 수, (entity, hit, score, metrics) 지문이 같다. hit 합 323 = 323 (07-15부터 52, 53, 55, 50, 43, 32, 38).
+- 계정 피처와 저장소 피처의 기존 13개 컬럼 지문: 7일 × 2 대상 14줄이 바꾸기 앞뒤로 같다 (예: 07-15 계정 660,123행). 그래서 피처 버전은 f1 그대로 (결정 13).
+- Gold: `evidence_current`의 multi_repo_burst = v2, `evidence_flags`의 multi_repo_burst 참 323.

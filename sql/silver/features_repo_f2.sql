@@ -45,7 +45,8 @@ SELECT
   count(*)                          AS stars,
   count_if(s.low_act)               AS low_act_stars,
   max(b.max_5m_stars)               AS max_5m_stars,
-  coalesce(max(c.max_co_star), 0)   AS max_co_star
+  coalesce(max(c.max_co_star), 0)   AS max_co_star,
+  CAST(NULL AS BIGINT)              AS max_repos_per_hour  -- 계정 컬럼
 FROM star s
 JOIN burst b ON s.target = b.target
 LEFT JOIN co c ON s.target = c.target

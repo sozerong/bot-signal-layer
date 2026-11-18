@@ -30,19 +30,31 @@ class JobOperator(DockerOperator):
             self.cli.create_host_config = create_host_config
 
 
+def heap(mem):
+    """컨테이너 상한 -> JVM 힙. 힙이 상한보다 크면 JVM이 GC나 디스크 내리기를 하기 전에 컨테이너가 죽여 원인 없는 오류가 된다
+    (failure_analysis.md F-12, 결정 13). JVM 바깥 몫(메타스페이스, 스레드, 네트워크 버퍼, Python)은 상한의 25%와 1GB 중 큰 값.
+    ponytail: 25%는 처음 값이다. measurements.md M-17의 실제 최대 메모리로 고친다"""
+    mib = int(mem[:-1]) * {"g": 1024, "m": 1}[mem[-1].lower()]
+    assert mib >= 2048, f"상한 {mem}: 힙을 남길 수 없다 (2g 이상)"
+    return f"{mib - max(mib // 4, 1024)}m"
+
+
 def job(name, command, mem=MEM, **kw):
-    """command: bot-job 컨테이너 안에서 bash로 돌릴 한 줄 (Jinja 템플릿 가능). 작업 폴더는 /work(레포)."""
+    """command: bot-job 컨테이너 안에서 bash로 돌릴 한 줄 (Jinja 템플릿 가능). 작업 폴더는 /work(레포).
+    mem: 컨테이너 상한. Spark 힙(SPARK_DRIVER_MEMORY)은 여기서 계산한다 (heap). 둘을 따로 적지 않는다"""
     return JobOperator(
         task_id=name,
         image="bot-job:4.1.2",
         command=["bash", "-c", "set -euo pipefail; (while sleep 60; do echo \"[alive] $(date +%T)\"; done) & HB=$!; "
-                               "trap 'kill $HB' EXIT; " + command],
+                               # 끝날 때 컨테이너 최대 메모리를 남긴다. 표본(docker stats)은 짧은 꼭짓점을 놓친다 (M-10 한계, M-17)
+                               "trap 'kill $HB; echo \"[mem.peak] $(cat /sys/fs/cgroup/memory/memory.max_usage_in_bytes "
+                               "/sys/fs/cgroup/memory.peak 2>/dev/null)\"' EXIT; " + command],
         docker_url="tcp://socket-proxy:2375",
         mounts=[Mount("/work", HOST, type="bind")],
         mount_tmp_dir=False,
         auto_remove="success",
         working_dir="/work",
-        environment={"BOT_CATALOG": "local", "SPARK_DRIVER_MEMORY": "16g", "PYTHONDONTWRITEBYTECODE": "1"},
+        environment={"BOT_CATALOG": "local", "SPARK_DRIVER_MEMORY": heap(mem), "PYTHONDONTWRITEBYTECODE": "1"},
         mem_limit=mem,
         **kw,
     )

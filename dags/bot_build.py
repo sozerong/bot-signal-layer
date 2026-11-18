@@ -46,13 +46,14 @@ with DAG(
         return " ".join(out)
 
     d = days()
-    create = job("create_tables", "python -m spark_jobs.create_tables", pool=SILVER_WRITE)
-    load = job("load_events", each_day(f"python -m spark_jobs.load_events --input raw/dt=$d {P}"), pool=SILVER_WRITE)
-    acct = job("features_account", each_day(f"python -m spark_jobs.run_sql --sql sql/silver/features_account.sql {P}"), pool=SILVER_WRITE)
-    repo = job("features_repo", each_day(f"python -m spark_jobs.run_sql --sql {FEATURES_REPO} {P}"), pool=SILVER_WRITE)
+    # 상한은 M-10 최대 메모리에 여유를 두고 정한다. 힙은 job()이 상한에서 계산한다 (F-12, 결정 13, M-17)
+    create = job("create_tables", "python -m spark_jobs.create_tables", mem="4g", pool=SILVER_WRITE)
+    load = job("load_events", each_day(f"python -m spark_jobs.load_events --input raw/dt=$d {P}"), mem="8g", pool=SILVER_WRITE)
+    acct = job("features_account", each_day(f"python -m spark_jobs.run_sql --sql sql/silver/features_account.sql {P}"), mem="12g", pool=SILVER_WRITE)
+    repo = job("features_repo", each_day(f"python -m spark_jobs.run_sql --sql {FEATURES_REPO} {P}"), mem="12g", pool=SILVER_WRITE)
     # 근거 다섯 개는 풀 때문에 하나씩 돈다. 쓴 뒤 확인(run_sql.run)이 실패를 내면 한 번 다시 돈다 (F-7)
     ev = [job(f"evidence_{e.split('/')[0]}", each_day(f"python -m spark_jobs.run_sql --sql sql/evidence/{e}.sql {P}"), mem="4g",
               pool=SILVER_WRITE, retries=1) for e in EVIDENCE]
-    gold = job("dbt_build", "python -m warehouse.dbt_build")
+    gold = job("dbt_build", "python -m warehouse.dbt_build", mem="8g")  # DuckDB는 상한의 80%를 스스로 잡는다
     record = job("record_build", "python -m warehouse.record_build", mem="2g")
     d >> create >> load >> acct >> repo >> ev >> gold >> record

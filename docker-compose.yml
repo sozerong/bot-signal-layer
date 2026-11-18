@@ -39,7 +39,7 @@ services:
     memswap_limit: 24g
     environment:
       BOT_CATALOG: local
-      SPARK_DRIVER_MEMORY: 16g
+      SPARK_DRIVER_MEMORY: 18g  # 상한 24g - JVM 바깥 몫 6g. dags/jobs.py heap()과 같은 규칙 (F-12, 결정 13)
     ports:
       - "4040:4040"
 
