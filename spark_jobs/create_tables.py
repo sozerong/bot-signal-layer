@@ -30,11 +30,13 @@ TABLES = {
         window_start DATE, window_end DATE, hit BOOLEAN, score DOUBLE, metrics STRING,
         judged_at TIMESTAMP, sql_sha256 STRING, run_id STRING
     """,
-    # 추가만 한다. (truth_source, entity_key, known_at 날짜)마다 하나 (build_truth.py의 MERGE)
+    # 추가만 한다. (truth_source, entity_key, target_window, known_at 날짜)마다 하나 (build_truth.py의 MERGE)
+    # target_window: 이 대상을 어느 판정 구간을 위해 골랐는지 (pick_targets의 window_end). 채점은 같은 구간 판정과만 짝짓는다 (결정 14)
     "bot.silver.truth": """
         entity_type STRING, entity_key STRING, entity_name STRING,
         truth_source STRING, label STRING, label_method STRING,
-        observed_at TIMESTAMP, known_at TIMESTAMP, raw_ref STRING
+        observed_at TIMESTAMP, known_at TIMESTAMP, raw_ref STRING,
+        target_window DATE
     """,
 }
 PARTITIONS = {
