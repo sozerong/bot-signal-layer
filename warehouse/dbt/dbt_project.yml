@@ -1,0 +1,15 @@
+# Gold (implementation_design.md 4.3절, 결정 6). 로컬: dbt-duckdb, warehouse_local/gold.duckdb. 이식 때(C3) 프로필만 bigquery로.
+name: bot_gold
+version: "1.0.0"
+profile: bot
+seed-paths: [seeds]
+test-paths: [tests]
+models:
+  bot_gold:
+    +materialized: table
+    staging:
+      +materialized: view
+seeds:
+  bot_gold:
+    +column_types: {policy: varchar, family: varchar, truth_source: varchar, target: varchar, allowed: boolean,
+                    evidence_id: varchar, rule_version: varchar, entity: varchar}

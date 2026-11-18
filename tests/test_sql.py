@@ -22,17 +22,18 @@ P = {"window_start": DAY, "window_end": DAY, "run_id": "test"}
 
 def evidence_sqls():
     reg = yaml.safe_load((ROOT / "rules" / "registry.yml").read_text(encoding="utf-8"))
-    return [ROOT / "sql" / "evidence" / k / f"{v['current']}.sql" for k, v in reg.items()]
+    return [ROOT / "sql" / "evidence" / k / f"{v['current']}.sql" for k, v in reg.items() if "family" in v]  # 피처 항목 제외
 
 
 @pytest.fixture(scope="module")
 def spark(tmp_path_factory):
     os.environ.update(BOT_CATALOG="local", BOT_WAREHOUSE=str(tmp_path_factory.mktemp("wh")), SPARK_DRIVER_MEMORY="2g")
-    from spark_jobs import run_sql
+    from spark_jobs import create_tables, run_sql
     from spark_jobs.load_events import load
     from spark_jobs.session import spark_session
 
     s = spark_session("test_sql", {"spark.ui.enabled": "false", "spark.sql.shuffle.partitions": "4"})
+    create_tables.create(s)  # 계약대로 만든 표에 쓴다. 계약과 맞지 않는 형이면 아래 쓰기에서 실패한다
     load(s, str(FIX), P)
     run_sql.run(s, ROOT / "sql" / "silver" / "features_account.sql", P)
     run_sql.run(s, ROOT / "sql" / "silver" / "features_repo.sql", P)
@@ -46,13 +47,14 @@ def spark(tmp_path_factory):
 def want():
     """규칙을 Spark와 따로, 순수 Python으로 센다 (4.2절 규칙 표, 사전 실험 02_detect.py)."""
     ev = [json.loads(line) for line in gzip.open(FIX, "rt", encoding="utf-8")]
-    name, n, hours, types = {}, defaultdict(int), defaultdict(set), defaultdict(set)
+    name, n, hours, types, hour_repos = {}, defaultdict(int), defaultdict(set), defaultdict(set), defaultdict(set)
     for e in ev:
         a, ts = str(e["actor"]["id"]), dt.datetime.fromisoformat(e["created_at"])
         name[a] = max(name.get(a, ""), e["actor"]["login"])
         n[a] += 1
         hours[a].add(ts.hour)
         types[a].add(e["type"])
+        hour_repos[a, ts.hour, e["type"]].add(str(e["repo"]["id"]))
     declared = {a for a in name if name[a].endswith("[bot]")}
     low = {a for a in name if types[a] == {"WatchEvent"}}
     stars = [(str(e["actor"]["id"]), str(e["repo"]["id"]), dt.datetime.fromisoformat(e["created_at"]).timestamp())
@@ -86,6 +88,7 @@ def want():
         ("low_activity", "gh_repo"): {r for r, v in repo.items() if v["stars"] >= 20 and v["low_act_stars"] / v["stars"] >= 0.5},
         ("lockstep_ratio", "gh_repo"): {r for r, v in repo.items() if v["max_co_star"] / v["stars"] >= 0.5},
         ("burst_5m", "gh_repo"): {r for r, v in repo.items() if v["max_5m_stars"] / v["stars"] >= 0.5},
+        ("multi_repo_burst", "gh_account"): {a for (a, _, _), rs in hour_repos.items() if len(rs) >= 100},
     }
     return {"events": len(ev), "accounts": len(name), "repo": repo, "hits": hits}
 
@@ -112,7 +115,8 @@ def test_evidence_hits(spark, want):
     # 근거는 대상 전부에 행을 낸다 (hit가 아니어도). 0행이면 파티션 덮어쓰기가 옛 행을 못 지운다 (run_sql.py)
     rows = dict(spark.sql("SELECT evidence_id, count(*) FROM bot.silver.evidence WHERE entity_type = 'gh_account' "
                           "GROUP BY 1").collect())
-    assert rows == {"declared_app": want["accounts"], "always_on": want["accounts"], "low_activity": want["accounts"]}
+    assert rows == {"declared_app": want["accounts"], "always_on": want["accounts"], "low_activity": want["accounts"],
+                    "multi_repo_burst": want["accounts"]}
 
 
 def test_fake_star_repo(spark, want):

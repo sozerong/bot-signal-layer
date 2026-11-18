@@ -1,0 +1,61 @@
+version: 2
+# 분석팀에 주는 표(real_user_*, impact)는 모델 계약을 건다 (4.3절). 컬럼 이름이나 형이 바뀌면 빌드가 실패한다.
+# 형 이름은 DuckDB 기준이다. 이식 때(C3) BigQuery 이름으로 바꾸는 곳이 여기다.
+
+x-event-columns: &event_columns
+  - {name: source,      data_type: varchar}
+  - {name: event_id,    data_type: varchar}
+  - {name: event_ts,    data_type: timestamp with time zone}
+  - {name: event_date,  data_type: date}
+  - {name: actor_key,   data_type: varchar}
+  - {name: actor_name,  data_type: varchar}
+  - {name: action,      data_type: varchar}
+  - {name: target,      data_type: varchar}
+  - {name: target_name, data_type: varchar}
+
+models:
+  - name: real_user_events
+    description: 이벤트 + 정책별 실유저 여부. 분석팀은 보통 정책 이름의 뷰(real_user_<정책>)를 쓴다
+    config: {contract: {enforced: true}}
+    columns:
+      - {name: source,          data_type: varchar}
+      - {name: event_id,        data_type: varchar}
+      - {name: event_ts,        data_type: timestamp with time zone}
+      - {name: event_date,      data_type: date}
+      - {name: actor_key,       data_type: varchar}
+      - {name: actor_name,      data_type: varchar}
+      - {name: action,          data_type: varchar}
+      - {name: target,          data_type: varchar}
+      - {name: target_name,     data_type: varchar}
+      - {name: is_real_lenient,  data_type: boolean}
+      - {name: is_real_balanced, data_type: boolean}
+      - {name: is_real_strict,   data_type: boolean}
+  - name: real_user_lenient
+    config: {contract: {enforced: true}}
+    columns: *event_columns
+  - name: real_user_balanced
+    config: {contract: {enforced: true}}
+    columns: *event_columns
+  - name: real_user_strict
+    config: {contract: {enforced: true}}
+    columns: *event_columns
+  - name: impact
+    config: {contract: {enforced: true}}
+    columns:
+      - {name: repo_key,       data_type: varchar}
+      - {name: repo_name,      data_type: varchar}
+      - {name: event_date,     data_type: date}
+      - {name: stars_all,      data_type: bigint}
+      - {name: stars_lenient,  data_type: bigint}
+      - {name: stars_balanced, data_type: bigint}
+      - {name: stars_strict,   data_type: bigint}
+      - {name: rank_all,       data_type: bigint}
+      - {name: rank_balanced,  data_type: bigint}
+  - name: entity_verdict
+    columns:
+      - name: category
+        data_tests:
+          - accepted_values: {arguments: {values: [human, declared_bot, suspected_bot]}}
+  - name: eval_pairs
+    description: 시험 대상. 행마다 판정 시각 <= 정답 확인 시각
+  - name: evaluation

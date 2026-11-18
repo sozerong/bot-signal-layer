@@ -6,3 +6,7 @@ always_on:      {family: behavior,     current: v1, entity: gh_account}
 low_activity:   {family: coordination, current: v1, entity: [gh_account, gh_repo]}
 lockstep_ratio: {family: coordination, current: v2, entity: gh_repo}
 burst_5m:       {family: coordination, current: v1, entity: gh_repo}
+multi_repo_burst: {family: behavior,   current: v1, entity: gh_account}
+
+# 피처 버전 (결정 9). family가 없는 항목은 근거가 아니다. f1 = sql/silver/features_repo.sql, fN = features_repo_fN.sql
+features_repo:  {current: f1}

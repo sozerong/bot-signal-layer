@@ -1,13 +1,40 @@
-# 로컬용: bot-job 컨테이너 하나. 레포를 /work로 붙인다 (implementation_design.md 8절 L1-2).
-#   docker compose run --rm bot-job pytest
+# 로컬: bot-job(계산) + Airflow(지휘). 레포를 /work로 붙인다 (implementation_design.md 3절, 8절 L1-2, L6).
+#   계산만: docker compose run --rm bot-job pytest
 #   Spark UI를 볼 때: docker compose run --rm --service-ports bot-job python -m ...  (run은 포트를 기본으로 열지 않는다)
+#   Airflow: docker compose up -d  -> http://127.0.0.1:8081 (8080은 서울 동네 찾기가 쓴다)
+# Airflow 구성은 서울 동네 찾기 docker-compose.yml(결정 109)에서 가져왔다. 바꾼 것: 데이터 DB와 화면들(pgadmin, metabase, ui)을 뺐고,
+# 계산 컨테이너를 bot-job 하나로, 시간대를 UTC로(GH Archive 날짜가 UTC), API 포트를 8081로.
+
+x-airflow-common: &airflow-common
+  image: bot-airflow:3.3.2
+  environment:
+    TZ: UTC
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${POSTGRES_PASSWORD}@airflow-db:5432/airflow
+    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:?set AIRFLOW_FERNET_KEY in .env}
+    AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET:?set AIRFLOW_JWT_SECRET in .env}
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+    # 내 PC에서만 여는 개발용이라 로그인 없이 모두 관리자. 포트는 127.0.0.1에만 연다
+    AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
+    # DockerOperator가 bot-job에 붙일 레포의 호스트 경로. 바인드 마운트는 호스트 Docker 기준이다
+    HOST_PROJECT_DIR: ${HOST_PROJECT_DIR:?set HOST_PROJECT_DIR in .env}
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./rules:/opt/airflow/rules:ro  # bot_build가 근거 목록과 버전을 registry에서 읽는다
+    - airflow_logs:/opt/airflow/logs
+  depends_on:
+    airflow-db:
+      condition: service_healthy
+
 services:
   bot-job:
-    build: .
+    build: {context: ., target: bot-job}
     image: bot-job:4.1.2
+    profiles: [jobs]  # 평소에는 뜨지 않는다. 사람은 docker compose run --rm, Airflow는 DockerOperator로 쓴다
     volumes:
       - ./:/work
-    # ponytail: 하루치(압축 2.6GB) 기준 첫 값. L3에서 실제 사용량을 보고 고친다
+    # 하루치 최대 6.1GB(measurements.md M-4). 일주일(L7) 뒤에 다시 본다. dags/jobs.py MEM과 함께 바꾼다
     mem_limit: 24g
     memswap_limit: 24g
     environment:
@@ -15,3 +42,89 @@ services:
       SPARK_DRIVER_MEMORY: 16g
     ports:
       - "4040:4040"
+
+  airflow-db:
+    image: postgres:17
+    mem_limit: 1g
+    memswap_limit: 1g
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_DB: airflow
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - airflow_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  airflow-init:
+    <<: *airflow-common
+    build: {context: ., target: airflow}
+    # Silver 쓰기 풀(자리 1개, dags/jobs.py SILVER_WRITE). 몇 번 돌려도 같다
+    command: ["bash", "-c", "airflow db migrate && airflow pools set silver_write 1 'Silver Iceberg commits one at a time (F-7)'"]
+    restart: "no"
+
+  airflow-apiserver:
+    <<: *airflow-common
+    # 상한은 서울 동네 찾기 실측(결정 109 H1)을 그대로 쓴다. L7에서 이 PC 실측으로 다시 본다
+    mem_limit: 512m
+    memswap_limit: 512m
+    command: api-server
+    ports:
+      - "127.0.0.1:8081:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/api/v2/monitor/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on: &airflow-after-init
+      airflow-db:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-scheduler:
+    <<: *airflow-common
+    mem_limit: 1792m
+    memswap_limit: 1792m
+    command: scheduler
+    healthcheck:
+      test: ["CMD-SHELL", 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on: *airflow-after-init
+
+  airflow-dag-processor:
+    <<: *airflow-common
+    mem_limit: 768m
+    memswap_limit: 768m
+    command: dag-processor
+    depends_on: *airflow-after-init
+
+  airflow-triggerer:
+    <<: *airflow-common
+    mem_limit: 768m
+    memswap_limit: 768m
+    command: triggerer
+    depends_on: *airflow-after-init
+
+  socket-proxy:
+    # DockerOperator가 bot-job 컨테이너를 만들 때만 거치는 Docker API 문 (서울 동네 찾기 결정 109 H4의 최소 묶음)
+    image: tecnativa/docker-socket-proxy:v0.5.0
+    mem_limit: 128m
+    memswap_limit: 128m
+    environment:
+      CONTAINERS: 1
+      POST: 1
+      IMAGES: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+volumes:
+  airflow_pgdata:
+  airflow_logs:

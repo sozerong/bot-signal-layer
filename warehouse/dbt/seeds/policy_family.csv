@@ -1,0 +1,9 @@
+policy,family
+lenient,self_report
+balanced,self_report
+balanced,infrastructure
+balanced,coordination
+strict,self_report
+strict,infrastructure
+strict,behavior
+strict,coordination

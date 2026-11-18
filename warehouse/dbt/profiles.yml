@@ -1,0 +1,9 @@
+# bot-job 컨테이너 안에서 돈다 (/work = 레포). Silver는 iceberg_scan으로 읽는다 (models/sources.yml)
+bot:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: /work/warehouse_local/gold.duckdb
+      extensions: [iceberg]
+      threads: 4

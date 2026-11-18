@@ -1,4 +1,18 @@
 raw/
+experiments/*/work/
 __pycache__/
 *.pyc
 .pytest_cache/
+warehouse_local/
+spark-events/
+*.parquet
+
+# dbt 빌드 산출물 (L5). evidence_current.csv는 빌드 때 rules/registry.yml에서 만든다
+warehouse/dbt/target/
+warehouse/dbt/logs/
+warehouse/dbt/dbt_packages/
+warehouse/dbt/seeds/evidence_current.csv
+warehouse/dbt/.user.yml
+
+# 로컬 Airflow 비밀 (L6)
+.env

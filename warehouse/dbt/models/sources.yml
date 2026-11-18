@@ -1,0 +1,18 @@
+version: 2
+# Silver는 Spark가 쓴 Iceberg Hadoop 카탈로그 표다. DuckDB가 iceberg_scan으로 version-hint.text를 따라 최신 스냅샷을 연다 (4.3절)
+sources:
+  - name: silver
+    meta:
+      external_location: "iceberg_scan('/work/warehouse_local/silver/{name}')"
+    tables:
+      - name: events
+      - name: entity_features
+      - name: evidence
+      - name: truth
+  - name: bronze
+    tables:
+      - name: manifest
+        description: 원천 파일 하나 = manifest 하나 (4.1절). 데이터 품질 시험이 줄 수를 대조한다
+        meta:
+          # 폴더 키(hour=00)가 같은 이름의 JSON 필드(hour)를 덮지 않게 하이브 파티션 읽기를 끈다 (failure_analysis.md F-4)
+          external_location: "read_json_auto('/work/raw/dt=*/hour=*/_manifest.json', hive_partitioning = false)"

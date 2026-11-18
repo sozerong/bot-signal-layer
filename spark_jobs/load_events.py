@@ -27,6 +27,7 @@ def main():
     files = a.input if a.input.endswith(".gz") else f"{a.input}/hour=*/*.json.gz"
     spark = spark_session(f"load_events {a.input}", run_sql.event_log_conf())
     load(spark, files, run_sql.parse_params(a.param))
+    spark.stop()  # 이벤트 로그를 닫는다 (F-2)
 
 
 if __name__ == "__main__":
