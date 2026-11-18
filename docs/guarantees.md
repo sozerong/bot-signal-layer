@@ -26,11 +26,10 @@
 | 범위를 좁힌 Gold 빌드도 규칙 버전 시드를 다시 싣고, 기록은 실제 Gold를 적는다 | `warehouse/dbt_build.py`(`evidence_current+`를 늘 더함), `record_build.py`(Gold 표를 읽음) | registry를 v3으로 바꾸고 `--select stg_evidence+`로만 빌드, 다시 v2로 | v3: 가짜 star 저장소 2,812, Gold 시드 v3, 기록 v3. v2: 2,793, v2, v2 (F-10, 2026-11-17) | `--select`나 `-s`를 쓴 빌드 | ② | `--selector`나 `--exclude`로 시드를 빼면 막지 못한다 |
 | events 행 수 = manifest 줄 수 합 (데이터 품질) | dbt 시험 `events_match_manifest` | 7일치 `dbt build`, 그리고 manifest 사본 하나의 줄 수를 1 늘려 같은 시험 SQL | 7일 통과, 사본에서는 `(2024-07-16, 4870089, 4870090)` 한 행으로 실패 (F-4, 2026-11-17) | | ③ | 거꾸로 확인은 dbt가 아니라 컴파일된 시험 SQL을 사본 경로로 돌린 것이다 (raw는 읽기만 한다) |
 | 규칙 변경 재처리 범위를 리니지가 정하고, 그 범위로 돈 결과가 손 범위와 같다 | `lineage/impact.py`, `rule_backfill` DAG | 근거 규칙(lockstep v3)과 피처(f2)를 리니지 범위로 7일치 다시, 되돌리기까지 | Silver 범위 = 손 범위(1개, 4개). Gold는 리니지가 `stg_truth` 하나 더. 결과 숫자가 M-11과 같음 (measurements.md M-14, 2026-11-17) | 리니지 회차 1 | ② | Gold 모델 고르기에는 행 조건 좁히기가 없다 (`real_user_lenient`, `stg_truth`를 더 고름). 시드는 리니지가 아니라 dbt_build가 막는다 |
-| 같은 규칙으로 다시 돌려도 판정 시각이 바뀌지 않는다 (채점을 지우지 않는다) | `run_sql.run`의 옛 행 맞추기 (결정 11) | burst_5m v1 07-15를 (1) 같은 SQL로 (2) 주석 한 줄 더한 사본으로 다시 | (1) 102,271행 모두 run_id 새것, judged_at 그대로 (2) 102,271행 모두 새 judged_at (F-8, 2026-11-17) | | ② | 시험 스크립트는 스크래치에 있다. evaluation 숫자(94.9% 대 4.0%)가 재처리 뒤 그대로인지는 다음 날 정답 확인 뒤에 본다 |
+| 같은 규칙으로 다시 돌려도 판정 시각과 채점이 바뀌지 않는다 | `run_sql.run`의 옛 행 맞추기 (결정 11) | burst_5m v1 07-15를 (1) 같은 SQL로 (2) 주석 한 줄 더한 사본으로 다시. (3) 다음 날 정답 확인 뒤 07-15 근거 여섯 개를 같은 규칙으로 다시 돌리고 Gold 전체 빌드 | (1) 102,271행 모두 run_id 새것, judged_at 그대로 (2) 102,271행 모두 새 judged_at (3) evaluation 네 줄, truth 집계, eval_pairs 9,204행이 앞뒤로 같음 (F-8, measurements.md M-16, 2026-11-17 ~ 18) | | ② | (1)(2) 시험 스크립트는 스크래치에 있다. 새 규칙 버전도 정답 확인보다 먼저 판정했으면 채점된다 (M-16 v3) |
 | registry만 바꿔도 다음 DAG 실행이 그 버전을 돈다 | `bot_build`가 `rules/registry.yml`을 읽음 | lockstep_ratio를 v3으로만 바꾸고 `bot_build` | v3 파티션이 새 run_id, Gold 시드와 기록 v3. 되돌리기 v2 (M-15, 2026-11-17) | dag-processor가 다시 파싱한 뒤 (15초) | ① | 파싱 전에 돈 실행은 옛 목록을 쓴다 |
 | 근거 하나를 더할 때 DAG와 시드를 고치지 않아도 된다 | registry, DAG, `dbt_build.py` | `multi_repo_burst` v1을 더하고 `rule_backfill` | 바뀐 코드 5개 파일(새 SQL 16줄 + 7줄 정도), DAG 태스크가 저절로 생김 (M-15) | 기존 계열(behavior)의 근거 | ① | Gold `evidence_flags`에 컬럼, 판정식에 이름을 손으로 더해야 한다 (결정 8) |
 
 ## 2. 아직 증명하지 않은 성질
 
 - 분석팀 표의 모델 계약이 형 변경을 막는다: 계약은 걸었고 빌드는 통과했지만, 일부러 형을 바꿔 실패하는지는 보지 않았다
-- 같은 규칙으로 재처리한 날에도 채점 숫자(94.9% 대 4.0%)가 그대로다: 결정 11로 판정 시각은 이어지지만, 오늘의 판정이 모두 정답 확인보다 늦어 숫자로는 아직 못 봄 (F-8). 2026-11-18 이후 late_truth 뒤에 본다
