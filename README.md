@@ -60,6 +60,8 @@ docker compose exec airflow-scheduler airflow dags unpause ingest_gh
 docker compose exec airflow-scheduler airflow dags trigger late_truth -c '{"days": "2024-07-15"}'
 ```
 
+생존 확인은 이미 성공한 대상을 다시 묻지 않고(`--only-missing`), GitHub가 429로 막으면 모두 같이 쉬며, 확인 실패가 5%를 넘으면 태스크가 실패한다 (docs/decisions.md 결정 16). 실패로 끝나면 같은 명령을 다시 돌리면 빈 것만 묻는다.
+
 채점은 정답을 고른 판정 구간(`days`의 날짜)의 판정과만 짝짓는다. `main.evaluation`은 구간마다 한 행과 전체 행(`window_end`가 비어 있음)을 낸다 (docs/decisions.md 결정 14). 판정보다 뒤에 확인한 정답만 채점에 쓴다. 같은 규칙으로 다시 돌린 근거는 옛 판정 시각을 이어받아 채점이 그대로다. 규칙을 바꾼 날에는 다음 정답 확인 전까지 새 버전의 채점이 빈다 (docs/decisions.md 결정 11).
 
 ### 4. 규칙을 바꿨을 때
@@ -123,5 +125,4 @@ docker compose run --rm bot-job python -m pytest tests -q
 
 미해결 오류는 [docs/failure_analysis.md](docs/failure_analysis.md)에 있다. 로컬에서 돌릴 때 부딪히는 것:
 - 시험 하나(`tests/test_gold_dialect.py`의 entity_verdict)가 실패한다. BigQuery 방언 변환 문제로 이식 때(C3) 고친다 (F-5).
-- 생존 확인 대상 고르기(`sql/truth/pick_targets.sql`)가 근거 규칙 버전을 거르지 않는다. 옛 버전 파티션이 남아 있으면 의심 대상에 섞이고 채점에서 대조군으로 세어진다 (F-13, 미해결).
 - Silver 표는 Iceberg Hadoop 카탈로그라 동시 커밋이 서로를 덮을 수 있다. 그래서 Airflow 풀로 줄 세우고 실행기가 쓴 뒤 확인한다 (F-7). Airflow 밖에서 손으로 여러 작업을 동시에 돌리지 않는다.

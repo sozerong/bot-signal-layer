@@ -35,10 +35,13 @@
 | Gold 모델의 meta 근거 계열이 SQL과 정책 시드에 맞는다 | `gold.yml` meta `evidence_families`, `tests/test_gold_meta.py` | 정책 뷰는 meta = policy_family 시드, 근거 컬럼을 읽는 모델은 SQL의 근거 이름 계열 ⊆ meta, 읽는 ref가 검사된 둘뿐인지. 거꾸로: fake_star_repo를 behavior로, balanced에서 coordination을 빼 봄 | 통과. 거꾸로 두 경우 모두 실패 (2026-11-18) | | ② | 근거 이름을 문자열로 찾는다. 이름 없이 근거를 읽는 새 모델(예: `select *`)은 ref 검사가 막는다. pytest라 dbt build가 강제하지 않는다 |
 | registry 한 줄만 바꿔도 리니지 영향 범위에 시드와 그 아래가 든다 | `lineage/extract.py registry_edges`, `lineage/impact.py` | lockstep_ratio만 v3으로 바꾸고 `impact --change rules/registry.yml`, 되돌림 | Gold 목록 맨 앞에 evidence_current, Silver는 v3.sql 하나 (M-19, 2026-11-18) | 시드 csv가 마지막 빌드 상태일 때 | ① | 바뀐 항목은 시드 csv와 비교해 찾는다. 시드 csv를 손으로 고치면 틀린다 |
 | 실행 계획에서 스테이지와 연산을 짝지을 수 있다 | `run_sql.save_plan`, 히스토리 서버 SQL 탭 | features_repo 하루, 계획 파일과 SQL 탭 노드 지표의 stage 번호 | 가장 긴 스테이지 25 = 자기 조인, AQE 200 → 13~16 (M-20, 2026-11-18) | | ① | 짝짓기는 손이다. 계획 파일은 AQE 전 계획 |
-| 채점은 정답을 고른 구간의 판정과만 짝짓는다 | `eval_pairs`의 (대상, target_window) 조인, `evaluation` 구간별 행 | 07-15 구간 숫자를 M-8과 비교, 6일 더 확인 뒤 구간별 표 | 07-15 정밀도 262/276 = 94.9% (M-8과 같음), 대조군 차이 8개는 F-13로 설명됨 (M-18, 2026-11-18) | | ② | 구간에 정답이 없으면(07-18, F-15) 그 구간 행이 없다. 전체 행은 정답 있는 구간만의 합이다 |
+| 채점은 정답을 고른 구간의 판정과만 짝짓는다 | `eval_pairs`의 (대상, target_window) 조인, `evaluation` 구간별 행 | 07-15 구간 숫자를 M-8과 비교, 6일 더 확인 뒤 구간별 표 | 07-15 정밀도 262/276 = 94.9% (M-8과 같음), 대조군 차이 8개는 F-13로 설명됨 (M-18, 2026-11-18) | | ② | 구간에 정답이 없으면 그 구간 행이 없다. 전체 행은 정답 있는 구간만의 합이다. K1 뒤 7개 구간 모두 정답 있음 (M-21) |
 | 구간을 더해도 truth에 중복이 생기지 않고 옛 행이 한 번 채워진다 | `build_truth`의 MERGE (키에 target_window), `truth.sql` | (1) 컬럼을 더한 뒤 build_truth (2) 엿새치 추가 뒤 한 번 더 | (1) 1,108 → 1,108, 빈 target_window 0 (2) 3,704 → 3,704, 키 중복 0 (M-18, 2026-11-18) | | ① | 같은 날 같은 저장소를 두 구간을 위해 확인하면 두 행이 된다 (의도) |
+
+| 생존 확인을 다시 돌려도 이미 확인한 것은 묻지 않는다 | `repo_alive --only-missing`, `checked()` | K1 다시 보내기 뒤 7개 구간에 같은 명령 한 번 더 | 모두 "물을 것 0개", 요청 0번, 새 raw 파일 없음 (M-21, 2026-11-18) | 성공 = 200, 301, 404, 451 | ① | raw 파일을 읽어 판단한다. raw를 지우면 다시 묻는다 |
+| 확인 실패가 문턱을 넘으면 태스크가 실패한다 | `repo_alive --max-fail-rate` | `--network none` 컨테이너에서 문턱 0%로 07-21 | 478개 모두 실패, exit 1 (M-21, 2026-11-18) | 출력은 스크래치 폴더 | ① | 문턱 아래의 실패는 초록으로 끝나고 로그 한 줄에만 남는다 |
+| 생존 확인 대상이 Gold의 지금 규칙 버전과 같고, 의심과 대조군이 번갈아 온다 | `pick_targets.sql`, registry 버전 파라미터 | 7개 구간에서 새 SQL의 의심을 Gold fake_star_repo와, 대조군을 옛 SQL과 비교 | 의심 = Gold, 옛 대조군 순서 유지, 순서 번갈아 (M-21, 2026-11-18) | | ① | 옛 확인의 F-13 몫은 truth에 남는다 |
 
 ## 2. 아직 증명하지 않은 성질
 
-- 07-18 구간 채점과 07-16, 07-17, 07-19 대조군: 생존 확인이 429로 막혀 정답이 없거나 적다 (F-15)
-- 생존 확인 대상이 Gold의 지금 규칙 버전과 같다: 지금은 아니다 (F-13)
+- 이식(C2 ~ C4) 뒤 같은 결과: `docs/local_baseline.md`의 "같아야 함" 값을 `scripts/baseline.py compare`로 대조한다 (K3에서 로컬 값만 남김)

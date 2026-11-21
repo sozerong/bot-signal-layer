@@ -1,0 +1,467 @@
+{
+ "gold": {
+  "evaluation": {
+   "burst_5m|v1|2024-07-15": {
+    "control_pos": 47,
+    "control_truth": 326,
+    "hit_pos": 226,
+    "hit_truth": 232,
+    "n_hit": 92007
+   },
+   "burst_5m|v1|2024-07-16": {
+    "control_pos": 65,
+    "control_truth": 465,
+    "hit_pos": 346,
+    "hit_truth": 373,
+    "n_hit": 94840
+   },
+   "burst_5m|v1|2024-07-17": {
+    "control_pos": 65,
+    "control_truth": 580,
+    "hit_pos": 479,
+    "hit_truth": 489,
+    "n_hit": 96014
+   },
+   "burst_5m|v1|2024-07-18": {
+    "control_pos": 68,
+    "control_truth": 510,
+    "hit_pos": 375,
+    "hit_truth": 461,
+    "n_hit": 94089
+   },
+   "burst_5m|v1|2024-07-19": {
+    "control_pos": 64,
+    "control_truth": 534,
+    "hit_pos": 433,
+    "hit_truth": 464,
+    "n_hit": 89500
+   },
+   "burst_5m|v1|2024-07-20": {
+    "control_pos": 86,
+    "control_truth": 371,
+    "hit_pos": 304,
+    "hit_truth": 308,
+    "n_hit": 74095
+   },
+   "burst_5m|v1|2024-07-21": {
+    "control_pos": 73,
+    "control_truth": 281,
+    "hit_pos": 189,
+    "hit_truth": 199,
+    "n_hit": 75002
+   },
+   "burst_5m|v1|all": {
+    "control_pos": 468,
+    "control_truth": 3067,
+    "hit_pos": 2352,
+    "hit_truth": 2526,
+    "n_hit": 615547
+   },
+   "fake_star_repo|combo|2024-07-15": {
+    "control_pos": 11,
+    "control_truth": 282,
+    "hit_pos": 262,
+    "hit_truth": 276,
+    "n_hit": 276
+   },
+   "fake_star_repo|combo|2024-07-16": {
+    "control_pos": 25,
+    "control_truth": 419,
+    "hit_pos": 386,
+    "hit_truth": 419,
+    "n_hit": 419
+   },
+   "fake_star_repo|combo|2024-07-17": {
+    "control_pos": 27,
+    "control_truth": 534,
+    "hit_pos": 517,
+    "hit_truth": 535,
+    "n_hit": 535
+   },
+   "fake_star_repo|combo|2024-07-18": {
+    "control_pos": 50,
+    "control_truth": 485,
+    "hit_pos": 393,
+    "hit_truth": 486,
+    "n_hit": 486
+   },
+   "fake_star_repo|combo|2024-07-19": {
+    "control_pos": 33,
+    "control_truth": 499,
+    "hit_pos": 464,
+    "hit_truth": 499,
+    "n_hit": 499
+   },
+   "fake_star_repo|combo|2024-07-20": {
+    "control_pos": 65,
+    "control_truth": 340,
+    "hit_pos": 325,
+    "hit_truth": 339,
+    "n_hit": 339
+   },
+   "fake_star_repo|combo|2024-07-21": {
+    "control_pos": 36,
+    "control_truth": 241,
+    "hit_pos": 226,
+    "hit_truth": 239,
+    "n_hit": 239
+   },
+   "fake_star_repo|combo|all": {
+    "control_pos": 247,
+    "control_truth": 2800,
+    "hit_pos": 2573,
+    "hit_truth": 2793,
+    "n_hit": 2793
+   },
+   "lockstep_ratio|v2|2024-07-15": {
+    "control_pos": 201,
+    "control_truth": 478,
+    "hit_pos": 72,
+    "hit_truth": 80,
+    "n_hit": 98
+   },
+   "lockstep_ratio|v2|2024-07-16": {
+    "control_pos": 347,
+    "control_truth": 768,
+    "hit_pos": 64,
+    "hit_truth": 70,
+    "n_hit": 74
+   },
+   "lockstep_ratio|v2|2024-07-17": {
+    "control_pos": 443,
+    "control_truth": 957,
+    "hit_pos": 101,
+    "hit_truth": 112,
+    "n_hit": 134
+   },
+   "lockstep_ratio|v2|2024-07-18": {
+    "control_pos": 300,
+    "control_truth": 815,
+    "hit_pos": 143,
+    "hit_truth": 156,
+    "n_hit": 165
+   },
+   "lockstep_ratio|v2|2024-07-19": {
+    "control_pos": 283,
+    "control_truth": 772,
+    "hit_pos": 214,
+    "hit_truth": 226,
+    "n_hit": 267
+   },
+   "lockstep_ratio|v2|2024-07-20": {
+    "control_pos": 308,
+    "control_truth": 585,
+    "hit_pos": 82,
+    "hit_truth": 94,
+    "n_hit": 107
+   },
+   "lockstep_ratio|v2|2024-07-21": {
+    "control_pos": 126,
+    "control_truth": 335,
+    "hit_pos": 136,
+    "hit_truth": 145,
+    "n_hit": 150
+   },
+   "lockstep_ratio|v2|all": {
+    "control_pos": 2008,
+    "control_truth": 4710,
+    "hit_pos": 812,
+    "hit_truth": 883,
+    "n_hit": 995
+   },
+   "low_activity|v1|2024-07-15": {
+    "control_pos": 3,
+    "control_truth": 8,
+    "hit_pos": 270,
+    "hit_truth": 550,
+    "n_hit": 95749
+   },
+   "low_activity|v1|2024-07-16": {
+    "control_pos": 14,
+    "control_truth": 21,
+    "hit_pos": 397,
+    "hit_truth": 817,
+    "n_hit": 99217
+   },
+   "low_activity|v1|2024-07-17": {
+    "control_pos": 13,
+    "control_truth": 21,
+    "hit_pos": 531,
+    "hit_truth": 1048,
+    "n_hit": 100771
+   },
+   "low_activity|v1|2024-07-18": {
+    "control_pos": 37,
+    "control_truth": 49,
+    "hit_pos": 406,
+    "hit_truth": 922,
+    "n_hit": 97755
+   },
+   "low_activity|v1|2024-07-19": {
+    "control_pos": 10,
+    "control_truth": 18,
+    "hit_pos": 487,
+    "hit_truth": 980,
+    "n_hit": 94784
+   },
+   "low_activity|v1|2024-07-20": {
+    "control_pos": 54,
+    "control_truth": 60,
+    "hit_pos": 336,
+    "hit_truth": 619,
+    "n_hit": 70148
+   },
+   "low_activity|v1|2024-07-21": {
+    "control_pos": 25,
+    "control_truth": 31,
+    "hit_pos": 237,
+    "hit_truth": 449,
+    "n_hit": 70910
+   },
+   "low_activity|v1|all": {
+    "control_pos": 156,
+    "control_truth": 208,
+    "hit_pos": 2664,
+    "hit_truth": 5385,
+    "n_hit": 629334
+   }
+  },
+  "fake_star_repo": {
+   "2024-07-15": 276,
+   "2024-07-16": 419,
+   "2024-07-17": 535,
+   "2024-07-18": 486,
+   "2024-07-19": 499,
+   "2024-07-20": 339,
+   "2024-07-21": 239
+  },
+  "fake_star_repo_0715_sha256": "6e58ca8e2c984a793462d42a6c0adcbab79a089a5e691062127eff08d0fa69dc",
+  "real_user": {
+   "2024-07-15": {
+    "all_events": 4914751,
+    "balanced_accounts": 656971,
+    "balanced_events": 3500551,
+    "lenient_accounts": 658593,
+    "lenient_events": 3527311,
+    "strict_accounts": 656510,
+    "strict_events": 3009012
+   },
+   "2024-07-16": {
+    "all_events": 4870089,
+    "balanced_accounts": 678365,
+    "balanced_events": 3583472,
+    "lenient_accounts": 680742,
+    "lenient_events": 3634189,
+    "strict_accounts": 677876,
+    "strict_events": 3132835
+   },
+   "2024-07-17": {
+    "all_events": 4836566,
+    "balanced_accounts": 677931,
+    "balanced_events": 3527950,
+    "lenient_accounts": 680274,
+    "lenient_events": 3598334,
+    "strict_accounts": 677444,
+    "strict_events": 3103909
+   },
+   "2024-07-18": {
+    "all_events": 4724216,
+    "balanced_accounts": 666197,
+    "balanced_events": 3479627,
+    "lenient_accounts": 668449,
+    "lenient_events": 3539370,
+    "strict_accounts": 665721,
+    "strict_events": 3071869
+   },
+   "2024-07-19": {
+    "all_events": 4499360,
+    "balanced_accounts": 621004,
+    "balanced_events": 3277749,
+    "lenient_accounts": 624311,
+    "lenient_events": 3315235,
+    "strict_accounts": 620527,
+    "strict_events": 2829341
+   },
+   "2024-07-20": {
+    "all_events": 3616185,
+    "balanced_accounts": 453108,
+    "balanced_events": 2436293,
+    "lenient_accounts": 454446,
+    "lenient_events": 2469829,
+    "strict_accounts": 452643,
+    "strict_events": 2001185
+   },
+   "2024-07-21": {
+    "all_events": 3615363,
+    "balanced_accounts": 456231,
+    "balanced_events": 2497520,
+    "lenient_accounts": 457879,
+    "lenient_events": 2515755,
+    "strict_accounts": 455763,
+    "strict_events": 2080762
+   }
+  }
+ },
+ "silver": {
+  "digest": {
+   "bot.silver.entity_features|2024-07-15": {
+    "hash": "-5778546878702277356694",
+    "rows": 762394
+   },
+   "bot.silver.entity_features|2024-07-16": {
+    "hash": "-4652783092012574048169",
+    "rows": 787695
+   },
+   "bot.silver.entity_features|2024-07-17": {
+    "hash": "-2548999543369008931243",
+    "rows": 788008
+   },
+   "bot.silver.entity_features|2024-07-18": {
+    "hash": "1962634809691526658218",
+    "rows": 774272
+   },
+   "bot.silver.entity_features|2024-07-19": {
+    "hash": "6608497554276671302161",
+    "rows": 724627
+   },
+   "bot.silver.entity_features|2024-07-20": {
+    "hash": "-4991583978736887949193",
+    "rows": 537072
+   },
+   "bot.silver.entity_features|2024-07-21": {
+    "hash": "2028829981846233149551",
+    "rows": 541710
+   },
+   "bot.silver.events|2024-07-15": {
+    "hash": "-9639011170655187706674",
+    "rows": 4914751
+   },
+   "bot.silver.events|2024-07-16": {
+    "hash": "-5952011029738530450015",
+    "rows": 4870089
+   },
+   "bot.silver.events|2024-07-17": {
+    "hash": "12812625049466719052477",
+    "rows": 4836566
+   },
+   "bot.silver.events|2024-07-18": {
+    "hash": "26481842953986703973290",
+    "rows": 4724216
+   },
+   "bot.silver.events|2024-07-19": {
+    "hash": "-3175238063173251091323",
+    "rows": 4499360
+   },
+   "bot.silver.events|2024-07-20": {
+    "hash": "-6125701146281424980394",
+    "rows": 3616185
+   },
+   "bot.silver.events|2024-07-21": {
+    "hash": "6700359564830184915635",
+    "rows": 3615363
+   },
+   "bot.silver.evidence|2024-07-15": {
+    "hash": "-13862843267406185444985",
+    "rows": 3709699
+   },
+   "bot.silver.evidence|2024-07-16": {
+    "hash": "-11614781255694830014245",
+    "rows": 3833013
+   },
+   "bot.silver.evidence|2024-07-17": {
+    "hash": "6820818354646591040735",
+    "rows": 3833814
+   },
+   "bot.silver.evidence|2024-07-18": {
+    "hash": "21838006010582731116250",
+    "rows": 3766986
+   },
+   "bot.silver.evidence|2024-07-19": {
+    "hash": "-5729998789175968828913",
+    "rows": 3524203
+   },
+   "bot.silver.evidence|2024-07-20": {
+    "hash": "-2567805284163716892960",
+    "rows": 2603679
+   },
+   "bot.silver.evidence|2024-07-21": {
+    "hash": "5896735309572059381246",
+    "rows": 2625698
+   }
+  },
+  "evidence_hits": {
+   "always_on|v1|gh_account|2024-07-15": 428,
+   "always_on|v1|gh_account|2024-07-16": 454,
+   "always_on|v1|gh_account|2024-07-17": 449,
+   "always_on|v1|gh_account|2024-07-18": 443,
+   "always_on|v1|gh_account|2024-07-19": 446,
+   "always_on|v1|gh_account|2024-07-20": 443,
+   "always_on|v1|gh_account|2024-07-21": 441,
+   "burst_5m|v1|gh_repo|2024-07-15": 92007,
+   "burst_5m|v1|gh_repo|2024-07-16": 94840,
+   "burst_5m|v1|gh_repo|2024-07-17": 96014,
+   "burst_5m|v1|gh_repo|2024-07-18": 94089,
+   "burst_5m|v1|gh_repo|2024-07-19": 89500,
+   "burst_5m|v1|gh_repo|2024-07-20": 74095,
+   "burst_5m|v1|gh_repo|2024-07-21": 75002,
+   "declared_app|v1|gh_account|2024-07-15": 1530,
+   "declared_app|v1|gh_account|2024-07-16": 1491,
+   "declared_app|v1|gh_account|2024-07-17": 1508,
+   "declared_app|v1|gh_account|2024-07-18": 1449,
+   "declared_app|v1|gh_account|2024-07-19": 1384,
+   "declared_app|v1|gh_account|2024-07-20": 945,
+   "declared_app|v1|gh_account|2024-07-21": 979,
+   "lockstep_ratio|v2|gh_repo|2024-07-15": 98,
+   "lockstep_ratio|v2|gh_repo|2024-07-16": 74,
+   "lockstep_ratio|v2|gh_repo|2024-07-17": 134,
+   "lockstep_ratio|v2|gh_repo|2024-07-18": 165,
+   "lockstep_ratio|v2|gh_repo|2024-07-19": 267,
+   "lockstep_ratio|v2|gh_repo|2024-07-20": 107,
+   "lockstep_ratio|v2|gh_repo|2024-07-21": 150,
+   "lockstep_ratio|v3|gh_repo|2024-07-15": 103,
+   "lockstep_ratio|v3|gh_repo|2024-07-16": 77,
+   "lockstep_ratio|v3|gh_repo|2024-07-17": 153,
+   "lockstep_ratio|v3|gh_repo|2024-07-18": 173,
+   "lockstep_ratio|v3|gh_repo|2024-07-19": 330,
+   "lockstep_ratio|v3|gh_repo|2024-07-20": 110,
+   "lockstep_ratio|v3|gh_repo|2024-07-21": 184,
+   "low_activity|v1|gh_account|2024-07-15": 94798,
+   "low_activity|v1|gh_account|2024-07-16": 98128,
+   "low_activity|v1|gh_account|2024-07-17": 99587,
+   "low_activity|v1|gh_account|2024-07-18": 96601,
+   "low_activity|v1|gh_account|2024-07-19": 93627,
+   "low_activity|v1|gh_account|2024-07-20": 69375,
+   "low_activity|v1|gh_account|2024-07-21": 70218,
+   "low_activity|v1|gh_repo|2024-07-15": 951,
+   "low_activity|v1|gh_repo|2024-07-16": 1089,
+   "low_activity|v1|gh_repo|2024-07-17": 1184,
+   "low_activity|v1|gh_repo|2024-07-18": 1154,
+   "low_activity|v1|gh_repo|2024-07-19": 1157,
+   "low_activity|v1|gh_repo|2024-07-20": 773,
+   "low_activity|v1|gh_repo|2024-07-21": 692,
+   "multi_repo_burst|v1|gh_account|2024-07-15": 52,
+   "multi_repo_burst|v1|gh_account|2024-07-16": 53,
+   "multi_repo_burst|v1|gh_account|2024-07-17": 55,
+   "multi_repo_burst|v1|gh_account|2024-07-18": 50,
+   "multi_repo_burst|v1|gh_account|2024-07-19": 43,
+   "multi_repo_burst|v1|gh_account|2024-07-20": 32,
+   "multi_repo_burst|v1|gh_account|2024-07-21": 38,
+   "multi_repo_burst|v2|gh_account|2024-07-15": 52,
+   "multi_repo_burst|v2|gh_account|2024-07-16": 53,
+   "multi_repo_burst|v2|gh_account|2024-07-17": 55,
+   "multi_repo_burst|v2|gh_account|2024-07-18": 50,
+   "multi_repo_burst|v2|gh_account|2024-07-19": 43,
+   "multi_repo_burst|v2|gh_account|2024-07-20": 32,
+   "multi_repo_burst|v2|gh_account|2024-07-21": 38
+  },
+  "manifest_lines": {
+   "2024-07-15": 4914751,
+   "2024-07-16": 4870089,
+   "2024-07-17": 4836566,
+   "2024-07-18": 4724216,
+   "2024-07-19": 4499360,
+   "2024-07-20": 3616185,
+   "2024-07-21": 3615363
+  }
+ }
+}
