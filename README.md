@@ -9,6 +9,73 @@
 - 이전 설계 (가짜 star 한정, v0.3): [GH_PROJECT_DESIGN.md](GH_PROJECT_DESIGN.md)
 
 
+## 가져가는 법
+
+분석가는 정책을 고르지 않아도 된다. 지표마다 기본 정책이 [warehouse/dbt/seeds/metric_policy.csv](warehouse/dbt/seeds/metric_policy.csv)에 정해져 있고, 판정이 왜 그렇게 났는지와 규칙이 바뀌면 숫자가 얼마나 바뀌는지를 표로 본다 (docs/decisions.md 결정 24).
+
+- 근거를 왜 쓰고 왜 버렸는지 한 장: [docs/criteria.md 2.1절 판정 기준 표](docs/criteria.md)
+- 가져가는 표면: `actor_policy_status`(대상 x 날짜 x 정책 → 실유저 여부, 빠지게 한 근거, 규칙 묶음 id), `why_excluded`(빠진 대상의 근거, 규칙 버전, 점수, 판정 시각, SQL 지문), `policy_compare_released`(지표 x 정책별 값), `ruleset_change_log`(규칙 묶음 변경 기록). 앞의 둘은 모델 계약이라 컬럼과 형이 바뀌면 빌드가 실패한다.
+- dbt 안에서는 매크로 `real_users(policy, source, include_ai_agent=false)`와 `default_policy(metric)`를 쓴다 ([warehouse/dbt/macros/real_users.sql](warehouse/dbt/macros/real_users.sql)). `source`는 꼭 준다. 같은 사람이 GitHub 계정과 웹 클라이언트로 따로 세어지기 때문이다.
+
+세 쿼리는 [warehouse/dbt/analyses/](warehouse/dbt/analyses/)에 있고 dbt exposure `analyst_three_queries`로 묶었다. 컴파일한 뒤 돌린다:
+
+```bash
+docker compose run --rm bot-job python -m warehouse.dbt_build compile
+```
+
+```bash
+docker compose run --rm bot-job python -m scripts.query warehouse/dbt/target/compiled/bot_gold/analyses/q1_events_default_policy.sql
+```
+
+**① 지표의 기본 정책으로 실유저만** (`q1_events_default_policy.sql`, 지표 `events`의 기본 정책을 시드에서 읽는다). 2026-11-22에 돌린 결과:
+
+| event_date | policy | events |
+|---|---|---|
+| 2024-07-15 | lenient | 3,527,311 |
+| 2024-07-16 | lenient | 3,634,189 |
+| 2024-07-17 | lenient | 3,598,334 |
+| 2024-07-18 | lenient | 3,539,370 |
+| 2024-07-19 | lenient | 3,315,235 |
+| 2024-07-20 | lenient | 2,469,829 |
+| 2024-07-21 | lenient | 2,515,755 |
+
+**② 이 대상은 왜 빠졌나** (`q2_why_excluded.sql`, 07-15 한 시간에 저장소 579개에 star를 준 계정):
+
+| policy | category | evidence_id | rule_version | score | metrics | judged_at | sql_sha |
+|---|---|---|---|---|---|---|---|
+| strict | suspected_bot | multi_repo_burst | v2 | 5.85 | {"max_repos_1h":585} | 2026-11-18 01:44:47+00:00 | 6d13d3980700 |
+
+lenient와 balanced에서는 빠지지 않고 strict(행동 계열)에서만 빠진다. 근거 SQL 지문으로 그때 규칙 파일을 찾는다.
+
+**③ 규칙 묶음이 바뀌면 지표가 얼마나 바뀌나** (`q3_ruleset_change.sql`, lockstep_ratio v2 → v3 시험, 07-15, 바뀐 것만):
+
+| metric | treatment | base_ruleset | other_ruleset | base_value | other_value | rel_change_pct |
+|---|---|---|---|---|---|---|
+| active_accounts | balanced | ad4bfe93bcd9 | fdcdcd213e30 | 656,971 | 656,913 | -0.009 |
+| active_accounts | strict | ad4bfe93bcd9 | fdcdcd213e30 | 656,510 | 656,452 | -0.009 |
+| events | balanced | ad4bfe93bcd9 | fdcdcd213e30 | 3,500,551 | 3,500,367 | -0.005 |
+| events | strict | ad4bfe93bcd9 | fdcdcd213e30 | 3,009,012 | 3,008,828 | -0.006 |
+| events_per_account | balanced | ad4bfe93bcd9 | fdcdcd213e30 | 5.328 | 5.329 | 0.004 |
+| events_per_account | strict | ad4bfe93bcd9 | fdcdcd213e30 | 4.583 | 4.583 | 0.003 |
+| repos_flagged | balanced | ad4bfe93bcd9 | fdcdcd213e30 | 276 | 280 | 1.449 |
+| repos_flagged | strict | ad4bfe93bcd9 | fdcdcd213e30 | 276 | 280 | 1.449 |
+
+기본 뷰(`policy_compare_released`)는 [seeds/ruleset_release.csv](warehouse/dbt/seeds/ruleset_release.csv)에 줄을 더해 공개하기 전까지 옛 묶음(`ad4bfe93bcd9`) 숫자를 그대로 보인다 (docs/measurements.md M-28).
+
+**dbt 밖에서 읽기.** Gold는 파일 하나(`warehouse_local/gold.duckdb`)다. 이미지에 DuckDB CLI는 없고 Python `duckdb`가 있다:
+
+```bash
+docker compose run --rm bot-job python -m scripts.query "select policy, count(*) filter (where is_real) as real_accounts, count(*) filter (where not is_real) as excluded from actor_policy_status where source = 'gh' and entity_type = 'gh_account' and event_date = date '2024-07-15' group by policy order by policy"
+```
+
+| policy | real_accounts | excluded |
+|---|---|---|
+| balanced | 656,971 | 3,152 |
+| lenient | 658,593 | 1,530 |
+| strict | 656,510 | 3,613 |
+
+**한계.** AI 에이전트 표시(`is_ai_agent`, 웹 원천에서 채움)는 User-Agent 문자열만 본다. UA는 꾸밀 수 있어서, 에이전트가 서명으로 자기를 밝히는 방식(HTTP Message Signatures, [RFC 9421](https://www.rfc-editor.org/rfc/rfc9421))이 퍼지면 이 표시는 약해진다. GitHub 원천은 UA가 없어 비어 있다(NULL).
+
 ## 로컬에서 돌리기
 
 Windows 데스크톱과 Docker Desktop(메모리 32GB 이상 권장, Spark 컨테이너 상한 24GB)을 기준으로 적었다. 명령은 레포 폴더에서 Git Bash로 친다.
@@ -93,6 +160,18 @@ docker compose run --rm bot-job python -m spark_jobs.load_events --input raw/dt=
 docker compose run --rm bot-job python -m warehouse.dbt_build
 ```
 
+적재는 그날 파일에 다른 날짜 이벤트가 한 줄이라도 있으면 쓰기 전에 멈춘다. 쓰면 그 날짜 파티션을 덮어쓰기 때문이다 (sources/registry.yml `late_data: reject`, docs/decisions.md 결정 22).
+
+참조 목록(크롤러 UA, AI 봇)은 받은 날짜별로 쌓는다. 받기는 바깥 요청이다:
+
+```bash
+docker compose run --rm bot-job python -m spark_jobs.load_ref fetch
+```
+
+```bash
+docker compose run --rm bot-job python -m spark_jobs.load_ref load --day 2026-11-22
+```
+
 측정 (bot-job 안):
 
 ```bash
@@ -119,7 +198,7 @@ docker compose run --rm bot-job python -m warehouse.dbt_build compile
 docker compose run --rm bot-job python -m pytest tests -q
 ```
 
-기대: 21개 중 20개 통과, entity_verdict 방언 시험 하나 실패 (아래 알려진 문제).
+기대: 28개 중 27개 통과, entity_verdict 방언 시험 하나 실패 (아래 알려진 문제).
 
 ### 알려진 문제
 

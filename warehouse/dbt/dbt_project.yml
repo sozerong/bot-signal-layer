@@ -12,4 +12,6 @@ models:
 seeds:
   bot_gold:
     +column_types: {policy: varchar, family: varchar, truth_source: varchar, target: varchar, allowed: boolean,
-                    evidence_id: varchar, rule_version: varchar, entity: varchar}
+                    evidence_id: varchar, rule_version: varchar, entity: varchar,
+                    ruleset_id: varchar, seq: integer, released_on: date, note: varchar,
+                    metric: varchar, default_policy: varchar, reason: varchar, measurement: varchar}

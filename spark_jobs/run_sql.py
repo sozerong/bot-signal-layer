@@ -35,7 +35,8 @@ def target(sql_path):
     return TARGETS[f"{p.parent.name}/{p.name}"], None
 
 
-def run(spark, sql_path, params):
+def run(spark, sql_path, params, check=None):
+    """check: 쓰기 전에 결과 데이터프레임을 받아 보는 함수. 막을 일이면 SystemExit (예: load_events의 늦은 데이터 거부, 결정 22)"""
     from pyspark.sql import functions as F
 
     text = Path(sql_path).read_text(encoding="utf-8")
@@ -67,6 +68,8 @@ def run(spark, sql_path, params):
         df = (df.join(old, ["entity_type", "entity_key"], "left")
               .withColumn("judged_at", F.when(same, F.col("_judged")).otherwise(F.col("judged_at")))
               .drop("_hit", "_sha", "_judged"))
+    if check:
+        check(df)
     save_plan(spark, df, sql_path, params)
     spark.sparkContext.setJobDescription(f"write {table} <- {Path(sql_path).as_posix()}")
     # 결과에 들어 있는 파티션만 바꾼다. 같은 날을 다시 돌려도 같은 결과(멱등).

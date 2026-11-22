@@ -219,3 +219,33 @@ engine_selection.md E8 A, E9 A.
 - **이유:** 관리형 Airflow는 외부 추정 최소 월 300달러 이상(gcp_research.md 6절)이라 크레딧 전부와 비슷하다. VM 방식은 한 달 몇 달러다(c1_forecast.md 3절). Gold는 분석팀이 실제로 쓰는 웨어하우스이고 Silver Iceberg를 옮기지 않고 읽는다.
 - **잃는 것:** VM 업그레이드, 백업, 보안 패치를 직접 한다. 클러스터 6 + VM 2 = 8 vCPU로 체험 제한에 여유가 없다.
 
+
+
+## 결정 22. 원천 등록부와 늦은 데이터 거부 가드 [결정] (2026-11-22, 지시서 handoff_v5_wp1.md 1-2) 〔근거: 지시서 1-2 "기록: 결정 22"〕
+
+- **결정:** `sources/registry.yml`에 원천마다 Bronze 위치와 형식, 주체 종류, 쓰기 방식, 늦은 데이터 처리를 둔다. `spark_jobs/load_events.py`가 이것을 읽는다. 〔근거: 코드: sources/registry.yml, spark_jobs/load_events.py `source()`〕
+- **쓰기 방식은 `overwrite_partition` 하나:** 등록부에 다른 값을 적으면 적재가 시작 전에 멈춘다. 〔근거: 코드: load_events.py `source()`. 판단: 원천이 모두 정적 파일이라 다른 방식이 필요 없다(지시서 1-2 2번). 스트림 원천이 오면 MERGE를 더한다〕
+- **늦은 데이터 `reject`:** 쓰기 직전에 파일 날짜(window_end)와 다른 `event_date`(NULL 포함) 행을 세고, 1 이상이면 쓰지 않고 실패한다. 〔근거: 코드: load_events.py `reject_late`, run_sql.py `run(..., check=)`. 계산: 쓰기 뒤에는 이미 덮어써졌으므로 막을 수 있는 시점은 쓰기 전뿐(지시서 1-2 3번)〕
+- **잃는 것:** 그날 Bronze를 한 번 더 읽는다. 07-15 12.7 ~ 13.9초, 07-20 6.2 ~ 6.6초로, load_events 앱 하나(26 ~ 38초)의 약 35%가 늘어난다. 〔근거: 측정: M-27, M-23 "load_events 26.0 ~ 38.0초"〕
+- **다시 볼 조건:** 이 비용이 문제가 되면 쓰기 전 `persist`로 한 번만 읽게 바꾼다. 날짜를 넘는 이벤트가 정상인 원천(시간대가 다른 웹 로그)이 오면 `reject` 대신 "다른 날짜 행은 그 날짜 파티션에 MERGE"를 더한다. 〔근거: 판단: 지금 GH는 7일 모두 다른 날짜 행 0개라 거부가 맞다(M-27). 웹 원천의 날짜 경계는 1-1에서 본다〕
+
+
+## 결정 23. 참조 목록은 적재일마다 쌓고, AI 에이전트는 ai.robots.txt의 목적 칸으로 고른다 [결정] (2026-11-22, 지시서 1-3) 〔근거: 지시서 handoff_v5_wp1.md 1-3 참조 목록, ai_agent_ua〕
+
+- **Bronze:** `raw/ref/<목록>/dt=<적재일>/`에 받은 그대로와 `_manifest.json`(주소, 크기, sha256, 라이선스). 이미 있으면 받지 않는다. 〔근거: 코드: spark_jobs/load_ref.py `fetch`, sources/registry.yml crawler_ua·ai_robots〕
+- **Silver:** `bot.silver.ref_ua_patterns`(pattern, list, name, operator, purpose, load_date), 파티션 (list, load_date). 다른 적재일은 그대로 남아 과거 판정을 다시 만들 수 있다. 〔근거: 코드: create_tables.py, load_ref.py `load`. 결정 9 되돌릴 수 있는 버전〕
+- **ai.robots.txt 쪽 원천:** 지시서 링크(fbartho 포크) 대신 원 저장소 `ai-robots-txt/ai.robots.txt`의 `robots.json`을 받았다. 〔근거: 판단: 포크보다 원 저장소가 갱신된다. 확인 필요: 원 저장소 LICENSE가 MIT인지 본다〕
+- **AI 이름은 낱말 경계 정규식으로 바꾼다:** robots.json의 키는 정규식이 아니라 이름이고 `Code`, `Dot`, `Muse`처럼 짧은 것이 있어, 앞뒤가 글자·숫자가 아닐 때만 걸리게 했다. 〔근거: 코드: load_ref.py `token`. 측정: M-25〕
+- **ai_agent_ua 범주(웹 근거, 아직 SQL 없음):** robots.json `function`이 `AI Assistants`, `AI Agents`, `AI Coding Agents`, `Undocumented AI Agents` 중 하나인 이름. 사용자 요청으로 가져오는 것(ChatGPT-User, Claude-User, Perplexity-User가 `AI Assistants`)이 여기 든다. 학습용 수집(GPTBot)과 검색 색인(OAI-SearchBot)은 빠진다. 〔근거: 측정: M-25 목적 칸 분포. 문서: [OpenAI 크롤러 문서](https://developers.openai.com/api/docs/bots?rc=novicell) ChatGPT-User는 사용자 요청〕
+- **잃는 것:** 목적 칸이 표준 값이 아닌 자유 글(예: "LLM training.")인 이름은 에이전트로 세지 않는다. 〔근거: 측정: M-25 자유 글 81개. 판단: 에이전트를 사람 쪽에 셀지 고르는 범주라 넓게 잡으면 봇이 사람으로 들어간다〕
+
+## 결정 24. 규칙 묶음 id를 Gold에 남기고, 기본 묶음은 공개할 때만 옮긴다. 지표별 기본 정책은 시드 [결정] (2026-11-22, 지시서 1-5) 〔근거: 지시서 handoff_v5_wp1.md 1-5 (1), (2). direction_v5.md 1.2, 3.1〕
+
+- **ruleset_id:** 시드 `evidence_current.csv`와 `policy_family.csv`의 행을 정렬해 sha256한 앞 12자리. `warehouse/dbt_build.py`가 계산해 dbt 변수로 넘긴다. 지금 묶음은 `ad4bfe93bcd9`. 〔근거: 코드: warehouse/dbt_build.py `ruleset_id`. 판단: 행 정렬과 줄 단위 해시라 CRLF로 받은 레포와 클라우드가 같은 id가 된다〕
+- **SQL이 아니라 Python에서 계산하는 이유:** 정렬된 `string_agg`는 BigQuery 변환이 안 된다(F-5와 같은 문제). 〔근거: 코드: failure_analysis.md F-5, tests/test_gold_dialect.py〕
+- **policy_compare는 묶음마다 행을 쌓는다:** dbt incremental `delete+insert`, 키는 ruleset_id. 같은 묶음을 다시 만들면 그 행만 바뀐다. 〔근거: 코드: models/gold/policy_compare.sql 설정 줄. 측정: M-28 시험 뒤 두 묶음 161행씩〕
+- **기본 뷰 `policy_compare_released`:** `seeds/ruleset_release.csv`의 seq가 가장 큰 묶음만. 규칙을 바꿔 다시 빌드해도 공개 줄을 더하기 전까지 분석가 숫자는 그대로다. 〔근거: 코드: models/gold/policy_compare_released.sql. 문서: [당근 데이터 신뢰성 발표](https://speakerdeck.com/bskim/danggeunmakesgwa-hamgge-seongjanghamyeo-deiteo-sinroeseong-jikyeonaegi-sugunsugun-deiteo-enjinieo-miseob-1hoe) 지표 불안정성〕
+- **변경 기록 `ruleset_change_log`:** 기본 묶음 대 policy_compare의 다른 묶음, 지표 x 날짜 x 처리 방식마다 차이. 〔근거: 코드: models/gold/ruleset_change_log.sql. 측정: M-28〕
+- **metric_policy:** `metric_policy_proposal`이 규칙(direction_v5.md 3.1)으로 제안하고 사람이 `seeds/metric_policy.csv`에 옮긴다. 지금 시드는 제안 그대로이고 이유 칸에 "사람 확인 전"이라 적었다. 〔근거: 코드: models/gold/metric_policy_proposal.sql, seeds/metric_policy.csv. 판단: 기본값은 사람이 책임지는 결정(CLAUDE.md 3절 4번)〕
+- **잃는 것:** 시험으로 만든 묶음의 행이 policy_compare에 남는다(v3 시험 `fdcdcd213e30`). 지우려면 `--full-refresh`로 다시 만든다. 〔근거: 측정: M-28. 판단: 남은 행이 시험 기록 구실을 한다〕
+- **이식 때 확인:** dbt-bigquery에서 incremental `delete+insert`를 쓸 수 있는지. 안 되면 ruleset_id로 파티션을 나눠 `insert_overwrite`. 〔근거: 확인 필요: dbt-bigquery 문서의 incremental_strategy 목록〕

@@ -38,12 +38,18 @@ TABLES = {
         observed_at TIMESTAMP, known_at TIMESTAMP, raw_ref STRING,
         target_window DATE
     """,
+    # 참조 목록 (지시서 handoff_v5_wp1.md 1-3). 적재일마다 따로 쌓고 덮어쓰지 않는다: 목록이 바뀌어도 과거 판정을 다시 만든다 (결정 9).
+    # pattern은 Java 정규식(rlike). ai_robots의 이름은 적재 때 낱말 경계 정규식으로 바꾼다 (load_ref.py)
+    "bot.silver.ref_ua_patterns": """
+        pattern STRING, list STRING, name STRING, operator STRING, purpose STRING, load_date DATE
+    """,
 }
 PARTITIONS = {
     "bot.silver.events": "source, event_date",
     "bot.silver.entity_features": "entity_type, event_date",
     "bot.silver.evidence": "evidence_id, rule_version, window_end",
     "bot.silver.truth": "truth_source",  # 결정 7: 정답은 작고 출처별로 읽는다
+    "bot.silver.ref_ua_patterns": "list, load_date",
 }
 
 

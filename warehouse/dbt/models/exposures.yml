@@ -1,0 +1,16 @@
+version: 2
+# 분석가가 가져가는 세 쿼리 (README "가져가는 법", 지시서 1-5 (4)). 이 모델들을 바꾸면 세 쿼리가 영향받는다
+exposures:
+  - name: analyst_three_queries
+    label: 분석가 세 쿼리 (기본 정책 실유저, 빠진 이유, 규칙 묶음 변경)
+    type: analysis
+    maturity: low
+    url: https://github.com/sozerong/GH#가져가는-법
+    description: analyses/q1_events_default_policy.sql, q2_why_excluded.sql, q3_ruleset_change.sql
+    depends_on:
+      - ref('real_user_events')
+      - ref('actor_policy_status')
+      - ref('metric_policy')
+      - ref('why_excluded')
+      - ref('ruleset_change_log')
+    owner: {name: bot-layer}

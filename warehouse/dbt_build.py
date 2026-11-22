@@ -6,8 +6,14 @@
 범위를 좁혀도(--select) 시드 evidence_current와 그 아래는 늘 함께 고른다. 규칙 버전 변경은 SQL이 아니라 시드를 바꾸는 일이라
 `+`(아래쪽만) 선택이 시드를 빠뜨리면 Gold가 옛 버전을 읽는다 (failure_analysis.md F-10).
 컴파일만 (리니지용): python -m warehouse.dbt_build compile
+
+규칙 묶음 id(ruleset_id, 결정 24): 시드 evidence_current.csv와 policy_family.csv의 행을 정렬해 해시한 앞 12자리.
+Gold가 판정에 쓰는 규칙 버전과 정책이 이 두 파일에서 정해지므로, 둘이 같으면 같은 id다. dbt 변수 ruleset_id로 넘긴다.
+줄바꿈(CRLF/LF)과 행 순서에 상관없게 행 단위로 정렬해 해시한다 (Windows에서 받은 레포와 클라우드가 같은 id가 되게).
 """
 import csv
+import hashlib
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -29,9 +35,17 @@ def write_evidence_current():
             w.writerow([k, v["current"], v["family"]])
 
 
+def ruleset_id():
+    h = hashlib.sha256()
+    for name in ("evidence_current.csv", "policy_family.csv"):
+        rows = sorted(r.strip() for r in (DBT / "seeds" / name).read_text(encoding="utf-8").splitlines()[1:] if r.strip())
+        h.update(("\n".join([name, *rows]) + "\n").encode("utf-8"))
+    return h.hexdigest()[:12]
+
+
 if __name__ == "__main__":
     write_evidence_current()
-    args = sys.argv[1:]
+    args = sys.argv[1:] + ["--vars", json.dumps({"ruleset_id": ruleset_id()})]
     cmd = args.pop(0) if args[:1] == ["compile"] else "build"
     for flag in ("--select", "-s"):
         if flag in args:

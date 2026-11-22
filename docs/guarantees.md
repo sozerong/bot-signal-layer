@@ -37,11 +37,14 @@
 | 실행 계획에서 스테이지와 연산을 짝지을 수 있다 | `run_sql.save_plan`, 히스토리 서버 SQL 탭 | features_repo 하루, 계획 파일과 SQL 탭 노드 지표의 stage 번호 | 가장 긴 스테이지 25 = 자기 조인, AQE 200 → 13~16 (M-20, 2026-11-18) | | ① | 짝짓기는 손이다. 계획 파일은 AQE 전 계획 |
 | 채점은 정답을 고른 구간의 판정과만 짝짓는다 | `eval_pairs`의 (대상, target_window) 조인, `evaluation` 구간별 행 | 07-15 구간 숫자를 M-8과 비교, 6일 더 확인 뒤 구간별 표 | 07-15 정밀도 262/276 = 94.9% (M-8과 같음), 대조군 차이 8개는 F-13로 설명됨 (M-18, 2026-11-18) | | ② | 구간에 정답이 없으면 그 구간 행이 없다. 전체 행은 정답 있는 구간만의 합이다. K1 뒤 7개 구간 모두 정답 있음 (M-21) |
 | 구간을 더해도 truth에 중복이 생기지 않고 옛 행이 한 번 채워진다 | `build_truth`의 MERGE (키에 target_window), `truth.sql` | (1) 컬럼을 더한 뒤 build_truth (2) 엿새치 추가 뒤 한 번 더 | (1) 1,108 → 1,108, 빈 target_window 0 (2) 3,704 → 3,704, 키 중복 0 (M-18, 2026-11-18) | | ① | 같은 날 같은 저장소를 두 구간을 위해 확인하면 두 행이 된다 (의도) |
-
 | 생존 확인을 다시 돌려도 이미 확인한 것은 묻지 않는다 | `repo_alive --only-missing`, `checked()` | K1 다시 보내기 뒤 7개 구간에 같은 명령 한 번 더 | 모두 "물을 것 0개", 요청 0번, 새 raw 파일 없음 (M-21, 2026-11-18) | 성공 = 200, 301, 404, 451 | ① | raw 파일을 읽어 판단한다. raw를 지우면 다시 묻는다 |
 | 확인 실패가 문턱을 넘으면 태스크가 실패한다 | `repo_alive --max-fail-rate` | `--network none` 컨테이너에서 문턱 0%로 07-21 | 478개 모두 실패, exit 1 (M-21, 2026-11-18) | 출력은 스크래치 폴더 | ① | 문턱 아래의 실패는 초록으로 끝나고 로그 한 줄에만 남는다 |
 | 생존 확인 대상이 Gold의 지금 규칙 버전과 같고, 의심과 대조군이 번갈아 온다 | `pick_targets.sql`, registry 버전 파라미터 | 7개 구간에서 새 SQL의 의심을 Gold fake_star_repo와, 대조군을 옛 SQL과 비교 | 의심 = Gold, 옛 대조군 순서 유지, 순서 번갈아 (M-21, 2026-11-18) | | ① | 옛 확인의 F-13 몫은 truth에 남는다 |
+| 그날 파일에 다른 날짜 행이 섞이면 쓰기 전에 실패하고 다른 파티션은 그대로다 | `load_events.reject_late`, `run_sql.run(check=)` | 07-14 표본 적재 뒤 07-15 표본 + 07-14 한 줄을 가드 켜고/끄고 적재 | 켬: SystemExit, 07-14 지문 그대로, 07-15 0행. 끔: 07-14가 1행 (F-16, 2026-11-22) 〔근거: 코드: tests/test_late_guard.py〕 | 표본 3,407행, 임시 창고 | ③ | 매 적재에 강제된다(등록부 late_data=reject). 날짜 경계를 넘는 게 정상인 원천에는 맞지 않는다 (결정 22 다시 볼 조건) |
+| 규칙 묶음을 바꿨다 되돌리면 Gold가 정확히 돌아오고, 바뀐 폭이 변경 기록에 남는다 | `dbt_build.ruleset_id`, `policy_compare`(묶음별 incremental), `ruleset_change_log` | lockstep v2 → v3 → v2, 단계마다 Gold 전체 빌드 | 07-15 repos_flagged 276 → 280, 되돌린 뒤 baseline 217개 중 다름 0 (M-28, 2026-11-22) 〔근거: 측정: M-28〕 | Silver에 두 버전 파티션이 있을 때 | ① | 손으로 한 시험이다. 시험 묶음 행이 policy_compare에 남는다 |
+| policy_compare의 지표는 모두 기본 정책이 있다 | dbt 시험 `metric_policy_covers` | 매 빌드 | PASS (2026-11-22) 〔근거: 코드: warehouse/dbt/tests/metric_policy_covers.sql〕 | | ③ | 시드 값이 맞는지는 사람이 본다 (지금은 제안 그대로) |
+| 분석가에게 주는 두 표면의 컬럼과 형이 바뀌면 빌드가 실패한다 | `actor_policy_status`, `why_excluded` 모델 계약 | 매 빌드 | PASS (2026-11-22) 〔근거: 코드: warehouse/dbt/models/gold/gold.yml contract〕 | DuckDB 형 이름 | ③ | 이식 때 BigQuery 형 이름으로 바꾼다 |
 
 ## 2. 아직 증명하지 않은 성질
-
+- 웹 원천의 세션, 웹 근거(declared_ua, assetless_browser, ai_agent_ua), 비율 지표의 분자·분모 분해, 구매 정답의 오삭제율: EClog를 받은 뒤 (지시서 handoff_v5_wp1.md 1-1, 1-3, 1-4) 〔근거: EClog 받기에 방명록 응답이 필요(2026-11-22)〕
 - 이식(C2 ~ C4) 뒤 같은 결과: `docs/local_baseline.md`의 "같아야 함" 값을 `scripts/baseline.py compare`로 대조한다 (K3에서 로컬 값만 남김)

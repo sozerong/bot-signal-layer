@@ -243,3 +243,13 @@
   - (D) 대상 순서를 의심과 대조군이 번갈아 (`pick_targets.sql`의 `ORDER BY rn, grp DESC`).
   - (E) 확인 실패 비율이 `--max-fail-rate`(기본 5%)를 넘으면 exit 1. 끝에 요청 수, 429 수, 쉰 시간, 확인 실패 비율을 한 줄로 찍는다.
   - 결과 (M-21): 07-16 ~ 07-20 다시 보내기에 요청 2,445번, 429 한 번, 쉼 60초, 확인 실패 0. 7개 구간 모두 정답과 대조군이 찼다. `--only-missing`으로 다시 돌리면 요청 0번. 문턱 0%로 일부러 실패시키면 exit 1.
+
+
+## F-16. 다른 날짜 이벤트 한 줄이 그 날짜 파티션 전체를 덮어쓴다 (재현, 가드로 막음) [해결, 결정 22] 〔근거: 지시서 handoff_v5_wp1.md 1-2 "F-16(가드 없을 때의 손실 재현)"〕
+
+- 태그: `쓰기`, `설계 가정` 〔근거: 판단: 실제로 잃은 적은 없고 쓰기 방식의 성질이다〕
+- 언제·어디: 2026-11-22, 지시서 1-2. `tests/test_late_guard.py`의 임시 창고. 〔근거: 코드: tests/test_late_guard.py〕
+- 재현: 07-14로 옮긴 표본 3,407행을 적재한 뒤, 07-15 표본 3,407행에 07-14 23:59:59 이벤트 한 줄을 섞어 가드 없이 적재했다. 07-14 파티션이 3,407행에서 1행이 되었다. 돌리기 전 예측도 1행이었다. 〔근거: 코드: test_late_guard.py `assert count(s, PREV) == 1` 통과. 문서: [Spark overwritePartitions](https://spark.apache.org/docs/4.1.1/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameWriterV2.overwritePartitions.html)〕
+- 원인: `run_sql.run`이 `overwritePartitions()`로 쓰고, 이 쓰기는 결과에 한 행이라도 있는 파티션을 통째로 바꾼다. `events.sql`은 날짜로 거르지 않는다. 〔근거: 코드: spark_jobs/run_sql.py 쓰기 줄, sql/silver/events.sql 2~3번째 줄〕
+- 지금까지 잃지 않은 이유: GH 7일 모두 그날 파일에 다른 날짜 행이 0개다. 관찰이지 보장이 아니었다. 〔근거: 측정: M-27(07-15, 07-20 다른 날짜 행 0), local_baseline.md 1절(manifest 줄 수 = events 행 수)〕
+- 처방: 쓰기 전에 다른 날짜 행을 세어 실패 (결정 22). 같은 표본을 가드를 켜고 적재하면 SystemExit로 끝나고 07-14 지문이 그대로, 07-15는 0행이다. 〔근거: 코드: test_late_guard.py 앞 세 assert 통과〕

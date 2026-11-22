@@ -1,0 +1,20 @@
+# 원천 등록부 (지시서 handoff_v5_wp1.md 1-2, decisions.md 결정 22). 원천마다 한 항목, 이름이 곧 events.source 값.
+# rules/registry.yml이 근거에 대해 하는 일을 원천에 대해 한다. 읽는 곳: spark_jobs/load_events.py
+#   bronze.path : 날짜 하나의 Bronze 파일 (--input을 안 주면 이것을 쓴다). {day} = window_end
+#   entity      : 이 원천의 주체 종류 (evidence.entity_type)
+#   write       : overwrite_partition 하나만 있다 (run_sql.run의 overwritePartitions).
+#                 ponytail: MERGE나 중복 제거가 필요한 원천(스트림)이 올 때 방식을 더한다
+#   late_data   : reject = 파일 날짜와 다른 event_date가 한 행이라도 있으면 쓰기 전에 실패 (F-16).
+#                 쓰기 뒤에는 이미 덮어써져 막을 수 없다
+gh:
+  bronze: {path: "raw/dt={day}/hour=*/*.json.gz", format: gharchive_json_gz}
+  entity: gh_account
+  write: overwrite_partition
+  late_data: reject
+
+# 참조 목록 (지시서 1-3). Bronze raw/ref/<이름>/dt=<적재일>/ 에 받은 그대로 + _manifest.json. 덮어쓰지 않는다.
+# 읽는 곳: spark_jobs/load_ref.py (fetch: 받기, load: Silver bot.silver.ref_ua_patterns)
+crawler_ua:
+  ref: {url: "https://raw.githubusercontent.com/monperrus/crawler-user-agents/master/crawler-user-agents.json", license: MIT}
+ai_robots:
+  ref: {url: "https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json", license: MIT}
