@@ -33,7 +33,7 @@ EXPORTS = {
         "select * from main.ruleset_change_log",
     ),
     "ruleset_release": ("공개한 규칙 묶음 하나", "select * from main.ruleset_release"),
-    "metric_policy": ("지표 하나와 그 기본 정책, 이유", "select * from main.metric_policy"),
+    "metric_policy": ("지표 하나와 그 기본 정책, 이유", "select * from main.metric_policy where metric in (select metric from main.policy_compare where source = 'gh')"),  # 원천 칸이 없어 GH 지표로 거른다
     "metric_policy_proposal": (
         "원천 x 지표. 규칙이 제안한 기본 정책과 자연 변동, 단계별 변화",
         "select * from main.metric_policy_proposal",
@@ -135,7 +135,7 @@ EXPORTS = {
     ),
     "evaluation": (
         "근거 x 버전 x 정답 출처 x 판정 구간(전체는 비어 있음). 정밀도와 대조군 양성률",
-        "select * from main.evaluation",
+        "select * from main.evaluation where evidence_id not in (select evidence_id from main.evidence_current where entity = 'web_client')",  # 원천 칸이 없어 웹 근거를 뺀다 (조합 fake_star_repo는 시드에 없어 남긴다)
     ),
 }
 
@@ -192,6 +192,10 @@ def main():
             path.unlink(missing_ok=True)  # 예전에 실수로 남은 파일도 지운다
             csv_path.unlink(missing_ok=True)
             continue
+        # 화면은 GitHub 원천만 그린다 (날짜 고르기와 차트가 원천을 가르지 않는다). 웹 원천(auth_lib, 결정 26)은 Gold와 CSV 묶음 밖에서 본다
+        # ponytail: 원천 칸이 있는 표만 거른다. 화면에 원천 고르기를 붙이면 이 줄을 지운다
+        has_source = "source" in {c[0] for c in con.execute(f"describe select * from ({sql})").fetchall()}
+        sql = f"select * from ({sql}) where source = 'gh'" if has_source else sql
         con.execute(f"copy ({sql}) to '{path.as_posix()}' (format parquet, compression zstd)")
         # 엑셀 "웹에서", 구글 시트 IMPORTDATA용 정적 CSV (UTF-8, BOM 없음: 기계가 읽는 주소. 사람이 받는 CSV는 화면이 BOM을 붙인다)
         con.execute(f"copy (select * from '{path.as_posix()}') to '{csv_path.as_posix()}' (header, delimiter ',')")
@@ -203,7 +207,7 @@ def main():
                         "columns": [{"name": c[0], "type": c[1]} for c in cols]}
         print(f"{name}: {rows:,}행, {path.stat().st_size:,}바이트")
 
-    span = con.execute("select min(event_date), max(event_date) from main.policy_compare").fetchone()
+    span = con.execute("select min(event_date), max(event_date) from main.policy_compare where source = 'gh'").fetchone()
     meta = {
         "exported_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "git_commit": git_commit(),

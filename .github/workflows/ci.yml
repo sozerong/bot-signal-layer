@@ -1,0 +1,46 @@
+# CI (handoff_v6.md Q4, handoff_v7.md 단계 2): bot-job 이미지 -> 표본 한 줄 실행(Q3) -> dbt 시험 -> pytest.
+# docker compose 대신 docker run을 쓴다: docker-compose.yml은 Airflow 비밀(.env)이 없으면 bot-job만 돌려도 멈춘다.
+# 로컬에서 같은 순서: 아래 run 줄을 그대로 (Git Bash에서는 MSYS_NO_PATHCONV=1, $PWD 대신 $(pwd -W)).
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      IMAGE: bot-job:4.1.2
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      # 층 캐시: Dockerfile 층(JDK, pyspark, dbt, Iceberg jar)을 GitHub Actions 캐시에 둔다. Dockerfile이 그대로면 다시 받지 않는다
+      - name: bot-job 이미지
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: bot-job
+          tags: ${{ env.IMAGE }}
+          load: true
+          cache-from: type=gha,scope=bot-job
+          cache-to: type=gha,scope=bot-job,mode=max
+
+      # 표본(2024-07-15 12시, 3,407행)으로 Silver -> 근거 -> dbt build(시험 포함) -> 분석 쿼리 셋. 창고는 warehouse_demo/
+      - name: 표본 한 줄 실행 (Q3)
+        run: docker run --rm -v "$PWD:/work" $IMAGE python -m scripts.demo
+
+      # 데모 Gold에 dbt 시험만 다시 (every_account_judged, every_evidence_ran 포함). events_match_manifest는 표본에 manifest가 없어 뺀다
+      - name: dbt 시험
+        run: docker run --rm -v "$PWD:/work" $IMAGE python -m scripts.demo test
+
+      # tests/test_gold_dialect.py가 warehouse/dbt/target/compiled를 읽는다. 없으면 건너뛰므로 먼저 컴파일한다
+      - name: dbt compile (방언 시험용)
+        run: docker run --rm -v "$PWD:/work" -e BOT_WAREHOUSE=/work/warehouse_demo $IMAGE python -m warehouse.dbt_build compile
+
+      # tests/test_ruleset_id.py(Spark 없이), test_judged_red.py(Spark와 dbt), test_sql.py, test_late_guard.py 등
+      - name: pytest
+        run: docker run --rm -v "$PWD:/work" $IMAGE python -m pytest tests -q

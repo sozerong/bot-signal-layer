@@ -7,7 +7,8 @@
   성공하면 단계를 처음으로 되돌린다. 엿새치를 한 번에 묻다가 막힌 상태에서 각자 계속 두드렸다 (F-15, 결정 16).
 - --only-missing: 같은 (저장소, 구간)에 성공한 확인이 확인 결과 파일에 이미 있으면 묻지 않는다. 다시 보내기는 실패한 것만.
 - 끝날 때 확인 실패 비율이 --max-fail-rate(기본 5%)를 넘으면 exit 1. 확인 실패가 초록 태스크 뒤에 숨지 않게 (F-15).
-- 근거별 지금 규칙 버전을 rules/registry.yml에서 읽어 pick_targets에 넘긴다 (F-13, 결정 16).
+- 근거별 지금 규칙 버전을 rules/registry.yml에서 읽어 pick_targets에 넘긴다 (F-13, 결정 16). 피처 버전(features_repo)도 (R-16).
+- 근거로 의심이 된 저장소가 있는데 대상이 0개면 실패로 끝낸다. 피처 버전이 어긋난 날이 초록으로 지나가지 않게 (R-16).
 - 301(이름이 바뀜)은 살아 있음으로 본다. 리다이렉트를 따라가지 않고 첫 응답 코드를 남긴다.
 - 결과는 원본처럼 쌓는다: checked_date=날짜 폴더에 새 part 파일. 옛 파일을 덮어쓰지 않는다.
 
@@ -119,9 +120,37 @@ def checked(raw, day):
 
 
 def versions():
-    """pick_targets 파라미터: 근거별 지금 규칙 버전 (registry)"""
+    """pick_targets 파라미터: 근거별 지금 규칙 버전과 피처 버전 (registry). 피처 버전은 전에 SQL에 'f1'로 박혀 있었다 (R-16)"""
     reg = yaml.safe_load((ROOT / "rules" / "registry.yml").read_text(encoding="utf-8"))
-    return {f"v_{k}": reg[k]["current"] for k in ("low_activity", "lockstep_ratio", "burst_5m")}
+    return {**{f"v_{k}": reg[k]["current"] for k in ("low_activity", "lockstep_ratio", "burst_5m")},
+            "feature_version": reg["features_repo"]["current"]}
+
+
+# 그 구간에 지금 버전 근거로 의심(low_activity AND (lockstep_ratio OR burst_5m))이 된 저장소 수. pick_targets.sql의 ev와 같은 식
+SUSPECTS = """
+SELECT count(*) FROM (
+  SELECT entity_key FROM bot.silver.evidence
+  WHERE entity_type = 'gh_repo' AND window_end = DATE(:window_end)
+    AND ((evidence_id = 'low_activity' AND rule_version = :v_low_activity)
+      OR (evidence_id = 'lockstep_ratio' AND rule_version = :v_lockstep_ratio)
+      OR (evidence_id = 'burst_5m' AND rule_version = :v_burst_5m))
+  GROUP BY entity_key
+  HAVING bool_or(evidence_id = 'low_activity' AND hit) AND bool_or(evidence_id IN ('lockstep_ratio', 'burst_5m') AND hit)
+)"""
+
+
+def pick(spark, day, params=None):
+    """pick_targets 결과 행. 근거로 의심이 된 저장소가 있는데 대상이 0개면 SystemExit (R-16).
+    피처 버전이 어긋나면(registry와 다른 버전의 피처만 있으면) 피처 조인이 비어 대상이 0개가 되고, 전에는 초록으로 끝났다"""
+    p = {"window_end": day, **(params or versions())}
+    sql = (ROOT / "sql" / "truth" / "pick_targets.sql").read_text(encoding="utf-8")
+    rows = [r.asDict() for r in spark.sql(sql, args=p).collect()]
+    if not rows:
+        n = spark.sql(SUSPECTS, args={k: v for k, v in p.items() if k != "feature_version"}).first()[0]
+        if n:
+            raise SystemExit(f"{day}: 근거로 의심이 된 저장소 {n}개인데 확인 대상이 0개다. "
+                             f"피처 버전 {p['feature_version']}의 entity_features가 그날 있는지 본다 (docs/review_logic.md R-16)")
+    return rows
 
 
 def main():
@@ -133,9 +162,10 @@ def main():
     day = a.window_end
     raw = Path(os.environ.get("BOT_BRONZE", ROOT / "raw")) / "truth_raw" / "repo_alive"
     spark = spark_session("repo_alive", {"spark.ui.enabled": "false"})
-    sql = (ROOT / "sql" / "truth" / "pick_targets.sql").read_text(encoding="utf-8")
-    rows = [r.asDict() for r in spark.sql(sql, args={"window_end": day, **versions()}).collect()]
-    spark.stop()
+    try:
+        rows = pick(spark, day)
+    finally:
+        spark.stop()
     picked = len(rows)
     if a.only_missing:
         done = checked(raw, day)

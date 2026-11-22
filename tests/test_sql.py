@@ -14,6 +14,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+from warehouse.dbt_build import is_gh
+
 ROOT = Path(__file__).resolve().parents[1]
 FIX = ROOT / "tests" / "fixtures" / "gh_sample.json.gz"
 DAY = "2024-07-15"
@@ -22,7 +24,7 @@ P = {"window_start": DAY, "window_end": DAY, "run_id": "test"}
 
 def evidence_sqls():
     reg = yaml.safe_load((ROOT / "rules" / "registry.yml").read_text(encoding="utf-8"))
-    return [ROOT / "sql" / "evidence" / k / f"{v['current']}.sql" for k, v in reg.items() if "family" in v]  # 피처 항목 제외
+    return [ROOT / "sql" / "evidence" / k / f"{v['current']}.sql" for k, v in reg.items() if is_gh(v)]  # 피처 항목과 웹 근거 제외
 
 
 @pytest.fixture(scope="module")

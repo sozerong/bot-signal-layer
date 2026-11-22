@@ -1,5 +1,18 @@
 # 측정 기록
 
+이 문서는 실제로 돌려서 얻은 숫자를 조건과 함께 번호(M-N)로 남긴 기록이다.
+README나 다른 문서의 숫자가 어디서 왔는지 따라갈 때 읽는다. 처음이면 아래 "먼저 볼 측정 5개"부터 본다.
+
+**먼저 볼 측정 5개**
+
+| 측정 | 한 줄 요약 |
+|---|---|
+| [M-26](#m-26) | 정책마다 지표가 얼마나 바뀌나. star 상위 100은 크게, 활동 계정은 거의 안 바뀐다 |
+| [M-36](#m-36) | 의심을 숫자로 확인. 거르지 않은 MDE가 큰 이유는 자기 신고 계정 하나, strict가 더 빼는 계정은 모두 이벤트 100건 이상 |
+| [M-37](#m-37) | 메모리 압박 재현. 상한 12g ~ 2g 모두 성공, spill은 2g에서만 |
+| [M-38](#m-38) | Spark 앱 묶기. 63개 → 9개로 결과 같고 컨테이너 시간 45% 감소 |
+| [M-23](#m-23) | 일주일 실행 시간 쪼개기. 클라우드 예측의 입력 |
+
 실행해서 얻은 값만 적는다. 한 측정 = 번호, 조건, 값, 해석.
 5분 넘게 도는 실행은 "돌리는 동안 한 일" 줄을 조건 칸에 더한다 (멘토 피드백, mentoring_2026-11-19.md 29행, 2026-11-22부터).
 추정이나 예측은 해석 칸에만 쓰고, 측정값과 섞지 않는다.
@@ -513,6 +526,7 @@ payload 키는 24개 시간 모두 같았다: WatchEvent `[action]`, ForkEvent `
 - v1과 v2: 7일 모두 날짜별 행 수, hit 수, (entity, hit, score, metrics) 지문이 같다. hit 합 323 = 323 (07-15부터 52, 53, 55, 50, 43, 32, 38).
 - 계정 피처와 저장소 피처의 기존 13개 컬럼 지문: 7일 × 2 대상 14줄이 바꾸기 앞뒤로 같다 (예: 07-15 계정 660,123행). 그래서 피처 버전은 f1 그대로 (결정 13).
 - Gold: `evidence_current`의 multi_repo_burst = v2, `evidence_flags`의 multi_repo_burst 참 323.
+- 갱신(2026-11-22, handoff_v7.md 단계 6): features_account의 6.09GiB는 필요량이 아니라 JVM이 받은 힙만큼 키운 꼭짓점(7일, 페이지 캐시 포함)이다. 〔근거: 측정: M-37. 결정 31〕
 
 ## M-19. 리니지 영향 보고서: registry 간선과 정책 meta로 Gold 좁히기 (지시서 J3)
 
@@ -597,6 +611,7 @@ payload 키는 24개 시간 모두 같았다: WatchEvent `[action]`, ForkEvent `
 - build_truth를 한 번 더: 3,704 → 3,704 (+0). (truth_source, entity_key, target_window, known_at 날짜)로 2행 이상인 키 0개, target_window가 빈 행 0개.
 
 
+<a id="m-21"></a>
 ## M-21. 생존 확인 고친 뒤 빈 정답 채우기 (지시서 K1, F-13, F-15, 결정 16)
 
 **조건** 2026-11-18. `truth/repo_alive.py`에 공유 쉼(429면 모든 동시 요청이 Retry-After 또는 60, 120, 300초 쉼), `--only-missing`, `--max-fail-rate`(기본 5%), registry 지금 버전 넘기기. `pick_targets.sql`은 근거별 지금 버전만 보고 의심과 대조군을 (순번, 묶음) 순으로 번갈아. `late_truth`를 `{"days": "2024-07-16 ... 2024-07-21"}`로 한 번(`k1_truth_retry`, 09:44:02 ~ 09:52:35Z, repo_alive 7분 38초, build_truth 13초, dbt 25초 PASS 18 ERROR 0). 07-15는 다시 보내지 않았다 (M-8 기준). 멈춰 둔 DAG를 잠깐 켜고 끝난 뒤 다시 멈춤.
@@ -693,6 +708,7 @@ payload 키는 24개 시간 모두 같았다: WatchEvent `[action]`, ForkEvent `
 - (다) low_activity 문턱 변경은 권하지 않는다. 삭제된 대조군이 문턱 바로 아래가 아니라 한참 아래(0.0 ~ 0.4)에 있어서 문턱을 조금 내려서는 잡히지 않는다.
 - 07-18 정밀도 80.9%(M-21)도 같은 날 burst hit 대조군이 30개로 많은 것과 관련이 있을 수 있다 [확인 필요].
 
+<a id="m-23"></a>
 ## M-23. 일주일 한 번 실행의 시간 쪼개기: Spark 이벤트 로그 (이식 예측 입력)
 
 **조건** 2026-11-22. 새로 돌리지 않고 M-17(`j1_week`, 2026-11-18 01:29:20Z ~ 01:46:42Z)의 `spark-events/` 이벤트 로그를 읽었다. 앱 시작이 01:29:00Z ~ 01:47:00Z인 앱 63개(태스크 9개 × 7일). 앱마다 `SparkListenerTaskEnd`의 Executor Run Time, Executor CPU Time, JVM GC Time을 더하고, 앱 시작·끝 시각으로 벽시계를 셌다. 스크립트는 스크래치(레포에 남기지 않음). 돌리는 동안 한 일: 해당 없음(기존 로그 읽기, 몇 초).
@@ -720,6 +736,7 @@ payload 키는 24개 시간 모두 같았다: WatchEvent `[action]`, ForkEvent `
 - 평균 병렬도 2,438 ÷ 837 = 2.9. local[*] 16코어(M-11) 중 평균 3개쯤만 일했다. 작은 앱이 많다.
 - 앱 안에서 태스크가 아닌 시간의 아래 한계는 837 − 2,438 ÷ 16 = 685초(앱당 10.9초)다. 이식 뒤 앱마다 YARN 시작이 더 붙으므로, 앱 수(63)가 클라우드 시간의 가장 큰 몫이 될 것으로 예측한다 (docs/c1_forecast.md 2절).
 - 실행 대비 CPU 0.66: 나머지 34%는 읽기·쓰기·대기로 보인다 [확인 필요: 셔플 쓰기와 Iceberg 쓰기 몫을 나누지 않았다].
+- 갱신(2026-11-22, handoff_v7.md 단계 6): "작업 밖 685초 = 앱 고정 시간" 해석은 틀렸다. 앱을 9개로 묶어도 작업 밖 시간은 380.8초가 남았고, 앱 하나를 덜 띄워 아낀 시간은 6.1초였다(10.9초 아님). 〔근거: 측정: M-38. 결정 32〕
 
 
 
@@ -751,6 +768,7 @@ payload 키는 24개 시간 모두 같았다: WatchEvent `[action]`, ForkEvent `
 - robots.json에 목적 칸(`function`)이 있다. 표준 값 개수: AI Assistants 35, AI Data Scrapers 21, AI Data Providers 20, AI Agents 20, AI Search Crawlers 14, AI Coding Agents 9, Undocumented AI Agents 8. 나머지 81개는 자유 글. 결정 23의 에이전트 네 값에 72개 이름이 든다. 〔근거: 실행 출력(Counter). 계산: 35 + 20 + 9 + 8 = 72, 208 − 127 = 81〕
 - 한계 하나: VS Code 데스크톱 UA(`... Code/1.95 Chrome/128 Electron/32 ...`)가 크롤러 목록의 `Code\/1\.` 패턴과 AI 목록의 `Code`에 모두 걸린다. 사람이 쓰는 앱의 요청이 봇으로 잡힐 수 있다. 〔근거: 실행 출력. 확인 필요: EClog UA에 `Code/`가 얼마나 있는지 1-1에서 센다〕
 
+<a id="m-26"></a>
 ## M-26. policy_compare: 지표마다 정책이 숫자를 얼마나 바꾸나, GH (지시서 1-4. 웹 원천은 EClog 뒤) 〔근거: 지시서 handoff_v5_wp1.md 1-4〕
 
 **조건** 2026-11-22. Gold `policy_compare`(규칙 묶음 `ad4bfe93bcd9`), 07-15 ~ 07-21. 계정당 이벤트 상위 1% 자르기의 99번째 값은 가장 가까운 순위 방식으로 날마다 39 ~ 42건. 〔근거: 코드: models/gold/policy_compare.sql. 실행 출력(스크래치 m26b.sql)〕
@@ -805,6 +823,7 @@ payload 키는 24개 시간 모두 같았다: WatchEvent `[action]`, ForkEvent `
 
 - **규칙의 반증 사례 하나:** 이벤트는 balanced 단계(1.36%)가 자연 변동(2.45%)보다 작아 lenient에서 멈춘다. 그런데 strict 단계는 13.7%로 자연 변동의 5배다. 규칙이 "한 단계씩 올라가다 멈춤"이라 큰 다음 단계를 못 본다. 〔근거: 위 표. direction_v5.md 3.1 반증 조건〕
 - 규칙을 고칠지는 사용자 결정이다. 시드에는 지금 규칙의 제안을 그대로 넣었다. 〔근거: CLAUDE.md 3절 4번. 코드: seeds/metric_policy.csv〕
+- 갱신(2026-11-22, handoff_v7.md 단계 6): 거르지 않은 MDE 101 ~ 138%는 자기 신고 계정 하나가 그날 이벤트의 17 ~ 24%를 내서 생긴 값이다(그 하나만 빼도 17 ~ 37%). star 상위 100의 "자연 변동 0.99%"는 남은 개수의 날짜 변화일 뿐이고, 상위 100 목록 자체는 날마다 73 ~ 89% 바뀐다. 이 측정의 규칙 묶음 `ad4bfe93bcd9`는 지금 공개 묶음 `9eff1a5e22a6`과 숫자가 같다. 〔근거: 측정: M-36 (a), (c). 결정 30〕
 
 ## M-28. 규칙 묶음 바꾸기 시험: lockstep v2 → v3 → v2 (지시서 1-5 (2)) 〔근거: 지시서 handoff_v5_wp1.md 1-5 (2) 시험〕
 
@@ -817,3 +836,499 @@ payload 키는 24개 시간 모두 같았다: WatchEvent `[action]`, ForkEvent `
 - 바뀐 지표와 폭(7일): 활동 계정 −0.015 ~ −0.002%(합 −396개), 이벤트 −0.014 ~ −0.001%(합 −1,446건), 계정당 이벤트 +0.000 ~ +0.005%, star 상위 100은 그대로. 모두 그 지표의 자연 변동(M-26: 0.6 ~ 2.6%)보다 훨씬 작다. 〔근거: 실행 출력(ruleset_change_log 묶음별 요약). 측정: M-26〕
 - 되돌린 뒤 `scripts.baseline compare`: Gold 값 217개 중 다름 0개. registry 파일은 커밋된 것과 같다(`git status` 변경 없음). 〔근거: 실행 출력〕
 - 기본 뷰 `policy_compare_released`는 시험 동안에도 v2 묶음만 보였다(공개 시드에 v3 줄을 더하지 않음). policy_compare에는 두 묶음이 161행씩 남는다. 〔근거: 코드: policy_compare_released.sql. 실행 출력 ruleset_id별 행 수〕
+
+### M-28 덧붙임. 새 id 정의(결정 30)로 다시 (2026-11-22, 지시서 handoff_v7.md 1-2) 〔근거: 지시서 1-2 "M-28 시험을 새 정의로 한 번 더"〕
+
+**조건** 같은 7일 Gold, `python -m warehouse.dbt_build`(Gold 전체), bot-job. Silver는 그대로. 〔근거: 코드: warehouse/dbt_build.py〕
+
+- 시험 전 기준값: `scripts.baseline all` → compare, 값 329개 중 다름 0개(49초). 〔근거: 실행 출력 2026-11-22 R0〕
+- 새 정의 첫 빌드: id `56aead61a1fd`(예측: ad4bfe93bcd9에서 바뀜, 지시서가 적은 값과 같음). 34노드 PASS 32 WARN 1(type_share_shift, 이전부터) 28.6초. 〔근거: 실행 출력. 지시서 1-2〕
+- 옛 id와 새 id의 policy_compare 비교 (각 161행):
+
+  | 컬럼 | 다른 행 | 최대 상대 차이 |
+  |---|---|---|
+  | value, change_vs_none, extra_vs_lenient, n, mean | 0 | 0 |
+  | variance (계정당 이벤트) | 34 | 1.05e-14 |
+  | rel_mde (계정당 이벤트) | 32 | 5.27e-15 |
+  | traffic_x_vs_none (계정당 이벤트) | 27 | (같은 크기) |
+
+  〔근거: 실행 출력 policy_compare 자기 조인 `is distinct from` 집계〕
+- 같은 id를 다시 빌드(`--select policy_compare`)해도 계정당 이벤트 분산 35행 중 33행이 바뀐다. 차이는 규칙이 아니라 DuckDB 병렬 합산 순서에서 온다. 〔근거: 실행 출력 varsnap 비교 "33 / 35". 판단: 같은 입력 같은 SQL에서 바뀌므로 규칙 변경과 무관〕
+- ruleset_change_log: base `ad4bfe93bcd9` 대 `56aead61a1fd` 161행 다름 0. → 공개 줄 seq 2 추가. 〔근거: 실행 출력. 코드: seeds/ruleset_release.csv〕
+- v2 → v3 → v2: v3 id `2ce36231097b`(옛 정의의 v3 `fdcdcd213e30`과 다름), repos_flagged strict 날짜별 276→280, 419→420, 535→536, 486→491, 499→503, 339→341, 239→241(+4, 1, 1, 5, 4, 2, 2). 예측(M-28과 같음)대로. 빌드 26.9초. 〔근거: 실행 출력 ruleset_change_log. 측정: M-28〕
+- 시험 동안 policy_compare_released는 `56aead61a1fd` 161행만. 되돌린 뒤 id `56aead61a1fd`, Gold 기준값 같음, registry는 커밋본 그대로(`git status`에 없음). 〔근거: 실행 출력 b_g2.json 비교 "gold 같음"〕
+- 근거 SQL 한 줄을 버전을 올리지 않고 고치면 id가 바뀐다: `test_verdict_change_new_id`의 always_on `n_events >= 100` → `>= 50` 경우가 통과. 〔근거: 시험: tests/test_ruleset_id.py, 6 passed〕
+- policy_compare에는 이제 묶음 4개(ad4bfe93bcd9, 56aead61a1fd, fdcdcd213e30, 2ce36231097b)가 161행씩 있다. 뒤의 둘은 v3 시험 행이다. 〔근거: 실행 출력 ruleset_id별 행 수〕
+- 한계: 미리 보려고 registry만 바꾸고 `ruleset_id()`를 따로 불렀더니 `538f61e12f11`이 나왔다(csv가 아직 v2). 빌드 id와 다르다. 결정 30 "알아 둘 것". 〔근거: 실행 출력 04:08 "v3 id 538f61e12f11"〕
+
+<a id="m-36"></a>
+## M-36. 확정 쿼리 묶음: 의심을 확인으로 (2026-11-22, 지시서 handoff_v7.md 1-4) 〔근거: 지시서 1-4 "M-36". docs/review_logic.md 의심 항목〕
+
+**조건** 7일 Gold(규칙 묶음 `9eff1a5e22a6`, 숫자는 ad4bfe93bcd9와 같음), bot-job, `python -m scripts.query scripts/m36/<파일>`. 다섯 개 합쳐 4.3초. 계정·저장소 이름은 적지 않는다. 〔근거: 코드: scripts/m36/. 측정: M-28 덧붙임. 지시서 1절 이름 비공개〕
+
+**(a) R-4 상위 1개 계정** 〔근거: 코드: scripts/m36/a_top_account.sql〕
+
+| 날짜 | 계정 | 상위 1개 이벤트 | 그날 이벤트 몫 | lenient에서 빠짐 | `[bot]` 이름 | none MDE | 상위 1개 뺀 none MDE | lenient MDE |
+|---|---|---|---|---|---|---|---|---|
+| 07-15 | 660,123 | 858,790 | 17.5% | 예 | 예 | 102.4% | 36.8% | 11.0% |
+| 07-16 | 682,233 | 871,262 | 17.9% | 예 | 예 | 101.4% | 18.9% | 9.1% |
+| 07-17 | 681,782 | 869,316 | 18.0% | 예 | 예 | 101.8% | 18.4% | 7.3% |
+| 07-18 | 669,898 | 844,353 | 17.9% | 예 | 예 | 101.1% | 17.1% | 7.7% |
+| 07-19 | 625,695 | 862,918 | 19.2% | 예 | 예 | 108.4% | 18.4% | 10.1% |
+| 07-20 | 455,391 | 882,263 | 24.4% | 예 | 예 | 137.7% | 22.7% | 11.4% |
+| 07-21 | 458,858 | 882,605 | 24.4% | 예 | 예 | 137.4% | 18.2% | 10.7% |
+
+〔근거: 실행 출력 a_top_account. lenient MDE는 policy_compare_released events_per_account〕
+- **예측과 비교:** 자기 신고이고 lenient에서 빠진다는 예측은 맞았다(7일 모두). "빼면 lenient 값 근처"는 틀렸다. 하나를 빼면 101 ~ 138%가 17 ~ 37%로 떨어진다. none과 lenient의 차이 중 그 계정 하나가 72 ~ 94%이고, 나머지는 다른 자기 신고 계정들이 만든다. 〔근거: 계산: (none − 하나 뺀 값) ÷ (none − lenient). 07-15 (102.4 − 36.8) ÷ (102.4 − 11.0) = 72%, 07-21 (137.4 − 18.2) ÷ (137.4 − 10.7) = 94%, 나머지 닷새 88 ~ 92%. 판단: "계정 하나가 거의 다"는 "차이의 72 ~ 94%"로 고쳐 쓴다〕
+- 07-15만 36.8%로 높다: 둘째로 큰 계정이 그날 컸다는 뜻이다 [확인 필요: 07-15 상위 2 ~ 5위 이벤트 수를 같은 쿼리의 rk ≤ 5로 본다]. 〔근거: 실행 출력. 판단: 나머지 엿새는 17 ~ 23%로 모인다〕
+
+**(b) R-4 strict에서만 빠진 계정** 〔근거: 코드: scripts/m36/b_strict_only.sql〕
+
+| 날짜 | 계정 | 그중 이벤트 100건 이상 | always_on | multi_repo_burst | 그 계정들의 이벤트 |
+|---|---|---|---|---|---|
+| 07-15 | 461 | 461 (100%) | 428 | 38 | 491,539 |
+| 07-16 | 489 | 489 (100%) | 454 | 40 | 450,637 |
+| 07-17 | 487 | 487 (100%) | 449 | 42 | 424,041 |
+| 07-18 | 476 | 476 (100%) | 443 | 37 | 407,758 |
+| 07-19 | 477 | 477 (100%) | 446 | 33 | 448,408 |
+| 07-20 | 465 | 465 (100%) | 443 | 24 | 435,108 |
+| 07-21 | 468 | 468 (100%) | 441 | 30 | 416,758 |
+
+〔근거: 실행 출력 b_strict_only〕
+- **예측과 비교:** 07-15 461개(예측 3,613 − 3,152 = 461과 같음), 100건 이상 비율 100%(예측 90% 넘음). always_on 몫 92 ~ 95%. 두 근거에 다 걸린 계정은 날마다 4 ~ 10개(always_on + multi_repo_burst − 계정 수). 〔근거: 계산: 428 + 38 − 461 = 5, 07-17 449 + 42 − 487 = 4, 07-21 441 + 30 − 468 = 3. README 07-15 표〕
+- 뜻: strict가 balanced 위에 더 빼는 계정은 전부 그날 이벤트 수(결과 지표의 분자)로 잘린 계정이다. 실험 지표에 strict를 쓰면 R-4의 처리 뒤 선택이 그대로 일어난다. 〔근거: 코드: always_on/v1.sql `n_events >= 100`. review_logic.md R-4〕
+
+**(c) R-3 star 상위 100의 교체** 〔근거: 코드: scripts/m36/c_top100_overlap.sql〕
+
+| 날짜 | 거르지 않은 상위 수(동점 포함) | 전날 상위와 같은 저장소 | balanced 상위 | strict 상위 | balanced·strict 같은 저장소 | 거르지 않음·balanced 같은 저장소 |
+|---|---|---|---|---|---|---|
+| 07-15 | 101 | (전날 없음) | 104 | 104 | 104 | 44 |
+| 07-16 | 103 | 27 | 101 | 101 | 101 | 27 |
+| 07-17 | 101 | 11 | 100 | 103 | 100 | 21 |
+| 07-18 | 102 | 12 | 100 | 100 | 100 | 43 |
+| 07-19 | 101 | 15 | 100 | 100 | 100 | 56 |
+| 07-20 | 100 | 27 | 101 | 101 | 101 | 20 |
+| 07-21 | 100 | 18 | 101 | 101 | 101 | 33 |
+
+〔근거: 실행 출력 c_top100_overlap〕
+- 자연 교체(예측 없음): 거르지 않은 상위 100 중 전날에도 상위였던 것은 11 ~ 27개. 날마다 73 ~ 89%가 바뀐다. metric_policy_proposal의 star 상위 100 "자연 변동 0.99%"(남은 개수의 날짜 변화)와 전혀 다른 양이다. 〔근거: 계산: 100 − 27 = 73, 100 − 11 = 89(분모를 동점 포함 수로 하면 1 ~ 2%p 차이). 측정: M-26 자연 변동〕
+- balanced와 strict 상위 100은 7일 모두 같은 목록이다(07-17은 strict 동점으로 103개가 balanced 100개를 다 포함). 예측(95개 이상)대로. 〔근거: 실행 출력 balanced_strict_same = n_balanced〕
+
+**(d) R-8 근거 hit를 대상 종류로 나눔** 〔근거: 코드: scripts/m36/d_hits_by_entity.sql〕
+- low_activity는 계정 69,375 ~ 99,587개와 저장소 692 ~ 1,184개에 같이 걸린다. evaluation의 n_hit은 이 둘을 더해 센다. 〔근거: 실행 출력 d_hits_by_entity〕
+- burst_5m은 저장소만 74,095 ~ 96,014개. star 하한이 없어 star 한두 개 저장소도 걸린다는 R-8과 맞는 크기다 [확인 필요: star 수 구간별 burst_5m hit를 entity_features에서 센다]. 〔근거: 실행 출력. 코드: sql/evidence/burst_5m/v1.sql〕
+- 나머지 계정 근거: declared_app 945 ~ 1,530, always_on 428 ~ 454, multi_repo_burst 32 ~ 55. lockstep_ratio 저장소 74 ~ 267. 〔근거: 실행 출력〕
+
+**(e) GH Archive event_id 중복** 〔근거: 코드: scripts/m36/e_event_id_dup.sql〕
+- **예측 0, 실제 하루 1 ~ 12개(7일 44개).** 이벤트 3,615,363 ~ 4,914,751건 중이라 비율은 최대 3.3×10⁻⁶. 날짜를 넘는 중복은 0. → F-19. 〔근거: 실행 출력. 계산: 12 ÷ 3,615,363〕
+- 중복은 모두 내용(계정, 행동, 시각, 대상)까지 같고 같은 시간 안에 있다. 07-17의 한 건은 원천 시간 파일(`2024-07-17-2.json.gz`) 안에 같은 줄이 두 번 들어 있다. 〔근거: 실행 출력 distinct_content = dup_ids, id_hour_pairs = dup_ids. zcat 줄 세기 2〕
+
+**(f) R-15 always_on "선언 봇 재현율 55.8%"의 출처**
+- 출처: 사전 실험 `02_detect.py`의 "L2 규칙의 선언 봇 재현율" 쿼리(분모: 이벤트 100건 이상인 선언 봇, 분자: 그중 활동 시간 20 이상). REPORT.md 31행. 〔근거: 코드: experiments/p0_bot_detection/gh/02_detect.py 42 ~ 46행〕
+- 지금 데이터로 같은 정의: 07-15 147개 중 82개 = **55.8%**(그대로 재현), 7일 55.8 ~ 71.3%. 〔근거: 실행 출력. stg_evidence always_on metrics의 n_events, active_hours를 declared_app hit 계정에 붙여 셈〕
+- 단서: 이 값은 "행동 조건이 알려진 봇을 얼마나 잡나"의 근사다. 지금 always_on v1은 선언 봇을 정의상 빼므로 규칙 자체의 재현율이 아니다. 분모를 선언 봇 전체로 하면 5.2 ~ 6.8%, 이벤트 가중이면 95.5 ~ 96.8%다. 〔근거: 코드: always_on/v1.sql `NOT endswith(entity_name, '[bot]')`. 실행 출력 세 정의〕
+
+## M-29. README 숫자 대조 (2026-11-22, 지시서 handoff_v7.md 1-5, handoff_v6.md Q1) 〔근거: 지시서 v6 Q1 "기록: M-29(대조 표 요약)"〕
+
+**조건** README.md의 숫자를 모두 뽑아 원 기록이나 지금 Gold·코드와 대조. 쿼리는 `python -m warehouse.dbt_build compile` 뒤 analyses 세 개와 README의 계정 표 쿼리를 다시 돌렸다. 〔근거: 실행 출력 2026-11-22 04:2x〕
+
+| 숫자 묶음 | 개수 | 대조한 곳 | 결과 | 근거 |
+|---|---|---|---|---|
+| ① 지표 기본 정책 이벤트 7일 | 7 | q1 다시 실행 | 같음 | 〔근거: 실행 출력 q1〕 |
+| ② 왜 빠졌나 한 줄(점수, max_repos_1h, 지문) | 4 | q2, M-6 | **다름**: 설명이 "star"였는데 M-6은 ReleaseEvent. 쿼리가 계정 이름을 판정과 함께 담고 있었다. 이름 없이 "자기 신고 아닌 계정 중 multi_repo_burst 점수 최대"로 고르니 다른 계정(590개)이라 표와 설명을 바꿈 | 〔근거: 측정: M-6. 코드: analyses/q2_why_excluded.sql. 지시서 v7 1절 이름 비공개〕 |
+| ③ 규칙 묶음 변경 8줄 | 24 | q3 | 값 같음, **id 다름**: 기본 묶음 ad4bfe93bcd9 → 9eff1a5e22a6, v3 시험 묶음은 새 정의로 2ce36231097b | 〔근거: 측정: M-28 덧붙임〕 |
+| 공개 묶음 설명 줄의 id | 1 | ruleset_release.csv | **다름**: 옛 id → 지금 공개 묶음과 이력으로 고침 | 〔근거: 코드: seeds/ruleset_release.csv〕 |
+| 07-15 정책별 계정 표 | 6 | 쿼리 다시 실행 | 같음 | 〔근거: 실행 출력〕 |
+| 설정 숫자(Spark 상한 24GB, DAG 5개, 풀 자리 1개, 실패 문턱 5%) | 4 | docker-compose.yml, dags/, repo_alive.py | 같음. "메모리 32GB 이상 권장"은 판단이라 출처 없음으로 둠 | 〔근거: 코드: docker-compose.yml 38행, dags/ 5개 DAG, truth/repo_alive.py 131행, docker-compose.yml 66행〕 |
+| 시험 기대 개수 | 2 | pytest 실행 | **다름**: 28개 중 27개 → 35개 모두 통과(F-5 해결, 새 시험) | 〔근거: 실행 출력 35 passed in 58.44s〕 |
+| 새 첫 화면 숫자(44 ~ 80%, 92.1%, 49 ~ 99%, 101 ~ 138%, 72 ~ 94%, 7 ~ 11%, 2.5 ~ 4.3%, 0.55 ~ 0.83%) | 8 | M-26, M-21 전체 줄, criteria 2.1, M-36, policy_compare_released | 같음(새로 쓴 숫자라 기록에서 가져옴) | 〔근거: 측정: M-26 774·780행, M-21 634행, M-36 (a) (b) (c)〕 |
+
+- 요약: 숫자 56개 중 다른 것 4묶음(②의 설명과 행, ③의 id, 공개 묶음 id, 시험 개수)을 고쳤다. 출처 없는 숫자는 "32GB 권장" 하나로, 판단이라 남겼다. 〔근거: 위 표 개수 합 7 + 4 + 24 + 1 + 6 + 4 + 2 + 8〕
+- 알려진 문제 절: F-5(해결)를 빼고 F-19(event_id 중복)를 넣었다. 〔근거: 코드: README.md 알려진 문제〕
+
+<a id="m-35"></a>
+## M-35. 데이터 실험실 화면을 실제 Gold로 (2026-11-22, 지시서 handoff_v7.md 단계 2, handoff_v6.md Q13) 〔근거: 지시서 v6 Q13 "기록: M-35"〕
+
+**조건** 7일 Gold(공개 묶음 = 빌드 묶음 `9eff1a5e22a6`), `dbt build` 초록(PASS 33, WARN 1) 뒤 bot-job에서 `python -m scripts.export_site`(7.4초)와 `--with-entities`. 화면은 호스트 `python -m http.server 8000 --directory site`, 데스크톱 앱 내장 브라우저(Chromium 계열) 하나. 〔근거: 실행 출력 2026-11-22 04:29. 코드: .claude/launch.json "site"〕
+
+| 표 | 예측 행 | 실제 행 | 바이트(Parquet) | 근거 |
+|---|---|---|---|---|
+| policy_compare | 805 (묶음 5 × 161) | 805 | 13,996 | 〔근거: 측정: M-28 덧붙임 묶음별 161행〕 |
+| ruleset_change_log | 644 (비교 묶음 4 × 161) | 644 | 7,440 | 〔근거: 같음〕 |
+| ruleset_release | 3 | 3 | 1,292 | 〔근거: 코드: seeds/ruleset_release.csv〕 |
+| metric_policy | 5 | 5 | 1,708 | 〔근거: 코드: seeds/metric_policy.csv〕 |
+| metric_policy_proposal | 4 | 4 | 1,261 | 〔근거: 실행 출력 1-6〕 |
+| daily_action | 약 100 | 105 | 5,094 | 〔근거: 계산: 이벤트 종류 15 × 7일〕 |
+| mde_cap | 588 (7 × 4 × 21) | 588 | 11,240 | 〔근거: 코드: export_site.py qs range(180, 201)〕 |
+| evaluation | (예측 없음) | 32 | 3,314 | 〔근거: 실행 출력〕 |
+| 공개 합계 | 1MB 아래 | | 45,345 | 〔근거: 실행 출력 "합계 45,345바이트"〕 |
+| suspects / why_excluded / impact_top (로컬만) | | 30,289 / 73,292 / 1,408 | 415,093 / 344,046 / 41,142 | 〔근거: 실행 출력 --with-entities, 합계 845,711바이트〕 |
+
+- R-19 정정 확인: policy_compare는 하루 23행(161 ÷ 7)이고 묶음마다 쌓인다. v6 Q13의 "날짜 7 × 지표 수 × 처리 4" 식은 맞지 않는다. 〔근거: 계산: 805 ÷ 5 ÷ 7 = 23. review_logic.md R-19〕
+- 공개 묶음 검사: 빌드 묶음과 공개 묶음이 같아 내보내기가 통과했다. 〔근거: 코드: export_site.py released/built 검사. 실행 출력〕
+- mde_cap q=100과 policy_compare_released events_per_account: 28행 모두 n과 평균이 같고, 분산은 상대 1.2e-14 이내다(부동소수 합산 순서, M-28 덧붙임과 같은 현상). 〔근거: 실행 출력 대조 쿼리〕
+- daily_action에서 계정 10개 미만이라 빠진 칸: 0개. 이벤트 종류 15개 × 7일이 모두 10개 이상이다. 〔근거: 실행 출력 dropped_cells 0. review_logic.md R-5〕
+- 요약 카드: 07-21 이벤트 3,615,363 → lenient 2,515,755(q1과 같음), star 상위 100에 balanced로 남은 33개(M-36 (c)와 같음), MDE 137.4% → 10.7%(M-36 (a)와 같음), 기본 정책 줄에 events_per_account balanced(1-6 시드). M-26과 같은 방향이다. 〔근거: 화면 텍스트. 측정: M-36〕
+- 요구사항 카드 8개: 모두 오류 없음, 3 ~ 7ms(7, 7, 7, 15, 32, 35, 16, 2행). 〔근거: 화면 #reqs 단추를 차례로 눌러 #lab-msg 읽음〕
+- SQL 콘솔(`?data=data_local`, 표 12개): 처음 100행 why_excluded 15ms, suspects 10ms. 컬럼별 요약(summarize) why_excluded(7.3만 행) 66ms, suspects 26ms, policy_compare 15ms. 〔근거: 화면 #q-msg〕
+- 왜 빠졌나(`?data=data_local`): 이름 목록 300개 중 첫 이름으로 찾기 164ms, 정책 상태 8행, 근거 29행. 공개 모드에서는 이 탭 단추가 숨는다. 〔근거: 화면. 코드: index.html tab("t-why").hidden〕
+- 첫 요약 카드까지: 탐색 시작에서 0.69초(CDN 파일은 브라우저 캐시가 있던 상태라 처음 방문보다 빠르다) [확인 필요: 캐시 없는 첫 방문 시간은 개발자 도구 "캐시 사용 중지"로 잰다]. 〔근거: performance.now() 측정〕
+- 하지 못한 것(사용자 확인): 파이어폭스, Windows 엑셀에서 .xlsx·.csv의 한글과 날짜, 엑셀 "데이터 → 웹에서"로 data/csv 주소 열기. 이 세션에는 엑셀과 파이어폭스가 없다. 〔근거: 지시서 v6 Q13 확인 목록. 판단: 내장 브라우저 하나로만 봤다〕
+- 끝난 기준: `site/data/`에 Parquet 8개, `csv/`, `meta.json`이 생기고 `git status`에 보인다(`?? site/data/`). 〔근거: 실행 출력 git status. 코드: .gitignore `!site/data/*.parquet`〕
+
+
+<a id="m-33"></a>
+## M-33. 표본 한 줄 실행(데모)과 CI 순서의 걸린 시간 (2026-11-22, 지시서 handoff_v6.md Q3, Q4) 〔근거: 지시서 Q3 "걸린 시간 M-33"〕
+
+### 표본 확인 (README에 넣을 값)
+- 표본 `tests/fixtures/gh_sample.json.gz`: 3,407행, 날짜 2024-07-15 하나, 시간 12시(UTC) 하나. 〔근거: 계산: 파이썬 gzip으로 줄마다 created_at 앞 10자, 13자를 센 값(Counter({'2024-07-15': 3407}), Counter({'2024-07-15T12': 3407}))〕
+- 표본 안 계정 1,594개, 저장소 1,914개. 〔근거: 계산: 같은 실행에서 actor.id, repo.id 고유 수〕
+- 표본은 2024-07-15 12시 원본에서 근거가 걸리는 저장소 3개, 트렌딩 저장소 2개, 그 star 계정의 이벤트 전부, 무작위 2,000개를 뽑은 것이다. 〔근거: 코드: tests/make_fixture.py 머리말〕
+
+### M-33 걸린 시간: 돌리기 전 예측
+- 이미지 빌드(이 PC, 레포 사본): 30초 안팎. 〔근거: 판단: 같은 Dockerfile 층이 이 PC BuildKit 캐시에 이미 있어 맥락 전송과 캐시 확인만 남는다. 반증: 2분을 넘으면 캐시가 안 맞은 것(ADD URL 층이나 맥락 크기)〕
+- 이미지 빌드(캐시 없는 CI 첫 회): 5 ~ 8분. 〔근거: 판단: JDK 21 설치, pyspark 4.1.2(약 450MB), dbt와 duckdb 설치가 대부분. 반증: CI 첫 회 Actions 기록〕
+- 데모(python -m scripts.demo): 2 ~ 3분. Spark 부분 약 1분, dbt build 약 1분. 〔근거: 판단: 3,407행이라 계산보다 Spark 시작(약 10초)과 Iceberg 쓰기 10번(각 3 ~ 5초), dbt 모델 약 20개와 시험 실행이 시간을 쓴다. tests/test_judged_red.py 머리말 "약 2분"이 Gold를 세 번 만든다. 반증: 5분을 넘으면 Spark 설정(셔플 파티션) 확인〕
+
+### M-33 걸린 시간: 실제 (조건: 이 PC Windows 11, Docker Desktop 29.7.2, 레포 사본 copy2 = `git ls-files -co --exclude-standard` 175개 파일, 2026-11-22)
+| 항목 | 예측 | 실제 | 차이 |
+|---|---|---|---|
+| 이미지 빌드, 층 캐시 있음 (`docker build --target bot-job`) | 30초 안팎 | 2 ~ 3초 (두 번) | 예측보다 짧다. Dockerfile에 COPY가 없어 맥락 전송이 거의 없다 |
+| 이미지 빌드, 캐시 없음 (`--no-cache --output type=cacheonly`, 기반 이미지는 받아 둔 상태) | CI 5 ~ 8분 | 108초 (apt JDK 15.7초, pyspark 61.1초, dbt 26.0초) | 이 PC 회선 기준. CI 첫 회는 기반 이미지 받기가 더해진다 |
+| 데모 첫 회 (빈 warehouse_demo) | 2 ~ 3분 | copy1 39초, copy2 47초 | 예측의 약 1/3. dbt build 자체가 4.4초 |
+| 데모 다시 (warehouse_demo 있음) | 같음 | 45초, 행 수와 쿼리 결과 같음 | 다시 돌려도 같다 |
+〔근거: 측정: scratchpad build2.log, build_cold.log, demo_run1.log, demo_run2.log, demo_run3.log의 셸 시작·끝 초 차이〕
+- 데모 단계별(copy2 첫 회): Spark 시작 5.9초, create_tables 3.7초, load_events 4.2초, 피처 7.6초, 근거 6개 7.0초, dbt build(시드 5, 모델 19, 시험 8) 10.6초, 분석 쿼리 compile과 출력 6.1초. 〔근거: 측정: demo_run2.log의 "지난 단계" 값. 표시 규칙: 각 머리줄의 초는 바로 앞 단계 시간(코드: scripts/demo.py step)〕
+- 예측이 크게 빗나간 이유: 3,407행에서는 계산이 아니라 JVM과 dbt 시작이 시간을 쓴다. test_judged_red의 "약 2분"은 dbt build를 세 번 하고 시험을 따로 돌린 값이다. 〔근거: 판단: dbt build 4.38초(로그 Finished 줄)인데 dbt 단계 10.6초라 나머지는 파싱과 시작. 반증: 표본을 키워도 시간이 그대로면 시작 비용이 지배한다는 해석이 맞다〕
+
+### 데모 결과 (copy2, ruleset_id 9eff1a5e22a6)
+- Silver: events 3,407행, 계정 피처 1,594행, 저장소 피처 79행, 근거 6개 행 1,594 / 79 / 1,594 / 79 / 1,673 / 1,594. 〔근거: 측정: demo_run2.log run_sql 출력 줄〕
+- dbt build: PASS=33 WARN=0 ERROR=0 (events_match_manifest 제외). 〔근거: 측정: demo_run2.log "Done." 줄. 제외 이유: 코드: scripts/demo.py 머리말〕
+- 판정(gh_account): lenient human 1,555 / declared_bot 39, balanced와 strict는 human 1,183 / suspected_bot 372 / declared_bot 39. 〔근거: 측정: copy1 데모 Gold의 entity_verdict 집계〕
+- q1: 2024-07-15 lenient 실유저 이벤트 2,674 (3,407 중 78.5%). 〔근거: 계산: 2,674 / 3,407. 측정: demo_run2.log q1 표〕
+- q2, q3는 0행. 오류가 아니라 표본의 한계다(아래 한계). 〔근거: 아래 오류 절〕
+
+### Q4 로컬 CI 순서 결과 (copy2, ci.yml과 같은 명령, pytest에는 -e DBT_TARGET_PATH=/tmp/dbt_target -e DBT_LOG_PATH=/tmp/dbt_logs)
+| 단계 | 결과 | 시간 |
+|---|---|---|
+| 이미지 빌드 | 성공 | 2초 (캐시) |
+| python -m scripts.demo | 성공, dbt PASS=33 | 47초 |
+| python -m scripts.demo test | PASS=8 (every_account_judged, every_evidence_ran 포함) | 7초 |
+| python -m warehouse.dbt_build compile | 성공 | 9초 |
+| python -m pytest tests -q | 35 passed (test_ruleset_id 6, test_judged_red 1, test_gold_dialect 21, test_sql 5, test_late_guard 1, test_gold_meta 1) | 60초 |
+〔근거: 측정: 위 명령의 종료 코드와 초. dbt 시험 이름: copy2 warehouse_demo/dbt_target/run_results.json. pytest 목록: --collect-only 출력〕
+- 이 결과는 사본을 뜬 시점(2026-11-22 13시대) 파일 기준이다. load_events.py, create_tables.py, dbt 시험을 고치는 다른 작업이 그 뒤 바꾼 것은 반영되지 않았다(사본에는 bot.silver.load_audit 표가 이미 들어 있었다). 〔근거: 측정: demo_run2.log create_tables 출력에 load_audit 줄. 판단: 동시 작업 중이라 커밋 전 한 번 더 돌려야 한다〕
+- GitHub Actions에서의 실제 시간은 아직 없다. 사용자가 올린 뒤 Actions 탭에서 본다(U2). 〔근거: 확인 필요(Actions 실행 기록)〕
+
+### Q4 로컬 CI 다시 (copy3, 다른 작업의 새 시험 test_daily_watch, test_load_audit, test_pick_targets, bot_share_vs_median, daily_rows_vs_median이 들어온 뒤 사본)
+| 단계 | 결과 | 시간 |
+|---|---|---|
+| python -m scripts.demo | 성공, dbt PASS=35 WARN=0 ERROR=0 | 47초 |
+| python -m scripts.demo test | PASS=10 (every_account_judged, every_evidence_ran, bot_share_vs_median, daily_rows_vs_median 포함) | 7초 |
+| python -m warehouse.dbt_build compile | 성공 | 9초 |
+| python -m pytest tests -q | 47 passed | 126초 |
+〔근거: 측정: scratchpad ci3_*.log의 "Done." 줄, "47 passed in 124.74s", 셸 종료 코드와 초〕
+- 데모 시간은 copy2와 같고(47초), pytest는 새 시험 12개가 늘며 60초에서 126초가 됐다. 〔근거: 계산: 47 - 35 = 12개, 126 - 60 = 66초〕
+
+### 한계 (표본 데모)
+- q2(왜 빠졌나)가 표본에서 0행이다. 표본에서 multi_repo_burst에 걸린 계정 1개가 declared_app에도 걸리는데, q2는 자기 신고가 아닌 계정만 고른다. 실제 Gold에서는 행이 나온다. 〔근거: 측정: 데모 Gold의 multi_repo_burst hit 계정 1개, declared_app True. 코드: warehouse/dbt/analyses/q2_why_excluded.sql. 판단: 반증 조건은 실제 Gold에서도 0행인 경우〕
+- q3(규칙 묶음 변경)도 0행이다. 데모는 묶음 하나로만 빌드해서 ruleset_change_log에 비교할 다른 묶음이 없다. 〔근거: 측정: 데모 Gold policy_compare의 ruleset_id 1개, ruleset_change_log 0행〕
+- README에 "표본에서는 q2, q3가 빈다"를 적을지, 표본이나 데모를 바꿀지는 사용자가 정한다. 〔근거: 판단: 표본을 바꾸면 test_sql 기대값이 바뀔 수 있다. CLAUDE.md 3절 4번〕
+
+---
+
+## M-34. 적재 가드(기록표 집계와 문턱)의 비용, 표본 기준 (지시서 handoff_v6.md Q5) 〔근거: 지시서 Q5 "기록: M-34(가드 비용, M-27 형식)"〕
+
+**조건** 2026-11-22, bot-job 컨테이너 local[*], 임시 창고(BOT_WAREHOUSE=임시 폴더). 표본 `tests/fixtures/gh_sample.json.gz` 3,407줄(x1)과, 그것을 id만 바꿔 100번 이어 붙인 340,700줄 파일 하나(x100). 같은 Spark 세션에서 옛 적재(커밋 79ef270의 `load_events.load`: DROPMALFORMED 읽기 + 늦은 행 count + 쓰기)와 새 적재(PERMISSIVE 읽기 + 기록표 집계 한 번 + 쓰기 + 기록표 한 행 추가)를 각 5번 돌리고, 첫 번은 데움으로 빼고 중앙값. 스크립트는 스크래치 `m34/guard_cost.py`. 〔근거: 코드: spark_jobs/load_events.py `audit`, `gate`, `record`. 스크래치 m34/guard_cost.py, m34/old_load_events.py(= git show HEAD:spark_jobs/load_events.py)〕
+
+| 입력 | 옛 적재 | 새 적재 | 차이 | 기록표 집계만 | 근거 |
+|---|---|---|---|---|---|
+| x1 (3,407줄) | 0.50초 | 1.10초 | +0.60초 | 0.24초 | 〔근거: 실행 출력 `RESULT x1`〕 |
+| x100 (340,700줄) | 3.75초 | 4.99초 | +1.24초 (+33%) | 1.60초 | 〔근거: 실행 출력 `RESULT x100`〕 |
+
+- 예측은 "옛 적재와 비슷하고 기록표 추가 쓰기만큼 1초 안팎 더 든다"였다. x1은 맞고, x100은 차이가 1.24초로 예측보다 크다. 〔근거: 스크래치 predictions_before.md 마지막 줄. 계산: 4.99 − 3.75 = 1.24〕
+- 차이의 몫: 기록표 한 행 추가(Iceberg 커밋 1번과 스냅샷 확인 질의)가 크기와 상관없이 약 0.6초, 나머지는 집계가 옛 늦은 행 count보다 무겁기 때문이다(합 7개, collect_set 1개 대 필터 count 1개). 〔근거: 계산: x1 차이 0.60초는 읽기가 거의 0인 크기라 고정 비용. x100 차이 1.24 − 0.60 = 0.64초. 판단: 반증 조건은 집계 칸을 늦은 행 하나로 줄여 다시 쟀을 때 0.64초가 줄지 않는 경우〕
+- 읽기 횟수는 옛 적재와 같다(Bronze 두 번: 문턱 확인 한 번, 쓰기 한 번). 옛 늦은 행 count를 기록표 집계 안으로 넣었기 때문이다. 〔근거: 코드: load_events.py `audit`의 `late_rows`, `run_sql.run`에 check를 넘기지 않음〕
+- 실제 하루치 예측: M-27에서 늦은 행 가드 한 번이 07-15에 12.7 ~ 13.9초였다. 새 집계도 한 번 읽기라 비슷하고, 집계 몫과 커밋 몫으로 하루 1 ~ 3초 늘 것으로 본다. 일주일 7 ~ 21초, 일주일 실행 17분 22초의 2% 안. 〔근거: 측정: M-27, M-17. 계산: (1 ~ 3) × 7 = 7 ~ 21초, 21 ÷ 1,042 ≈ 2%. 확인 필요: 사용자가 7일을 다시 돌릴 때 load_events 태스크 시간을 M-23과 비교〕
+- 표본은 gz 파일 하나라 Spark 태스크 하나로 읽는다(gz는 나눠 읽을 수 없다). 실제 하루는 파일 24개라 병렬로 읽혀 비율이 다를 수 있다. 〔근거: 판단: gzip은 분할 불가 압축. 확인 필요: 7일 재실행 때 Spark UI의 태스크 수〕
+
+---
+
+<a id="m-37"></a>
+## M-37. 메모리 압박 재현: features_account 07-15를 컨테이너 상한별로 (2026-11-22, 지시서 handoff_v7.md 3-1) 〔근거: 지시서 3-1 "기록: M-37"〕
+
+**조건** bot-job 컨테이너를 `mem_limit`(= `memswap_limit`)과 `SPARK_DRIVER_MEMORY`만 바꿔 띄우고 `python -m spark_jobs.run_sql --sql sql/silver/features_account.sql` 07-15 한 날을 돌렸다. 힙은 DAG 규칙(상한 − max(상한 25%, 1GB))과 같다. local[*] = 16코어. 07-15는 7일 중 가장 큰 날이다(현재 스냅샷 4,914,751행, 데이터 파일 1개 120.2MiB). 실행마다 같은 내용으로 entity_features 07-15 칸을 덮어쓴다. 〔근거: 코드: dags/jobs.py `heap()`, 스크래치 m37/run.sh. 측정: iceberg_metadata 날짜별 record_count (07-15 4,914,751 ~ 07-21 3,615,363)〕
+
+**예측** 지시서: 8g는 성공하되 spill, 실패 경계 6g 근처(M-17 6.09GiB에서). 내 예측: 6g까지 spill 없음, 4g에서 spill 시작. 〔근거: 지시서 3-1. 판단: M-17 값은 페이지 캐시를 센 cgroup 꼭짓점이라 실제 필요보다 크다고 봤다〕
+
+**상한별 결과** (시간 = 이벤트 로그 앱 시작~끝. 실행 메모리·spill·GC = 태스크 지표 합. RSS·캐시 = 1초 표본 꼭짓점. max_usage = cgroup 꼭짓점)
+
+| 상한 | 힙 | 앱 시간 | 태스크 실행 합 | 태스크 최대 실행 메모리 | spill 메모리 / 디스크 | GC | 큰 스테이지 느린/중앙값 | RSS 꼭짓점 | 캐시 꼭짓점 | max_usage | 결과 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 12g | 9216m | 25.8초 | 87.6초 | 0.672GiB | 0 / 0 | 4.8초 | 1.01 | 4.51GiB | 0.45GiB | 4.98GiB | 성공 |
+| 8g | 6144m | 24.6초 | 87.7초 | 0.672GiB | 0 / 0 | 6.2초 | 1.02 | 4.04GiB | 0.45GiB | 4.56GiB | 성공 |
+| 6g | 4608m | 23.9초 | 81.3초 | 0.672GiB | 0 / 0 | 4.8초 | 1.01 | 3.70GiB | 0.45GiB | 4.20GiB | 성공 |
+| 4g | 3072m | 26.4초 | 86.6초 | 0.672GiB | 0 / 0 | 5.7초 | 1.02 | 3.26GiB | 0.45GiB | 3.73GiB | 성공 |
+| 3g | 2048m | 24.1초 | 96.0초 | 0.672GiB | 0 / 0 | 5.8초 | 1.02 | 2.60GiB | 0.39GiB | 3.00GiB (= 상한) | 성공 |
+| 2g | 1024m | 23.4 ~ 28.5초 | 105 ~ 134초 | 0.372GiB | 1.138 / 0.233GiB | 8.6 ~ 13.9초 | 1.00 ~ 1.01 | 1.56GiB | 0.43GiB | 2.00GiB (= 상한) | 성공, failcnt 0 |
+
+〔근거: 스크래치 m37/summary.txt, m37/ev.py로 spark-events/local-1795322011738 ~ local-1795322306538 요약, m37/rss_*.log. 2g는 같은 설정 네 번(m2, m2_b와 설정이 실제로 안 들어간 두 번), spill은 네 번 모두 같은 값〕
+
+- 실험 뒤 기준값 비교: 값 329개 중 다름 0개(features_account가 07-15 칸을 12번 같은 내용으로 덮어씀). 〔근거: 명령: python -m scripts.baseline all, compare docs/local_baseline.json (2026-11-22 04:46Z)〕
+- 모든 상한에서 실패가 없다. 그래서 F-20은 쓰지 않는다. 〔근거: 위 표 결과 칸. 지시서 3-1 "실패는 F-19로…"(번호는 1-4에서 F-19를 이미 써서 다음 번호 F-20 몫)〕
+- 예측 둘 다 틀렸다. spill은 3g까지 0이고 2g에서만 생겼다. 〔근거: 위 표〕
+- 틀린 이유: M-17의 6.09GiB는 필요량이 아니다. JVM은 받은 힙만큼 키워 두고 돌려주지 않는다. RSS 꼭짓점이 상한을 따라 4.51 → 1.56GiB로 내려가는데, 앱 시간은 그대로다. 실제 필요는 태스크 최대 실행 메모리 0.672GiB 쪽이다. M-17은 7일을 한 컨테이너에서 차례로 돈 꼭짓점이고, 캐시도 포함했다. 〔근거: 위 표 RSS와 앱 시간 칸. 측정: M-17 표 머리 "최대 메모리 = cgroup memory.max_usage_in_bytes, 페이지 캐시를 함께 센다". 소스: [Spark monitoring, peakExecutionMemory 정의](https://spark.apache.org/docs/4.1.2/monitoring.html)〕
+
+**진단 (2g, 스테이지별)** 앱 local-1795322188226
+
+| 스테이지 | 태스크 | 하는 일 | 셔플 읽기 → 쓰기 | spill 메모리 | GC |
+|---|---|---|---|---|---|
+| 0 | 1 | Iceberg 스캔 + 첫 부분 집계 | 0 → 110.4MiB | 0.310GiB | 작음 |
+| 2 | 17 | 셔플 뒤 집계 | 110.4 → 82.8MiB | 0 | 4.7초 |
+| 5 | 17 | count(DISTINCT) 펼친 집계 | 82.8 → 126.7MiB | 0.531GiB | 작음 |
+| 9 | 17 | 다음 집계 | 126.7 → 61.9MiB | 0.297GiB | 작음 |
+| 14, 20 | 17, 1 | 마지막 집계와 쓰기 | 61.9 → 27.4 → 0 | 0 | 작음 |
+
+〔근거: 이벤트 로그 SparkListenerStageCompleted의 RDD 이름(스테이지 0에 DataSourceRDD)과 TaskEnd의 Shuffle Read/Write Metrics. 코드: sql/silver/features_account.sql의 두 단계 GROUP BY와 count(DISTINCT h / action / target)〕
+
+- 스테이지 0이 태스크 하나인 이유: 07-15의 살아 있는 데이터 파일이 하나(120.2MiB)이고, 파일이 Iceberg의 기본 분할 목표 크기보다 작아 한 조각으로 읽힌다. 그래서 490만 행의 첫 집계가 한 태스크에 몰린다. 〔근거: 측정: 위 iceberg_metadata 파일 1개. 확인 필요(read.split.target-size 기본값 128MB는 [Iceberg 1.11.0 configuration](https://iceberg.apache.org/docs/1.11.0/configuration/) 페이지를 하위 에이전트가 요약한 값이라 원문 대조 전)〕
+- 셔플 스테이지가 17개 태스크인 이유: AQE가 200개 파티션을 합친다. 기본값 parallelismFirst=true에서는 advisoryPartitionSizeInBytes를 무시하고 병렬성을 먼저 본다. 〔근거: 소스: [Spark 4.1.2 SQL 성능 조정, Coalescing Post Shuffle Partitions](https://spark.apache.org/docs/4.1.2/sql-performance-tuning.html) "When true, Spark ignores the target size specified by spark.sql.adaptive.advisoryPartitionSizeInBytes". 측정: 아래 후보 B〕
+- 2g에서 spill이 나는 이유: 힙 1024m에서 예약 300MiB를 빼고 60%가 실행·저장 몫이라 약 434MiB다. 이것을 동시에 도는 16개 태스크가 나눠 쓴다. 12g에서는 태스크 최대 0.672GiB를 그대로 받았지만 2g에서는 0.372GiB에서 잘려 넘친다. 〔근거: 계산: (1024 − 300) × 0.6 ≈ 434MiB. 소스: [Spark 4.1.2 tuning, Memory Management](https://spark.apache.org/docs/4.1.2/tuning.html) reserved 300MiB, spark.memory.fraction 0.6. 측정: 위 표 태스크 최대 실행 메모리 칸〕
+
+**처방 후보, 모두 2g(힙 1024m)에서**
+
+| 후보 | 바꾼 것 | 태스크 수 | spill 메모리 / 디스크 | GC | 태스크 실행 합 | 앱 시간 | 확인 |
+|---|---|---|---|---|---|---|---|
+| 기준 | 없음 | 71 | 1.138 / 0.233GiB | 8.6 ~ 13.9초 | 105 ~ 134초 | 23.4 ~ 28.5초 | |
+| A | `SPARK_MASTER=local[4]` (동시 태스크 16 → 4) | 22 | 1.141 / 0.218GiB | 0.7초 | 38.2초 | 23.9초 | 큰 스테이지 태스크 5개 |
+| B | `advisoryPartitionSizeInBytes=8m` | 72 | 1.138 / 0.232GiB | 10.3초 | 105.4초 | 24.4초 | 설정이 이벤트 로그에 들어감, 스테이지는 그대로 17개 |
+| C | `coalescePartitions.enabled=false` (200개 그대로) | 1,002 | 0.310 / 0.042GiB | 28.7초 | 147.2초 | 26.3초 | 큰 스테이지 느린/중앙값 4.59 |
+
+〔근거: 스크래치 m37/summary.txt c_l4, c_adv8, c_nocoal 줄. ev.py로 local-1795322344660, local-1795322373293, local-1795322574623 요약. 이벤트 로그 Spark Properties에서 설정값 확인〕
+
+- A는 spill 양은 같지만 GC가 0.7초, 태스크 실행 합이 1/3로 준다. 태스크마다 받는 메모리가 커져서 덜 쪼개지는 것으로 본다. 〔근거: 위 표. 판단: 같은 힙을 4개로 나누면 태스크 몫이 16개일 때의 약 4배〕
+- B는 효과가 없다. 위 parallelismFirst 문서대로다. 〔근거: 위 표 B 줄, 스테이지 태스크 수〕
+- C는 셔플 스테이지 spill을 없애고(남은 0.310GiB는 스테이지 0의 태스크 하나 몫) 대신 GC와 태스크 수가 크게 는다. 앱 시간은 2초 더 길다. 〔근거: 위 표 C 줄, 진단 표 스테이지 0 spill 0.310GiB와 같은 값〕
+- 재지 않은 후보: 스캔 분할을 작게 해 스테이지 0을 여러 태스크로 나누기(Iceberg split-size). 스테이지 0의 spill 0.31GiB만 겨냥하고, 2g에서도 실패가 없어 먼저 잴 이유가 약하다. 〔근거: 판단: 위 진단 표에서 스테이지 0 몫이 전체 spill의 27%(0.310 ÷ 1.138)〕
+
+**고른 것: 결정 31** (SQL과 Spark 설정은 그대로 두고, DAG의 features_account 상한만 12g → 4g) 〔근거: docs/decisions.md 결정 31〕
+
+**마무리 문단** 계정 피처는 날마다 490만 행을 계정·시간·type으로 두 번 집계하는 일이라, 메모리에 넘치면 디스크로 흘려 끝까지 가는 Spark의 통합 메모리 관리 덕분에 상한을 크게 잡지 않아도 될 것이라 보고 Spark를 썼다. 해 보니 M-17의 6.09GiB가 "필요한 양"처럼 읽혀 상한 12g와 클라우드 머신 크기 걱정이 생겼다. 상한을 12g에서 2g까지 내려 재 보니 실패는 한 번도 없었고, 3g까지는 spill도 없었다. 2g에서는 spill과 GC가 늘었지만 앱 시간은 그대로였다. 원인은 JVM이 받은 힙만큼 키워 두는 성질이었고, 실제로 필요한 것은 태스크 최대 실행 메모리 0.67GiB였다. 그래서 상한을 4g로 줄이고, 더 작은 머신에서는 동시 태스크 수를 줄이는 처방(후보 A)을 가져갔다. 결과적으로 "넘쳐도 죽지 않는다"는 장점을 숫자로 확인하고, 그 장점 위에서 메모리를 3분의 1로 줄였다. 〔근거: 위 상한별 표와 후보 표. 측정: M-17. 결정 31〕
+
+<a id="m-38"></a>
+## M-38. Spark 앱 묶기: 날짜마다 앱(63개) 대 태스크마다 앱(9개) (2026-11-22, 지시서 handoff_v7.md 3-2) 〔근거: 지시서 3-2 "기록: M-38"〕
+
+**조건** 2026-11-22 04:47Z ~ 05:20Z. bot-job 컨테이너를 태스크마다 한 번씩 차례로 띄웠다(DAG와 같은 모양, 컨테이너 9번씩). 상한은 compose 기본값(24g, 힙 18g)으로 두 쪽 같다. 날짜별 쪽은 DAG의 `each_day`처럼 컨테이너 안에서 날짜마다 `python -m spark_jobs.load_events` 또는 `run_sql`. 묶음 쪽은 스크래치 `m38/bundle.py`가 앱 하나 안에서 날짜를 돈다(`load()`, `run_sql.run()`을 그대로 부름). 두 쪽 모두 작업 트리의 load_events(다른 세션의 Q5 기록표, PERMISSIVE 읽기, 커밋 전)를 썼다. 그래서 M-23(옛 DROPMALFORMED 적재)과 비교할 때 load_events 몫에 기록표 집계 비용이 섞인다. 돌리는 동안 한 일: 단계 5 문서 단서(R-7 ~ R-13, R-17, R-20), Q8 그림 경로 확인, 3-3 스크립트 준비. 〔근거: 스크래치 m38/run.sh, m38/bundle.py, m38/summary.txt. 측정: M-34(가드 비용)〕
+
+**예측** 작업 밖 시간이 앱 수에 비례해 685초 → 약 98초. 〔근거: 지시서 3-2. 계산: 685 × 9 ÷ 63〕
+
+**값** (M-23과 같은 계산: 앱 벽시계 = 이벤트 로그 앱 시작~끝, 작업 밖 아래 한계 = 벽시계 합 − 태스크 실행 합 ÷ 16)
+
+| | M-23 (옛 적재, Airflow) | 날짜별 63개 | 묶음 9개 | 묶음 ÷ 날짜별 |
+|---|---|---|---|---|
+| 앱 벽시계 합 | 837.4초 | 930.1초 | 553.7초 | 0.60 |
+| 태스크 실행 합 | 2,438.1초 | 3,525.1초 | 2,767.1초 | 0.78 |
+| GC 합 | 80초 | 80.1초 | 41.3초 | 0.52 |
+| 작업 밖 아래 한계 | 685초 | 709.7초 | 380.8초 | 0.54 |
+| 컨테이너 벽시계 합 (띄우기 포함) | 해당 없음 | 1,072.2초 | 586.1초 | 0.55 |
+
+| 태스크 | 날짜별 앱 벽시계 합 | 묶음 앱 벽시계 | 날짜별 태스크 실행 합 | 묶음 태스크 실행 합 |
+|---|---|---|---|---|
+| load_events | 312.2초 | 270.6초 | 2,246.9초 | 2,098.7초 |
+| features_account | 149.0초 | 90.1초 | 519.2초 | 304.0초 |
+| features_repo | 97.1초 | 43.9초 | 287.9초 | 144.7초 |
+| 근거 6개 | 371.7초 | 149.0초 | 471.1초 | 219.6초 |
+
+〔근거: 스크래치 m38/ana.py로 spark-events의 새 앱(before/after 목록 차이) 요약. 컨테이너 벽시계는 m38/summary.txt〕
+
+- 결과가 같다: 묶음 실행 뒤 기준값 329개 중 다름 0개. 〔근거: 명령: python -m scripts.baseline all, compare docs/local_baseline.json (05:2xZ)〕
+- 적재 기록표(Q5): run_id마다 7행, 모두 status ok, 버린 줄 0, 필수 NULL 0, manifest_lines = rows_read 7행 모두, 늦은 행 0, 처음 보는 type 0. 예측(14행, 모두 ok)과 같다. 〔근거: iceberg_scan('/work/warehouse_local/silver/load_audit') run_id별 집계. 다른 세션 요청(Q5 마무리)〕
+- 날짜별 쪽의 작업 밖 709.7초는 M-23 685초와 4% 차이로 재현됐다. load_events 태스크 실행 합이 1,279 → 2,247초로 는 것은 기록표 집계(Bronze를 한 번 더 집계) 몫으로 본다. 〔근거: 측정: M-23 load_events 1,278.7초. 판단: 다른 태스크는 M-23과 비슷하다(features_account 508 → 519초)〕
+- **예측이 틀렸다**: 묶음 쪽 작업 밖 시간은 98초가 아니라 380.8초다. 앱 하나를 덜 띄워 아낀 시간은 (709.7 − 380.8) ÷ 54 = 6.1초로, 예측의 10.9초보다 작다. 남은 380.8초는 앱 고정 시간이 아니라 날짜마다 앱 안에서 도는 일이다(16코어를 다 못 쓰는 태스크 1개짜리 스테이지, 드라이버의 계획·Iceberg 커밋). M-23의 "작업 밖 시간 = 앱 고정 시간" 가정이 틀렸다. 〔근거: 계산. 측정: M-37 진단 표(태스크 1개 스테이지 0, 20)〕
+- 예측에 없던 것: 태스크 실행 합도 22% 준다(3,525 → 2,767초). 근거 6개는 절반 아래(471 → 220초), GC도 절반이다. 같은 JVM이 둘째 날부터 데워진 상태(JIT 컴파일, 클래스 적재)로 도는 몫으로 본다. 〔근거: 위 표. 확인 필요(날짜별 태스크 시간을 묶음 안에서 첫날과 둘째 날로 나눠 보기)〕
+- 클라우드 예측으로: c1_forecast.md 2절의 "줄어드는 시간 54 × (10.9 + Y)초"는 로컬에서 54 × 6.1 = 329초였다. 클라우드에서 앱마다 붙는 YARN 시작 Y는 여기서 재지 못했다. 〔근거: 계산. c1_forecast.md 2절〕
+
+- 덧붙임(run_days 확인): 결정 32대로 만든 `spark_jobs/run_days.py`로 features_account 7일을 4g 컨테이너(힙 3072m)에서 한 앱으로 돌렸다. rc 0, 앱 93.0초, 태스크 497개, spill 0, 태스크 최대 실행 메모리 0.672GiB, failcnt 0(max_usage는 상한 4GiB까지 찼는데 페이지 캐시를 센 값이다). 뒤의 기준값 비교 329개 중 다름 0개. 〔근거: spark-events/local-1795324737464, m37/ev.py. 측정: M-37 캐시 꼭짓점〕
+
+**고른 것: 결정 32** 〔근거: docs/decisions.md 결정 32〕
+
+**마무리 문단** 이 프로젝트는 하루를 다시 돌리는 일이 잦아(규칙 바꾸기, 늦은 정답) 날짜마다 앱을 띄우는 단순함 때문에 날짜별 앱 63개 구조를 썼다. 해 보니 일보다 앱을 띄우고 닫는 데 쓰는 시간이 커 보였고(M-23), 클라우드에서는 앱마다 YARN 시작이 더 붙는다. 태스크마다 앱 하나로 묶어 재 보니 결과는 같고(기준값 다름 0개) 컨테이너 시간은 1,072초에서 586초로 45% 줄었다. 다만 줄어든 이유는 예측과 달랐다. 앱 고정 시간은 앱당 6.1초뿐이었고, 대신 같은 JVM을 이어 쓰며 태스크 실행 자체가 22% 줄었다. 그래서 "날짜 단위로 다시 쓴다"는 장점(날짜 파티션 덮어쓰기와 가드)은 그대로 두고 앱만 묶는 쪽을 가져갔다. 〔근거: 위 표. 측정: M-23. 결정 32〕
+
+<a id="m-39"></a>
+## M-39. lockstep 창 넓히기: 자기 조인 행 수를 먼저 계산하고 세기, 지금 있는 7일 안에서 (2026-11-22, 지시서 handoff_v7.md 3-3, 일부) 〔근거: 지시서 3-3 "기록 M-39"〕
+
+**조건** 2026-11-22 05:3xZ. 읽기만 했다(Silver에 쓰지 않음). 스크래치 `m39/m39.py`가 features_repo.sql의 `la`와 같은 거르기(그날 저활동 계정, 선언 봇 제외, 계정·날짜마다 star 2 ~ 50개)를 07-15 ~ 07-21 7일에 걸쳐 만들고, 창 1시간·24시간·7일로 `la a JOIN la b ON 같은 계정 AND a.target < b.target AND |Δt| ≤ 창`을 셌다. bot-job 기본 상한(24g), local[*]. 앱 local-1795324908816, 컨테이너 43초. 15일 창은 Bronze가 7일뿐이라 하지 못했다(아래). 〔근거: 코드: sql/silver/features_repo.sql la, pair. 스크래치 m39/m39.py〕
+
+**예측** (1) 창 1시간: M-11 B의 하루 쌍 후보 24.7만 ~ 57.3만(상한 50) × 7일 = 173만 ~ 401만. (2) 창 = 날짜 칸, 7일: 계정마다 C(n, 2)를 더한 값이 조인 행의 위 한계(같은 저장소 쌍은 빠지므로). 〔근거: 측정: M-11 B 쌍 후보 표. direction_v5.md 3.2 S1 "계정마다 C(창 안 star 저장소 수, 2) 합"〕
+
+| 창 | 계산 예측 (계정마다 C(n,2) 합) | 실제 조인 행 | 실제 ÷ 예측 | 조인 시간 | 공통 계정 10명 이상 쌍 |
+|---|---|---|---|---|---|
+| 1시간 | 154.7만 (같은 시계 시간 칸만, 아래 한계) / 173만 ~ 401만 (M-11 B × 7) | 178.1만 | 1.15 / 범위 안 | 4.2초 | 17,331 |
+| 24시간 | 258.7만 (같은 날짜만) | 319.9만 | 1.24 | 3.2초 | 27,299 |
+| 7일 | 447.2만 (7일 전체, max n = 188) | 445.5만 | 0.996 | 3.4초 | 35,456 |
+
+〔근거: m39.py 출력. la = 615,066 star, 계정 127,284〕
+
+- 7일 창은 계산이 실제와 0.4% 안에서 맞았다. 차이는 같은 계정이 같은 저장소를 두 번 star한 행(`a.target < b.target`이 뺀다)으로 본다. 〔근거: 계산: 1 − 4,455,028 ÷ 4,472,164 = 0.38%〕
+- 1시간과 24시간 창은 칸 안 C(n,2)보다 15 ~ 24% 많다. 창이 칸 경계(시계 시간, 날짜)를 넘는 쌍을 칸 계산이 세지 않기 때문이다. 칸 계산은 아래 한계다. 〔근거: 위 표. review_logic.md R-17과 같은 경계 문제〕
+- 폭발은 없었다: 창을 1시간에서 7일로 168배 늘려도 조인 행은 2.5배, 시간은 그대로다. 계정·날짜마다 star 50개 상한(f1의 일부)이 n을 묶기 때문이다. 7일 동안 한 계정의 n은 최대 188이다. 〔근거: 계산: 4,455,028 ÷ 1,781,379 = 2.5. 코드: features_repo.sql la의 `BETWEEN 2 AND 50`〕
+- 그래서 direction_v5.md S1의 "폭발"은 상한을 200으로 풀 때의 이야기다. 상한 50을 두면 15일 창도 계산으로 미리 잴 수 있다. 15일 예측: 7일 값 ÷ 하루 값 = 1.73배였으므로 15일은 대략 447만의 2배 안팎(약 900만)으로 본다. 〔근거: 계산: 4,472,164 ÷ 2,586,731 = 1.73. 확인 필요(15일 Bronze를 받은 뒤 같은 스크립트로)〕
+- 하지 못한 것: 15일 창. Bronze가 07-15 ~ 07-21 7일뿐이고, 8일 이상 더 받아야 한다(로컬 7일 raw 크기로 하루 약 2GB, 8일이면 약 16GB). 내려받기는 사용자 허락이 필요해 마지막 보고에서 묻는다. 디스크 여유는 549GB라 조건(80GB)은 맞는다. 〔근거: 측정: R0 디스크 549GB. 계산: direction_v5.md S1 "14GB ÷ 7". CLAUDE.md 3절(지시서와 다르게 할 때는 묻는다)〕
+- 갱신(2026-11-22): 사용자가 내려받기를 허락해("둘 다 받기") 15일 창을 쟀다. 07-22 ~ 29를 받아(192개 파일, 실패 0, 599초) 스크래치 창고(warehouse_local은 그대로)에 07-15 ~ 29 events와 계정 피처를 쓰고 같은 스크립트(m39b.py)로 셌다. 15일 적재 기록표는 모두 버린 줄 0, 늦은 줄 0. 〔근거: 실행: 스크래치 fetch_gh.log "192개 중 실패 0개", m39/run15.sh, summary15.txt〕
+
+  | 창 | 처음 어림 (7일 값 × 15/7) | 계산 예측 (조인 전, C(n,2) 합) | 실제 조인 행 | 실제 ÷ 계산 | 조인 시간 | 공통 10명 이상 쌍 |
+  |---|---|---|---|---|---|---|
+  | 1시간 | 382만 | 280.9만 (같은 시계 시간 칸만) | 324.8만 | 1.16 | 7.6초 | 25,446 |
+  | 24시간 | 686만 | 496.7만 (같은 날짜 칸만) | 607.8만 | 1.22 | 7.1초 | 40,746 |
+  | 7일 | 약 860만 | 없음 | 998.2만 | 없음 | 6.0초 | 53,723 |
+  | 15일 | 900만 ~ 1,100만 | 1,144.2만 (15일 전체, max n = 308) | 1,140.4만 | 0.997 | 5.5초 | 55,711 |
+
+  〔근거: m39b.py 출력(스크래치 m39/log15_count.txt). 입력 1,273,324 star, 계정 233,124〕
+  - 조인 전에 계정마다 C(n,2)를 더한 예측이 15일 창에서 0.33% 안으로 맞았다. 차이는 같은 계정이 같은 저장소를 두 번 star한 행으로 본다. 〔근거: 계산: 1 − 11,403,647 ÷ 11,441,894. 판단: 자기 조인이 같은 저장소 쌍을 거른다〕
+  - 1시간·24시간 창의 칸 계산은 실제보다 16 ~ 22% 적다. 칸은 시계 시간·날짜 경계로 자르고 실제 창은 미끄러지므로, 경계를 걸치는 쌍만큼 실제가 많다. 칸 계산은 하한, 15일 전체 계산은 상한으로 쓴다. 〔근거: 계산: 3,248,254 ÷ 2,809,506, 6,078,272 ÷ 4,967,246. 코드: m39b.py〕
+  - 폭발은 없다: 창을 1시간에서 15일로 360배 넓혀도 행은 3.5배, 조인 시간은 그대로(5.5 ~ 7.6초). 조인 앱 78초, 태스크 3,538개, 꼭짓점 실행 메모리 0.33GiB, spill 0, 실패 0. 계정·날짜 star 상한이 n을 묶는다(15일 max n = 308). 〔근거: 계산: 11,403,647 ÷ 3,248,254 = 3.5. 이벤트 로그 local-1795330840152 요약(스크래치 m37/ev.py)〕
+  - 시간 단서: 15일 적재 655초, 계정 피처 207초는 AUTH 작업과 CPU를 나눠 쓴 값이라 단독 시간이 아니다. 〔근거: 실행 시각이 겹침(스크래치 auth/summary.txt, m39/summary15.txt)〕
+  - 스크래치 창고(m39/wh15, 1.8GB)는 사용자 허락으로 지웠다(2026-11-22 "지워 줘"). 다시 재려면 m39/run15.sh로 만든다. 측정 출력(log15_*.txt)은 남겼다. 〔근거: CLAUDE.md 3절 6번. 사용자 2026-11-22〕
+
+<a id="m-41"></a>
+## M-41. 바뀐 사실 맞추기와 처음 보는 사람용 정리 (2026-11-22, 지시서 handoff_v7.md 단계 6) 〔근거: 지시서 6-1 "표를 measurements.md M-41로"〕
+
+**조건** 2026-11-22 06:0xZ ~ 06:25Z. 6-1 표의 옛 문장을 grep으로 찾아, 지금의 사실을 말하는 문서는 새 값으로 고치고 기록 문서는 항목 끝에 갱신 줄을 붙였다(6-0 원칙). 빌드 산출물(warehouse/dbt/target, site/data*/csv)은 손대지 않았다. 〔근거: 지시서 6-0, 6-1〕
+
+**6-1 대조 표**
+
+| 바뀐 것 | 고친 곳 | 근거 |
+|---|---|---|
+| 거르지 않은 MDE의 뜻 | direction_v6.md 1절 표, README 첫 화면(17 ~ 24%, 17 ~ 37%), 화면 요약 단서, M-26 갱신 줄. site_design.md에는 해당 문장이 없었다 | 〔근거: 측정: M-36 (a)〕 |
+| strict의 정의 | real_user_strict.sql 주석, 화면 거름 강도 설명, 용어집. data_model.md와 site_design.md는 이미 새 정의 | 〔근거: 코드: entity_verdict.sql〕 |
+| strict를 실험 대상에 쓰지 않음 | README 가져가는 법, 화면 strict 설명("보고용 상한"), 용어집. criteria.md 4절은 1-6에서 고침 | 〔근거: 측정: M-36 (b)〕 |
+| 기본 정책(D10) | README 가져가는 법, direction_v6.md WP1-a 갱신, 화면 기본 단계 설명, 결정 24 갱신 줄 | 〔근거: 코드: seeds/metric_policy.csv〕 |
+| star 상위 100 자연 변동 | 화면 요약 단서, 용어집, M-26 갱신 줄. 시드 reason 칸은 1-6에서 단서가 붙어 있었다 | 〔근거: 측정: M-36 (c)〕 |
+| 공개 규칙 묶음 id | 결정 24 갱신 줄, 용어집, README 가져가는 법(`9eff1a5e22a6`) | 〔근거: 코드: seeds/ruleset_release.csv〕 |
+| features_account 메모리 | README 깊이, direction_v6.md WP2 2-2, local_baseline.md 갱신 줄, 결정 13 갱신 줄, M-17 갱신 줄. c1_forecast.md는 3-1에서 고침 | 〔근거: 측정: M-37〕 |
+| Spark 앱 묶기 | direction_v6.md WP2 2-3, M-23 갱신 줄, README 깊이. c1_forecast.md는 3-2에서 고침 | 〔근거: 측정: M-38〕 |
+| 같은 이벤트 두 번 | guarantees.md 범주 줄, README 한계와 다음. data_model.md는 이미 적혀 있었다 | 〔근거: F-19〕 |
+| always_on 55.8% | criteria.md 2.1은 1-4에서 고침 | 〔근거: 측정: M-36 (f)〕 |
+| 화면 탭 이름 | site_design.md는 이미 "정책 비교(예전 이름 지표 × 정책)" | 〔근거: 코드: site/index.html〕 |
+| 시험 개수 | direction_v6.md 2절(pytest 49, dbt 노드 37), README 로컬 시험 줄 | 〔근거: 이 측정 아래 확인〕 |
+| 판정 없는 계정 | guarantees.md 범주 줄. data_model.md와 real_user_events.sql 주석은 이미 새 사실 | 〔근거: F-18〕 |
+| 표에 없던 것 | 화면 balanced 설명의 "사칭 계정"(인프라 근거 0개라 뺌), direction_v6.md 2절·3절 끝난 작업 표시, WP2 2-1 결과 | 〔근거: review_logic.md R-12. 측정: M-39〕 |
+
+**남은 옛 문장** 지금의 사실을 말하는 문서(README, design_overview, data_model, guarantees, criteria, site_design, glossary, runbook, c1_forecast, engine_selection, usability_test, site/index.html, Gold SQL, 시드, Silver SQL)에서 옛 문장 패턴이 14줄 걸렸다. 모두 새 사실을 함께 적은 줄(README 13행 MDE 뜻, 116행 6.09GiB의 해석, c1_forecast 58행)이거나 이력 줄(site_design "예전 이름", "고쳤다", ruleset_release 첫 공개 행, 시드 reason의 단서)이다. 고칠 옛 문장 0. 〔근거: 명령: grep -nE '101 ~ 138|근거 하나라도|하나라도 걸리면|계정당 이벤트 strict|자연 변동 0\.99|ad4bfe93bcd9|6\.09GiB|약 98초|event_id 중복 없|지표 × 정책|pytest 21|시험 31개|실유저로 둔다' (2026-11-22 06:2xZ)〕
+
+**새 문서와 첫 두 줄** docs/glossary.md(항목 33개, 정의마다 코드 근거). decisions, measurements, failure_analysis, criteria, guarantees, data_model, runbook, site_design, c1_forecast, engine_selection, usability_test 맨 위에 "무엇이고 누가 언제 읽나" 두 줄. measurements.md 맨 위에 "먼저 볼 측정 5개"(M-26, M-36, M-37, M-38, M-23). README가 따라갈 수 있게 M-21, M-23, M-26, M-33, M-35 ~ M-39, F-18, F-19 머리 앞에 앵커를 달았다(내용은 그대로). 〔근거: 코드: docs/glossary.md, 각 문서 1 ~ 4행〕
+
+**화면 문구 바뀜** site/index.html: 거름 강도 설명 셋(지표별 기본, balanced, strict), 요약 문장 단서 둘(상위 100 목록 교체, MDE와 자기 신고 계정), 지표별 기본 정책 줄의 지표 이름 한국어(METRIC_KO 상수 추가). id, data- 속성, 함수 이름은 그대로. 내보내기 다시(합계 45,458바이트). 로컬 서버로 열어 탭 9개를 차례로 눌렀다: 모두 내용이 차고 "오류", "NaN" 0, 콘솔 오류 0. 〔근거: 코드: site/index.html LEVELS, summary(). 실행: python -m scripts.export_site, 브라우저 확인 06:1xZ〕
+
+**6-6 읽기 확인** (README만 보고, 첫 화면 = 1 ~ 45행)
+| 질문 | 답이 있는 곳 |
+|---|---|
+| 무엇을 하는 프로젝트인가 | 1행 제목, 5행 한 줄 |
+| 왜 필요한가 | 7 ~ 9행 |
+| 어떻게 써 보나 | "써 보기" 절(화면, 표본 한 줄 실행 명령 둘) |
+| 숫자 하나와 그 기준 | 11 ~ 13행(GitHub 7일 2024-07-15 ~ 21, 정책 balanced, 정답 저장소 삭제) |
+| 한계는 무엇인가 | 17행 "지금의 한계" 한 줄과 "한계와 다음" 절 링크 |
+
+- 첫 40행에서 용어집에 있는 말 25개가 처음 나올 때 링크 없이 나오는 곳 0. 〔근거: 계산: 스크래치 없이 python으로 첫 등장 위치가 `[말](` 꼴인지 검사〕
+- 실제 사람 30초 시험은 U5(사용자). 〔근거: 지시서 6-6〕
+
+**확인** pytest 49개 통과(109초), 실제 Gold dbt build PASS 35 WARN 1(type_share_shift) ERROR 0, 기준값 329개 중 다름 0개. 〔근거: 실행 출력 06:23Z〕
+
+<a id="m-30"></a>
+## M-30. 웹 원천 AUTH 적재와 원천 하나 붙이는 비용 (2026-11-22, 지시서 handoff_v6.md WP1-b, handoff_v7.md 단계 4) 〔근거: 지시서 v5_wp1 1-3 "종류별 바뀐 파일과 줄, 바뀐 이유"〕
+
+**받기** Zenodo 3477932 `public_v2.json` 3,218,672,736바이트. 〔근거: 코드: raw/auth_lib/_manifest.json〕
+- 연결 하나로는 초당 약 12KB(70시간 넘게 걸릴 속도)라 멈췄다. 100MB씩 33조각을 8개씩 동시에 범위 요청으로 받아 이었다. 〔근거: 실행: curl 속도 측정. 스크래치 auth/chunk.sh, assemble.py. 판단: 연결마다 속도가 묶인 것으로 보았다〕
+- 이은 뒤 조각(raw/auth_lib/parts, 3.0GB)과 받다 만 파일(public_v2.json.part)은 사용자 허락으로 지웠다. 원본 public_v2.json은 manifest 바이트 수와 같다. 〔근거: 사용자 2026-11-22 "지워 줘". 실행: stat 3,218,672,736 = _manifest.json bytes〕
+- 이은 파일의 md5가 Zenodo가 밝힌 값과 같고, 요청 줄은 4,091,155개로 사전 실험 수와 같다. 〔근거: 실행: assemble.py 출력. REPORT.md 3절 "요청 409만 건"〕
+
+**적재** 첫 시도는 가드가 막았다(F-23, resource 없는 줄 30,763개). 결정 34로 계약을 맞춘 뒤 46초. 〔근거: 실행: 스크래치 auth/summary.txt. F-23〕
+
+| 값 | 결과 | 예측 | 근거 |
+|---|---|---|---|
+| 읽은 줄 / 버린 줄 | 4,091,155 / 0 | 4,091,155 / 0 | 〔근거: load_audit 출력, _manifest.json lines〕 |
+| 요청 없이 끊긴 줄 (408, 400) | 30,762 | 몰랐음 | 〔근거: load_audit 출력. F-23〕 |
+| 그 밖의 resource 없음 | 1 | 0 | 〔근거: 같은 출력〕 |
+| 날짜 (UTC) | 2018-02-28 ~ 03-31, 32일 | 32일 | 〔근거: 스크래치 auth/m30.txt〕 |
+| 대상 (web_client) / 세션 | 42,078 / 75,050 | 세션 67,417 근처 | 〔근거: m30.txt〕 |
+| UA 있는 세션 | 67,417 | 67,417 (사전 실험) | 〔근거: m30.txt. REPORT.md 3절〕 |
+
+- 세션 75,050 중 7,633개는 UA가 없거나 "-"인 세션이다(대부분 408 줄). 사전 실험은 이것을 뺐고, 빼면 67,417로 정확히 같다. 〔근거: 계산: 75,050 − 67,417. 코드: experiments/p0_bot_detection 02_detect.py UA 조건〕
+- 근거 셋 32일: declared_ua 100초, assetless_browser 93초, ai_agent_ua 75초. 참조 목록 13초, 정답 18초, Gold 빌드 28 ~ 31초. 〔근거: 스크래치 auth/summary.txt, dbt 출력〕
+
+**원천 하나 붙이는 비용** (M-15 형식. 문서 제외, 코드만) 〔근거: 지시서 v7 단계 4 "바뀐 파일 수와 걸린 시간"〕
+
+| 종류 | 파일 | 줄 | 왜 | 근거 |
+|---|---|---|---|---|
+| 적재 | `sources/registry.yml` | +15 | 원천 항목 (위치, 대상 종류, 문턱) | 〔근거: 코드〕 |
+| 적재 | `spark_jobs/load_web.py` (새) | 88 | 객체 하나짜리 JSON을 줄로 읽기, 기록표, manifest 대조 | 〔근거: 코드. 결정 26〕 |
+| 적재 | `spark_jobs/run_sql.py` | +1 | SQL 파일 → 표 한 줄 | 〔근거: 코드 TARGETS〕 |
+| Silver SQL | `sql/silver/events_auth_lib.sql` (새) | 42 | 세션, 경로 종류 | 〔근거: 코드〕 |
+| 근거 | declared_ua, assetless_browser, ai_agent_ua `v1.sql` (새 3) | 29 + 37 + 26 | 웹 근거 | 〔근거: 코드〕 |
+| 근거 | `rules/registry.yml` | +4 | 근거 셋의 계열과 대상 | 〔근거: 코드〕 |
+| 정답 | `sql/truth/auth_library.sql` (새), `truth/build_truth.py` | 27, +13 | 고정 라벨 정답 | 〔근거: 코드〕 |
+| Gold 모델 | stg_events, evidence_flags, entity_verdict, real_user_events, actor_policy_status, why_excluded, policy_compare (7) | 약 +70 | GitHub 가정(대상 `gh_account`, 원천 `'gh'`)을 풀고 웹 판정·지표를 더함. policy_compare가 +49로 대부분 | 〔근거: 명령: git diff --numstat(이 세션 몫)〕 |
+| 시드 | `metric_policy.csv` +3, `ruleset_release.csv` +1. `policy_family.csv`, `truth_independence.csv` 0 | +4 | 웹 지표 기본 정책, 공개 줄 | 〔근거: 코드. 지시서 v5_wp1 1-3 "정책 시드 변경은 0줄"〕 |
+| dbt 시험 | every_account_judged, every_evidence_ran, policy_account_sum, type_share_shift, events_match_manifest (5) | 약 +30 | 원천마다 따로 보게 | 〔근거: 코드〕 |
+| 빌드·리니지 | `warehouse/dbt_build.py` (is_gh, 시드 entity 칸), `lineage/extract.py` | +7, 2 | GH 날짜를 도는 곳이 웹 근거를 거르게 | 〔근거: 코드. F-22〕 |
+| DAG | `dags/bot_build.py` | +3 −1 | 매일 빌드는 GH 근거만 | 〔근거: 코드. 결정 26〕 |
+| 시험 | `tests/test_web.py` (새), test_sql·test_daily_watch·test_judged_red, `scripts/demo.py` | 81, 각 1 ~ 3 | 웹 적재와 근거 확인, GH 근거만 돌리기 | 〔근거: 코드〕 |
+| 화면 내보내기 | `scripts/export_site.py` | +4 | 화면은 GH만 그린다 | 〔근거: 코드〕 |
+
+- 합: 코드 파일 약 30개 (새 파일 7개), 약 600줄. 시간: 코드와 실행 약 35분, 받기 약 19분 따로. 〔근거: 계산: 위 표. 실행 시각 기록(스크래치 auth/summary.txt)〕
+- 바뀌지 않은 것: Silver 표 계약(create_tables.py) 0줄, 정책 시드 0줄, 독립성 시드 0줄, 판정 뼈대(evidence → evidence_flags → entity_verdict → real_user) 그대로. 근거 계산과 판정을 나눈 설계가 원천을 하나 더해도 버텼다. 〔근거: 코드: create_tables.py, policy_family.csv, truth_independence.csv. 결정 8〕
+- 비용이 컸던 곳: Gold 모델 7개와 dbt 시험 5개가 대상 종류 `gh_account`와 원천 `'gh'`를 글자로 박아 두었다. 원천을 대상 종류로 가르는 곳은 셋째 원천이 오면 "대상 종류 → 원천" 시드로 바꾼다. 〔근거: 코드: actor_policy_status.sql 5행 ponytail 주석〕
+- 셋째 원천(EClog)의 예상 비용: 적재기, Silver SQL, 근거 SQL, 등록부 두 곳, 시드 한 줄. Gold와 시험은 원천 조건이 이미 있어 적다. 〔근거: 판단: 이번 표에서 GH 가정을 푸는 몫(Gold, 시험, is_gh)을 뺀 나머지〕
+- 덧붙임: 시드에 칸(entity)을 더하면 Gold의 그 시드 표를 한 번 다시 만들어야 한다(`dbt seed --select evidence_current --full-refresh`). 빌드 전체에 --full-refresh를 주면 policy_compare의 옛 규칙 묶음 행까지 지워지므로 시드만 했다. 〔근거: 실행: 첫 dbt 빌드 "3 columns … 4" 오류. 코드: policy_compare.sql incremental〕
+
+<a id="m-31"></a>
+## M-31. 웹 근거 hit와 채점 (2026-11-22, 지시서 handoff_v6.md WP1-c, WP1-e) 〔근거: 지시서 v6 WP1-c, WP1-e〕
+
+**조건** M-30의 적재 뒤, 근거 셋 32일, 참조 목록 crawler_ua 1,506개, ai_robots 208개. 세션 단위 대조는 스크래치 auth/m30.py (읽기만). 〔근거: 코드: sql/evidence/*/v1.sql. M-25〕
+
+| 값 | 사전 실험 (REPORT.md 3절) | 이번 | 근거 |
+|---|---|---|---|
+| 자기 신고 세션 비율 (UA 있는 세션) | 19.1% | 19.06% | 〔근거: m30.txt〕 |
+| 자기 신고 요청 비율 | 10.1% | 10.14% | 〔근거: m30.txt〕 |
+| declared_ua hit 대상·날짜 / 전체 | 없음 | 7,968 / 58,051 | 〔근거: m30.txt〕 |
+| assetless_browser | 69 세션 | 66 대상·날짜 | 〔근거: m30.txt, entity_verdict strict suspected_bot 66〕 |
+| ai_agent_ua | 예측 0 | 3 대상·날짜, 요청 4 | 〔근거: Gold stg_evidence 질의〕 |
+
+- 자기 신고는 사전 실험과 0.04%p 안에서 같다. 세션이 아니라 대상·날짜 단위로 걸어서(그날 다른 세션에서 robots.txt를 요청한 대상도 신고로 셈) 아주 조금 다르다. 〔근거: 계산: 19.1 − 19.06. 코드: declared_ua v1.sql robots 조건〕
+- 목록별 (대상·날짜): 두 목록 모두 4,508, 두 목록과 robots 249, 크롤러 목록만 2,539, 크롤러와 robots 626, robots.txt만 45, AI 목록만 1. AI 목록이 크롤러 목록에 더한 몫은 1개뿐이다 (2018년 로그). 〔근거: m30.txt 목록별 hit〕
+- ai_agent_ua 3건은 예측(0)과 다르다. AI 코딩 도구 항목 `Code`의 낱말 패턴이 UA 안 주소 `code.google.com`의 "code"에 걸렸다. 걸린 대상(AppEngine을 거친 크롤러)은 이미 declared_ua로 신고된 봇이라 판정은 바뀌지 않는다. 〔근거: 실행: Gold 질의(hit의 UA). 코드: spark_jobs/load_ref.py token() "앞뒤가 글자·숫자가 아니면 낱말"〕
+- 처방 제안 (만들지 않음): 이름 패턴 경계에서 `.`을 글자 쪽으로 보아 주소 속 낱말을 걸지 않게 한다. 지금 피해는 요청 4건이고 판정 0건이다. 〔근거: 계산: 4 ÷ 4,091,155 = 0.0001%. 판단: 패턴을 바꾸면 GH 쪽 ai_robots hit도 다시 봐야 해 사용자 확인 뒤에 한다〕
+- WP1-e (`Code/` UA): 0개. 문턱 1%에 닿지 않아 예외 목록 시드를 제안하지 않는다. 2018년 로그라 VS Code UA가 없는 것이 당연하고, 이 원천으로는 그 문제의 크기를 잴 수 없다. 〔근거: m30.txt code_uas 0. 지시서 WP1-e 문턱〕
+
+**채점** (`main.evaluation`, 정답 auth_library, 구간 합) 〔근거: 코드: gold/evaluation.sql〕
+
+| 근거 | 걸림 | 정답 있음 | 양성 | 정밀도 | 대조군 양성률 | 근거 |
+|---|---|---|---|---|---|---|
+| assetless_browser | 66 | 66 | 0 | 0.0 | 13.74% | 〔근거: Gold 질의〕 |
+
+- 정밀도 0은 예측한 값이다. 정답이 "크롤러 UA 또는 robots.txt"이고 assetless_browser는 자기 신고 UA를 빼고 걸므로 양성이 될 길이 거의 없다. 이 정답으로는 행동 근거를 잴 수 없다. 〔근거: 코드: sql/truth/auth_library.sql 머리 주석. REPORT.md 3절 "비선언 봇 탐지: 확인하지 못함"〕
+- declared_ua는 채점하지 않았다 (같은 신호, 순환). 시험 independence_forbidden PASS. 〔근거: 코드: truth_independence.csv. dbt 출력〕
+- 정답 bot 7,967과 declared_ua hit 7,968의 차이 1은 AI 목록에만 걸린 대상이다 (정답은 원 논문처럼 크롤러 목록만 쓴다). 〔근거: m30.txt 정답 라벨 수, 목록별 hit AI 목록만 1〕
+
+<a id="m-32"></a>
+## M-32. policy_compare 웹 지표 (2026-11-22, 지시서 handoff_v6.md WP1-d) 〔근거: 지시서 v6 WP1-d〕
+
+**조건** 규칙 묶음 841ebd6f310f, `main.policy_compare` source = auth_lib, 32일. 값은 날마다 세고(자정 UTC를 넘는 세션은 날마다 따로), 아래 "한 달"은 날짜 값의 합이다. UA 없는 세션도 넣는다 (사전 실험은 뺐다). 〔근거: 코드: gold/policy_compare.sql web CTE〕
+
+**돌리기 전 예측** 상세 조회 lenient −57% 근처, 전환율 64.9% → 64.8%, balanced = lenient (웹에 조직·인프라 근거 없음). 〔근거: REPORT.md 3절. policy_family.csv〕
+
+| 지표 | none | lenient (= balanced) | strict | lenient 변화 | 근거 |
+|---|---|---|---|---|---|
+| 상세 조회 (한 달) | 286,040 | 123,675 | 123,399 | −56.8% | 〔근거: Gold 질의〕 |
+| 세션 (한 달) | 75,461 | 62,284 | 62,194 | −17.5% | 〔근거: Gold 질의〕 |
+| 검색 후 상세 전환율 (한 달) | 64.90% (25,046 / 38,592) | 64.81% (24,170 / 37,292) | 64.92% (24,157 / 37,210) | −0.09%p | 〔근거: Gold 질의〕 |
+
+- 예측과 맞았다: 상세 조회 −56.8% (사전 실험 −57%), 전환율 64.9 → 64.8%. 〔근거: 계산: 1 − 123,675 ÷ 286,040. REPORT.md 3절〕
+- 전환율이 그대로인 이유가 숫자로 보인다: 분자(검색하고 상세까지 간 세션) −3.5%, 분모(검색한 세션) −3.4%로 같은 방향, 같은 크기로 줄었다. 선언 봇은 검색을 거의 하지 않고 상세를 바로 긁어 퍼널 밖에 있다. 〔근거: 계산: 1 − 24,170 ÷ 25,046 = 3.50%, 1 − 37,292 ÷ 38,592 = 3.37%〕
+- 날마다 보면 상세 조회 변화는 −26% ~ −93%로 크게 흔들린다 (평균 −51.2%). 크롤러가 오는 날에 따라 다르다. 〔근거: Gold 질의 change_vs_none의 최소, 최대, 평균〕
+- 지표별 기본 정책: 규칙 제안이 셋 모두 lenient (balanced와 차이 0, 자연 변동 상세 조회 15.7%, 세션 13.7%, 전환율 3.7%). 시드에 넣은 값과 같다. 〔근거: Gold metric_policy_proposal. 코드: seeds/metric_policy.csv〕
+- strict가 더 빼는 몫 (assetless_browser 66 대상·날짜)은 상세 조회 −276, 세션 −90으로 작다. 정답으로 잴 수 없는 근거라 보고용 상한이다. 〔근거: 계산: 123,675 − 123,399, 62,284 − 62,194. M-31 채점〕
+- GH 숫자는 그대로다: 기준값 329개 중 바뀐 값 0 (새로 생긴 열쇠 493개는 AUTH와 새 8일 manifest), 공개 묶음 9eff1a5e22a6과 새 묶음의 GH policy_compare 161행 값 다름 0, MDE 차이 최대 1.6×10⁻¹⁴ (부동소수 합 순서). 〔근거: 실행: scripts.baseline compare, Gold 질의. 결정 35〕
+- 최소 관측 경고: daily_rows_vs_median AUTH 4행 (03-01은 앞날 02-28이 2시간이라 비 17.8, 03-31은 0.33, 토요일 03-17·03-24는 0.50·0.45), type_share_shift AUTH 12행 (도서관 로그의 검색·상세 비율이 날마다 흔들림). 원천의 실제 모양이라 문턱은 그대로 둔다. 〔근거: 실행: 컴파일된 시험 SQL을 Gold에 돌림. 결정 33〕
+- 화면 데이터: 공개 묶음이 바뀌어 site/data를 다시 내보냈다(07:17Z). 원천 칸이 없는 metric_policy와 evaluation에 웹 줄(지표 3개, assetless_browser 채점 33행)이 섞여 들어가는 것을 다시 내보내기 전 비교에서 찾아 막았다. 막은 뒤 줄 순서를 무시하면 daily_action, mde_cap, metric_policy, metric_policy_proposal, evaluation(32행)은 앞 내보내기와 같고, policy_compare에 새 묶음 161행이 더해졌다. 화면은 "규칙 묶음 841ebd6f310f 기준"으로 바뀌고 웹 숫자는 보이지 않는다. 브라우저 오류 0. 〔근거: 코드: scripts/export_site.py metric_policy, evaluation 거르기. 실행: 스크래치 sitecmp2.sh, 내장 브라우저 확인〕
+- 덧붙임: 같은 비교에서 옛 묶음 9eff1a5e22a6의 policy_compare 35행이 분산·MDE 끝자리(10⁻¹⁴ 크기)만 다르게 다시 쓰였다. 증분 표가 그 날짜를 다시 계산하며 부동소수 합 순서가 바뀐 것으로 본다. 값의 뜻은 같다. 〔근거: 실행: comm 비교 줄 예 variance 7288.898468613861 → …864. 판단: 결정 35 이유 1과 같은 크기〕

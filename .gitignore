@@ -4,6 +4,8 @@ __pycache__/
 *.pyc
 .pytest_cache/
 warehouse_local/
+# 표본 한 줄 실행 창고 (scripts/demo.py, handoff_v6.md Q3)
+warehouse_demo/
 spark-events/
 *.parquet
 # 화면용 집계(docs/site_design.md 6절)는 올리고, 대상 단위 묶음은 로컬에만

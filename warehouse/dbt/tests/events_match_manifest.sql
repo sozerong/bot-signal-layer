@@ -7,7 +7,7 @@ with m as (
   group by 1
 ),
 e as (
-  select event_date, count(*) as n from {{ ref('stg_events') }} group by event_date
+  select event_date, count(*) as n from {{ ref('stg_events') }} where source = 'gh' group by event_date  -- 웹은 load_web.py가 manifest 줄과 대조한다
 )
 select e.event_date, e.n, m.lines
 from e left join m using (event_date)

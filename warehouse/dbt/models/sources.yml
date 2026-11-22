@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: silver
     meta:
-      external_location: "iceberg_scan('/work/warehouse_local/silver/{name}')"
+      external_location: "iceberg_scan('{{ env_var('BOT_WAREHOUSE', '/work/warehouse_local') }}/silver/{name}')"
     tables:
       - name: events
       - name: entity_features

@@ -6,11 +6,20 @@
 #                 ponytail: MERGE나 중복 제거가 필요한 원천(스트림)이 올 때 방식을 더한다
 #   late_data   : reject = 파일 날짜와 다른 event_date가 한 행이라도 있으면 쓰기 전에 실패 (F-16).
 #                 쓰기 뒤에는 이미 덮어써져 막을 수 없다
+#   audit       : 적재 기록표 bot.silver.load_audit의 문턱 (결정 27, 28)
+#     max_bad_ratio : 버린 줄 ÷ manifest 줄(없으면 읽은 줄), 또는 필수 필드 하나의 NULL ÷ 읽은 행이 이 값을 넘으면 쓰지 않고 실패
+#     known_types   : 알려진 이벤트 type. 밖의 type은 경고와 기록만 (실패 아님). GitHub 문서의 16개
+#                     (https://docs.github.com/en/rest/using-the-rest-api/github-event-types, 2026-11-22 확인)
 gh:
   bronze: {path: "raw/dt={day}/hour=*/*.json.gz", format: gharchive_json_gz}
   entity: gh_account
   write: overwrite_partition
   late_data: reject
+  audit:
+    max_bad_ratio: 0.001
+    known_types: [CommitCommentEvent, CreateEvent, DeleteEvent, DiscussionEvent, ForkEvent, GollumEvent,
+                  IssueCommentEvent, IssuesEvent, MemberEvent, PublicEvent, PullRequestEvent,
+                  PullRequestReviewEvent, PullRequestReviewCommentEvent, PushEvent, ReleaseEvent, WatchEvent]
 
 # 참조 목록 (지시서 1-3). Bronze raw/ref/<이름>/dt=<적재일>/ 에 받은 그대로 + _manifest.json. 덮어쓰지 않는다.
 # 읽는 곳: spark_jobs/load_ref.py (fetch: 받기, load: Silver bot.silver.ref_ua_patterns)
@@ -18,3 +27,17 @@ crawler_ua:
   ref: {url: "https://raw.githubusercontent.com/monperrus/crawler-user-agents/master/crawler-user-agents.json", license: MIT}
 ai_robots:
   ref: {url: "https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json", license: MIT}
+
+# 웹 원천 (handoff_v5_wp1.md 1-3, 결정 26). 그리스 테살로니키 대학 도서관 검색엔진 nginx 로그 2018-03, 요청 4,091,155건.
+# 받은 그대로(JSON 객체 하나, 한 줄에 요청 하나 "id":{...},) + _manifest.json. 읽는 곳: spark_jobs/load_web.py
+#   한 달치 파일 하나라 날짜 파일 단위의 late_data 검사가 없다. 파일 안 모든 날짜(UTC)의 파티션을 한 번에 덮어쓴다
+#   timestamp는 UTC('...Z'). 그리스 현지 3월 1일 0시 = UTC 2월 28일 22시라 02-28은 2시간, 03-31은 21시간만 있다
+#   ip는 끝 6자리가 가려진 값이다. actor_key = sha2(ip|ua) 앞 16자리, 세션 = 같은 actor, 30분 무활동이면 끊음
+auth_lib:
+  bronze: {path: "raw/auth_lib/public_v2.json", format: auth_json_lines,
+           url: "https://zenodo.org/records/3477932/files/public_v2.json?download=1", license: CC-BY-4.0,
+           md5: 2f126f1f33a8cb7851c2863094998788, bytes: 3218672736}
+  entity: web_client
+  write: overwrite_partition
+  audit:
+    max_bad_ratio: 0.001

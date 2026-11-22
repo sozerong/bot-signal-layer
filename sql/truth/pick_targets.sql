@@ -2,6 +2,8 @@
 -- suspect: 그 판정 구간의 fake_star_repo (low_activity AND (lockstep_ratio OR burst_5m), Gold와 같은 식).
 --   근거마다 지금 규칙 버전(:v_low_activity 등)만 본다. repo_alive가 rules/registry.yml에서 읽어 넘긴다 (F-13, 결정 16).
 --   전에는 버전을 거르지 않아 lockstep_ratio v2와 v3이 함께 있는 날 v3에만 걸린 저장소가 섞였다
+--   피처 버전(:feature_version)도 registry의 features_repo current를 받는다. 전에는 'f1' 고정이라 f2로 바꾸면
+--   피처가 0행이 되어 대상 0개로 초록 종료했다 (docs/review_logic.md R-16). repo_alive가 근거 hit가 있는데 대상 0개면 실패로 끝낸다
 -- control: 같은 날 star 20개 이상인 비의심 저장소에서 해시 순으로 suspect와 같은 수.
 --   star 수 상한을 suspect의 최댓값으로 두는 것은 사전 실험 02_detect.py 그대로 (아주 큰 저장소가 대조군을 채우지 않게).
 --   해시는 Spark xxhash64라 사전 실험(DuckDB hash)과 고른 대조군이 다르다.
@@ -22,7 +24,7 @@ WITH ev AS (
 f AS (
   SELECT f.entity_key, f.entity_name, f.stars, coalesce(ev.low_act AND ev.coord, false) AS suspect
   FROM bot.silver.entity_features f LEFT JOIN ev ON f.entity_key = ev.entity_key
-  WHERE f.entity_type = 'gh_repo' AND f.event_date = DATE(:window_end) AND f.feature_version = 'f1'
+  WHERE f.entity_type = 'gh_repo' AND f.event_date = DATE(:window_end) AND f.feature_version = :feature_version
 ),
 s AS (
   SELECT entity_key, entity_name, stars,

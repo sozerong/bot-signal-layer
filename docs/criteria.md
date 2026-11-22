@@ -1,5 +1,8 @@
 # 봇 판정 기준
 
+이 문서는 봇을 무엇으로 판정하는지(근거), 무엇으로 채점하는지(정답), 정책마다 무엇을 빼는지를 모은 기준표다.
+판정 결과를 해석하거나 근거를 더하고 뺄 때 읽는다. 용어는 [용어집](glossary.md)에 있다.
+
 상태: 초안 (2026-11-16), 2.1절 기준 표 추가 (2026-11-22). 이 문서는 세 부분이다.
 1. 공개된 데이터와 연구가 **실제로 어떤 기준으로 봇이라고 판정했는지** (조사)
 2. 이 프로젝트가 쓸 **근거 목록** (각 근거가 무엇을 보고, 얼마나 믿을 만한지)
@@ -44,7 +47,7 @@
 | `ai_agent_ua` | 자기 신고 | AI 어시스턴트·에이전트 UA (사람 대신 행동) | 세션 | 웹 | 범주 표시용, 봇 판정과 따로 |
 | `ip_verified_crawler` | 인프라 | 주장한 크롤러의 공개 대역 + FCrDNS 일치 여부 | 요청 → 세션 | Zanbil | 강함, 시점 차이 주의 |
 | `cloud_ip` | 인프라 | 클라우드 업체 IP 대역에서 옴 | 세션 | Zanbil | 중간 (사람도 VPN·클라우드를 씀) |
-| `always_on` | 행동 | 하루 20시간 이상 활동, 100건 이상 | 계정 | GH | 크론형만 잡음 (선언 봇 재현율 55.8%) |
+| `always_on` | 행동 | 하루 20시간 이상 활동, 100건 이상 | 계정 | GH | 크론형만 잡음 (행동 조건의 선언 봇 재현율 근사 55.8 ~ 71.3%: 이벤트 100건 이상 선언 봇 중. 지금 규칙은 선언 봇을 정의상 빼므로 규칙 자체의 재현율은 아님, M-36 (f)) |
 | `event_regularity` | 행동 | 이벤트 간격의 규칙성 (RABBIT의 지니 불균등) | 계정, 세션 | 전부 | 미측정 |
 | `comment_repetition` | 행동 | 댓글 반복성 (BoDeGHa) | 계정 | GH | 미측정 |
 | `assetless_browser` | 행동 | 브라우저 UA인데 CSS/JS·AJAX·이미지를 안 받음 | 세션 | 웹 | 도서관 로그에서는 무해한 자동화만 잡힘 |
@@ -64,11 +67,11 @@
 | 근거 | 버전 | 계열 → 정책 | 쓰는 이유 | 잰 강도 | 근거 |
 |---|---|---|---|---|---|
 | `declared_app` | v1 | 자기 신고 → lenient, balanced, strict | 플랫폼이 붙인 `[bot]` 표시라 사람이 걸릴 일이 거의 없다 | 07-15 hit 1,530 계정 | 〔근거: rules/registry.yml, policy_family.csv, local_baseline.md 1절〕 |
-| `always_on` | v1 | 행동 → strict | 하루 20시간 넘게 도는 크론형 자동화를 잡는다 | 선언 봇 재현율 55.8%, 07-15 hit 428 | 〔근거: 이 문서 2절 강도 칸, local_baseline.md 1절〕 |
-| `low_activity` | v1 | 조직 → balanced, strict | 가짜 star의 전제(StarScout 저활동 정의). 저장소로 모으면 강해진다 | 저장소 단독 정밀도 49.1 ~ 96.2% | 〔근거: 측정 M-18 근거 하나씩〕 |
-| `lockstep_ratio` | v2 | 조직 → balanced, strict | 같은 계정 무리가 여러 저장소를 같이 찍는 모양(CopyCatch) | 단독 정밀도 87.2 ~ 94.7% | 〔근거: M-18〕 |
-| `burst_5m` | v1 | 조직 → balanced, strict | 하루 100개 넘게 star하는 무리는 lockstep에서 빠지므로 따로 잡는다 | 단독 정밀도 92.6 ~ 98.6% | 〔근거: M-18, M-11 B "burst_5m SQL 머리말이 적은 설계 의도가 데이터로 확인됐다"〕 |
-| `multi_repo_burst` | v2 | 행동 → strict | 03시 ReleaseEvent 1,606건을 낸 세 계정이 기존 근거 다섯 개에 모두 0 hit였다 | 정밀도 미측정(계정 정답 없음), 07-15 hit 52 | 〔근거: M-6, 결정 12, 결정 13〕 |
+| `always_on` | v1 | 행동 → strict | 하루 20시간 넘게 도는 크론형 자동화를 잡는다 | 행동 조건의 선언 봇 재현율 근사 55.8%(07-15, 7일 55.8 ~ 71.3%, 분모는 이벤트 100건 이상 선언 봇. 지금 v1은 선언 봇을 빼므로 규칙 자체의 재현율 아님), 07-15 hit 428 | 〔근거: 측정: M-36 (f), 사전 실험 02_detect.py 42 ~ 46행, local_baseline.md 1절〕 |
+| `low_activity` | v1 | 조직 → balanced, strict | 가짜 star의 전제(StarScout 저활동 정의). 저장소로 모으면 강해진다 | 저장소 조합 안 정밀도 49.1 ~ 96.2% (정답 표본이 조합 판정과 대조군에서만 뽑혀 근거 단독 hit 전체의 정밀도가 아니다. 계정에도 걸려 evaluation n_hit에 계정 약 7 ~ 10만이 섞인다) | 〔근거: 측정 M-18 근거 하나씩, M-36 (d). sql/truth/pick_targets.sql. review_logic.md R-7, R-8〕 |
+| `lockstep_ratio` | v2 | 조직 → balanced, strict | 같은 계정 무리가 여러 저장소를 같이 찍는 모양(CopyCatch) | 조합 안 정밀도 87.2 ~ 94.7% (사실상 lockstep ∧ low_activity의 값) | 〔근거: M-18. sql/truth/pick_targets.sql. review_logic.md R-7〕 |
+| `burst_5m` | v1 | 조직 → balanced, strict | 하루 100개 넘게 star하는 무리는 lockstep에서 빠지므로 따로 잡는다 | 조합 안 정밀도 92.6 ~ 98.6% (star 하한이 없어 star 1 ~ 2개 저장소도 걸린다. hit는 저장소 7.4 ~ 9.6만) | 〔근거: M-18, M-36 (d), sql/evidence/burst_5m/v1.sql. review_logic.md R-7, R-8. M-11 B "burst_5m SQL 머리말이 적은 설계 의도가 데이터로 확인됐다"〕 |
+| `multi_repo_burst` | v2 | 행동 → strict | 03시 ReleaseEvent 1,606건을 낸 세 계정이 기존 근거 다섯 개에 모두 0 hit였다 | 정밀도 미측정(계정 정답 없음), 07-15 hit 52. UTC 시계 시간 칸(hour(event_ts))으로 세어 칸 경계를 걸친 몰림은 갈려 안 걸린다 | 〔근거: M-6, 결정 12, 결정 13. sql/silver/features_account.sql. review_logic.md R-17〕 |
 
 - 조합 판정 `fake_star_repo` = `low_activity AND (lockstep_ratio OR burst_5m)`. 일주일 정밀도 92.1%, 07-15는 94.9%. 〔근거: M-22 결론 줄, local_baseline.md 1절 채점 표〕
 
@@ -79,6 +82,14 @@
 | `declared_ua` | 자기 신고 → 전 정책 | 크롤러 목록 UA나 robots.txt 요청은 스스로 봇이라 밝힌 것 | AUTH 세션 19.1%, 요청 10.1% | 〔근거: experiments/p0_bot_detection/REPORT.md 3절〕 |
 | `assetless_browser` | 행동 → strict | 브라우저 UA인데 CSS/JS/이미지를 안 받으면 사람 브라우저가 아닐 가능성이 크다 | 도서관 로그에서는 무해한 자동화만 잡혔다. 그래서 strict에만 넣는다 | 〔근거: 이 문서 2절 강도 칸, 02_detect.py 57번째 줄 L2 규칙〕 |
 | `ai_agent_ua` | 범주(정책에 안 넣음) | 사람 대신 행동하는 에이전트라 봇도 사람도 아니다. 넣을지는 쓰는 쪽이 고른다 | 해당 없음 | 〔근거: 이 문서 4절 마지막 줄〕 |
+
+갱신(2026-11-22): 셋 다 붙였다. 결과는 아래와 같다. 〔근거: 코드: sql/evidence/declared_ua, assetless_browser, ai_agent_ua v1.sql. 결정 35〕
+
+| 근거 | 32일 hit (대상·날짜) | 채점 | 알게 된 한계 | 근거 |
+|---|---|---|---|---|
+| `declared_ua` | 7,968 / 58,051. 세션 19.06%, 요청 10.14%로 사전 실험과 같다 | 하지 않음(정답과 같은 신호) | AI 목록이 크롤러 목록에 더한 몫은 1개(2018년 로그) | 〔근거: M-31〕 |
+| `assetless_browser` | 66 | 정밀도 0.0(66 중 양성 0), 대조군 양성률 13.7%. 정답이 자기 신고라 잴 수 없다 | 신고하지 않는 봇을 채점할 정답이 웹에 없다 | 〔근거: M-31 채점 표〕 |
+| `ai_agent_ua` | 3 (요청 4) | 하지 않음(범주) | 모두 오탐: AI 코딩 도구 이름 `Code`가 UA 안 주소 `code.google.com`에 걸렸다. 걸린 대상은 이미 신고된 크롤러라 판정은 같다. 이름 패턴 경계 처방은 제안만 | 〔근거: M-31〕 |
 
 ### 버린 것과 보류한 것
 
@@ -112,6 +123,11 @@
 | `purchase` | 부분 정답 (사람) | 세션 | 늦게 | 모든 봇 근거의 오탐 (구매자를 봇으로 찍었나) | `purchase` |
 | `auth_library` | 자기 신고 라벨 | 세션 | 고정 | 행동 | `declared_ua` |
 
+알아 둘 것 (2026-11-22 문서 단서, 고칠 방향은 다음 판 설계로):
+- `repo_deleted`가 조직·행동 근거와 독립이라는 근거는 없다. GitHub가 같은 모양의 조작을 잡아 지운다면 정밀도는 "GitHub 탐지기와의 일치도"이고, 404에는 비공개 전환과 계정 정지도 섞인다. 〔근거: review_logic.md R-10. 판단: 독립을 잰 측정이 없다〕
+- 07-15는 학습 구간이다. 문턱과 suspect_v3를 같은 날 삭제 여부를 본 사전 실험이 정했으므로 07-15 채점(94.9%)은 규칙을 고른 날의 값이고, 07-16 ~ 07-21이 시험 구간이다. 〔근거: 측정: M-5, M-7. review_logic.md R-11〕
+- 정답은 한 번 확인한 저장소를 다시 묻지 않는다(`late_truth`의 `--only-missing`). 결정 8의 "확인할 때마다 쌓는다"는 정기 실행에서는 두 번째 확인이 생기지 않는다. 〔근거: 코드: truth/repo_alive.py, dags/late_truth.py. review_logic.md R-9〕
+
 이 표는 `truth_independence.csv`로 기계가 읽게 두고, 평가 마트를 만들 때 순환 쌍을 자동으로 거른다 (설계 11절 보증 4).
 
 ## 4. 정책 초안 (확정 전)
@@ -119,8 +135,12 @@
 | 정책 | 봇으로 빼는 것 | 쓰는 곳 |
 |---|---|---|
 | lenient | 자기 신고만 | 순수 트래픽 추이 |
-| balanced | 자기 신고 + 인프라 검증 실패(크롤러 사칭) + 조직 근거 | 분석팀 기본 |
-| strict | 근거 하나라도 걸리면 | 메시지 발송, 실험 대상자 선정 |
+| balanced | 자기 신고 + 인프라 검증 실패(크롤러 사칭) + 조직 근거. 지금 인프라 계열 근거는 0개이고, 생겨도 판정식이 계열 목록을 코드에 적어 두어 무시한다 | 분석팀 기본 |
+| strict | balanced에 더해 행동 근거(always_on, multi_repo_burst)로 걸린 계정까지. low_activity 하나만으로는 빼지 않는다 | 메시지 발송, 보고용 상한. 실험 대상 선정에는 쓰지 않는다: 행동 근거가 결과 지표와 같은 그날 이벤트 수로 자른다 |
+
+balanced 줄의 인프라 단서: 〔근거: rules/registry.yml(인프라 family 없음), entity_verdict.sql 계열 줄. review_logic.md R-12〕 why_excluded(화면 "왜 빠졌나")는 범주를 바꾸지 않은 근거(예: strict에서 low_activity만)도 이유 목록에 보인다. 이유 목록은 "걸린 근거"이지 "뺀 근거"가 아니다. 〔근거: warehouse/dbt/analyses/q2_why_excluded.sql, entity_verdict.sql 19 ~ 31행. review_logic.md R-13〕
+
+strict 줄은 2026-11-22 코드와 D10에 맞춰 고쳤다. 〔근거: 코드: entity_verdict.sql strict 판정 줄. review_logic.md R-13, R-4. 측정: M-36 (b) strict에서만 빠진 계정 100%가 그날 이벤트 100건 이상. 결정 24 덧붙임(D10)〕
 
 `ai_agent`는 세 정책 모두에서 봇과 따로 표시하고, 포함 여부는 쓰는 쪽이 고른다.
 

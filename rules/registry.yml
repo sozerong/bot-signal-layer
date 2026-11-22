@@ -10,3 +10,8 @@ multi_repo_burst: {family: behavior,   current: v2, entity: gh_account}  # v2: �
 
 # 피처 버전 (결정 9). family가 없는 항목은 근거가 아니다. f1 = sql/silver/features_repo.sql, fN = features_repo_fN.sql
 features_repo:  {current: f1}
+
+# 웹 원천 AUTH 근거 (handoff_v5_wp1.md 1-3, 결정 26). 피처 표 없이 bot.silver.events를 바로 읽는다
+declared_ua:       {family: self_report, current: v1, entity: web_client}
+assetless_browser: {family: behavior,    current: v1, entity: web_client}  # strict만 (policy_family.csv의 behavior)
+ai_agent_ua:       {family: ai_agent,    current: v1, entity: web_client}  # 범주. policy_family.csv에 없어 어느 정책도 빼지 않는다

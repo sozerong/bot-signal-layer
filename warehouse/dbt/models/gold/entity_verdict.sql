@@ -1,6 +1,7 @@
 -- 대상 x 날짜 x 정책 -> 범주와 걸린 근거 (4.3절). 조합 규칙은 여기에만 있다. 근거 계산과 따로 바뀐다
---   declared_bot : declared_app (자기 신고는 모든 정책에 있다)
---   suspected_bot: 계정은 (행동 계열이 든 정책에서 always_on 또는 multi_repo_burst) 또는 (조직 계열이 든 정책에서 그날 저활동이고 fake_star_repo에 star)
+--   declared_bot : declared_app(GitHub) 또는 declared_ua(웹) (자기 신고는 모든 정책에 있다)
+--   suspected_bot: 웹 대상(web_client)은 행동 계열이 든 정책에서 assetless_browser (결정 26)
+--                  계정은 (행동 계열이 든 정책에서 always_on 또는 multi_repo_burst) 또는 (조직 계열이 든 정책에서 그날 저활동이고 fake_star_repo에 star)
 --                  저장소는 조직 계열이 든 정책에서 fake_star_repo
 with pf as (
   select policy,
@@ -14,25 +15,27 @@ fake_acct as (
   join {{ ref('fake_star_repo') }} f on ev.target = f.repo_key and ev.event_date = f.event_date
   join {{ ref('evidence_flags') }} a
     on a.entity_type = 'gh_account' and a.entity_key = ev.actor_key and a.event_date = ev.event_date and a.low_activity
-  where ev.action = 'WatchEvent'
+  where ev.source = 'gh' and ev.action = 'WatchEvent'
 ),
 hits as (
   select e.entity_type, e.entity_key, e.window_end as event_date, p.policy,
-         string_agg(distinct e.evidence_id, ',' order by e.evidence_id) as hit_evidence
+         string_agg(distinct e.evidence_id, ',' order by e.evidence_id nulls first) as hit_evidence  -- nulls first: BigQuery 변환 (F-5, 결정 25)
   from {{ ref('stg_evidence') }} e join {{ ref('policy_family') }} p on e.family = p.family
   where e.hit
   group by e.entity_type, e.entity_key, e.window_end, p.policy
 )
 select f.entity_type, f.entity_key, f.event_date, pf.policy,
        case
-         when f.declared_app then 'declared_bot'
+         when f.declared_app or f.declared_ua then 'declared_bot'
+         when f.entity_type = 'web_client' and pf.has_behavior and f.assetless_browser then 'suspected_bot'
          when f.entity_type = 'gh_account' and pf.has_behavior and (f.always_on or f.multi_repo_burst) then 'suspected_bot'
          when f.entity_type = 'gh_account' and pf.has_coordination and fa.entity_key is not null then 'suspected_bot'
          when f.entity_type = 'gh_repo' and pf.has_coordination and f.low_activity and (f.lockstep_ratio or f.burst_5m) then 'suspected_bot'
          else 'human'
        end as category,
        h.hit_evidence,
-       f.judged_at
+       f.judged_at,
+       case when f.entity_type = 'web_client' then f.ai_agent_ua end as is_ai_agent  -- 범주 (ai_agent_ua). GitHub는 UA가 없어 NULL
 from {{ ref('evidence_flags') }} f
 cross join pf
 left join fake_acct fa on f.entity_type = 'gh_account' and fa.entity_key = f.entity_key and fa.event_date = f.event_date

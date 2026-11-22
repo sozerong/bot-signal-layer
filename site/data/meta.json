@@ -1,0 +1,518 @@
+{
+ "exported_at": "2026-11-22T07:17:05+00:00",
+ "git_commit": "79ef270",
+ "released_ruleset": "841ebd6f310f",
+ "build_ruleset": "841ebd6f310f",
+ "with_entities": false,
+ "event_date_min": "2024-07-15",
+ "event_date_max": "2024-07-21",
+ "tables": {
+  "policy_compare": {
+   "grain": "원천 x 날짜 x 지표 x 처리 방식 x 규칙 묶음. 지표 값, 거르지 않음 대비 변화율, lenient 대비 추가 변화율, MDE",
+   "rows": 966,
+   "bytes": 15053,
+   "csv_bytes": 112681,
+   "columns": [
+    {
+     "name": "source",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "event_date",
+     "type": "DATE"
+    },
+    {
+     "name": "metric",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "kind",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "treatment",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "value",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "change_vs_none",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "extra_vs_lenient",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "num_value",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "den_value",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "num_change_vs_none",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "den_change_vs_none",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "n",
+     "type": "BIGINT"
+    },
+    {
+     "name": "mean",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "variance",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "rel_mde",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "traffic_x_vs_none",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "ruleset_id",
+     "type": "VARCHAR"
+    }
+   ]
+  },
+  "ruleset_change_log": {
+   "grain": "원천 x 날짜 x 지표 x 처리 방식 x 비교 묶음. 기본 묶음 대비 다른 묶음의 값 차이",
+   "rows": 805,
+   "bytes": 7941,
+   "csv_bytes": 79385,
+   "columns": [
+    {
+     "name": "source",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "event_date",
+     "type": "DATE"
+    },
+    {
+     "name": "metric",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "kind",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "treatment",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "base_ruleset",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "other_ruleset",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "base_value",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "other_value",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "diff",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "rel_change",
+     "type": "DOUBLE"
+    }
+   ]
+  },
+  "ruleset_release": {
+   "grain": "공개한 규칙 묶음 하나",
+   "rows": 4,
+   "bytes": 1397,
+   "csv_bytes": 595,
+   "columns": [
+    {
+     "name": "ruleset_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "seq",
+     "type": "INTEGER"
+    },
+    {
+     "name": "released_on",
+     "type": "DATE"
+    },
+    {
+     "name": "note",
+     "type": "VARCHAR"
+    }
+   ]
+  },
+  "metric_policy": {
+   "grain": "지표 하나와 그 기본 정책, 이유",
+   "rows": 5,
+   "bytes": 1715,
+   "csv_bytes": 1090,
+   "columns": [
+    {
+     "name": "metric",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "default_policy",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "reason",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "measurement",
+     "type": "VARCHAR"
+    }
+   ]
+  },
+  "metric_policy_proposal": {
+   "grain": "원천 x 지표. 규칙이 제안한 기본 정책과 자연 변동, 단계별 변화",
+   "rows": 4,
+   "bytes": 1259,
+   "csv_bytes": 414,
+   "columns": [
+    {
+     "name": "source",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "metric",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "natural_var",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "step_balanced",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "step_strict",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "n_days",
+     "type": "BIGINT"
+    },
+    {
+     "name": "proposed_policy",
+     "type": "VARCHAR"
+    }
+   ]
+  },
+  "daily_action": {
+   "grain": "원천 x 날짜 x 이벤트 종류. 정책별 이벤트 수와 계정 수. 그날 그 종류를 낸 계정이 10개 미만이면 싣지 않는다",
+   "rows": 105,
+   "bytes": 5243,
+   "csv_bytes": 8271,
+   "columns": [
+    {
+     "name": "source",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "event_date",
+     "type": "DATE"
+    },
+    {
+     "name": "action",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "events_none",
+     "type": "BIGINT"
+    },
+    {
+     "name": "events_lenient",
+     "type": "BIGINT"
+    },
+    {
+     "name": "events_balanced",
+     "type": "BIGINT"
+    },
+    {
+     "name": "events_strict",
+     "type": "BIGINT"
+    },
+    {
+     "name": "accounts_none",
+     "type": "BIGINT"
+    },
+    {
+     "name": "accounts_lenient",
+     "type": "BIGINT"
+    },
+    {
+     "name": "accounts_balanced",
+     "type": "BIGINT"
+    },
+    {
+     "name": "accounts_strict",
+     "type": "BIGINT"
+    }
+   ]
+  },
+  "mde_cap": {
+   "grain": "원천 x 날짜 x 처리 방식 x 자르기 백분위(90 ~ 100, 0.5 간격). 계정 수, 자른 값, 계정당 이벤트 평균과 분산. 실험 감도 계산기의 재료",
+   "rows": 588,
+   "bytes": 11234,
+   "csv_bytes": 44141,
+   "columns": [
+    {
+     "name": "source",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "event_date",
+     "type": "DATE"
+    },
+    {
+     "name": "treatment",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "q",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "n",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "cap_value",
+     "type": "BIGINT"
+    },
+    {
+     "name": "mean",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "variance",
+     "type": "DOUBLE"
+    }
+   ]
+  },
+  "evaluation": {
+   "grain": "근거 x 버전 x 정답 출처 x 판정 구간(전체는 비어 있음). 정밀도와 대조군 양성률",
+   "rows": 32,
+   "bytes": 3330,
+   "csv_bytes": 2508,
+   "columns": [
+    {
+     "name": "evidence_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "rule_version",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "truth_source",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "window_end",
+     "type": "DATE"
+    },
+    {
+     "name": "n_hit",
+     "type": "BIGINT"
+    },
+    {
+     "name": "n_hit_with_truth",
+     "type": "BIGINT"
+    },
+    {
+     "name": "n_hit_positive",
+     "type": "BIGINT"
+    },
+    {
+     "name": "precision",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "n_control_with_truth",
+     "type": "BIGINT"
+    },
+    {
+     "name": "n_control_positive",
+     "type": "BIGINT"
+    },
+    {
+     "name": "control_positive_rate",
+     "type": "DOUBLE"
+    }
+   ]
+  }
+ },
+ "models": {
+  "real_user_events": {
+   "description": "이벤트 + 정책별 실유저 여부. 분석팀은 보통 정책 이름의 뷰(real_user_<정책>)를 쓴다",
+   "columns": {
+    "source": null,
+    "event_id": null,
+    "event_ts": null,
+    "event_date": null,
+    "actor_key": null,
+    "actor_name": null,
+    "action": null,
+    "target": null,
+    "target_name": null,
+    "is_real_lenient": null,
+    "is_real_balanced": null,
+    "is_real_strict": null
+   }
+  },
+  "real_user_lenient": {
+   "description": null,
+   "columns": {
+    "source": null,
+    "event_id": null,
+    "event_ts": null,
+    "event_date": null,
+    "actor_key": null,
+    "actor_name": null,
+    "action": null,
+    "target": null,
+    "target_name": null
+   }
+  },
+  "real_user_balanced": {
+   "description": null,
+   "columns": {
+    "source": null,
+    "event_id": null,
+    "event_ts": null,
+    "event_date": null,
+    "actor_key": null,
+    "actor_name": null,
+    "action": null,
+    "target": null,
+    "target_name": null
+   }
+  },
+  "real_user_strict": {
+   "description": null,
+   "columns": {
+    "source": null,
+    "event_id": null,
+    "event_ts": null,
+    "event_date": null,
+    "actor_key": null,
+    "actor_name": null,
+    "action": null,
+    "target": null,
+    "target_name": null
+   }
+  },
+  "impact": {
+   "description": null,
+   "columns": {
+    "repo_key": null,
+    "repo_name": null,
+    "event_date": null,
+    "stars_all": null,
+    "stars_lenient": null,
+    "stars_balanced": null,
+    "stars_strict": null,
+    "rank_all": null,
+    "rank_balanced": null
+   }
+  },
+  "entity_verdict": {
+   "description": null,
+   "columns": {
+    "category": null
+   }
+  },
+  "fake_star_repo": {
+   "description": null,
+   "columns": {}
+  },
+  "disagreement": {
+   "description": null,
+   "columns": {}
+  },
+  "eval_pairs": {
+   "description": "시험 대상. 행마다 판정 시각 <= 정답 확인 시각",
+   "columns": {}
+  },
+  "evaluation": {
+   "description": "근거 x 버전 x 정답 출처 x 판정 구간. window_end가 NULL인 행은 구간을 합친 전체 (결정 14)",
+   "columns": {}
+  },
+  "policy_compare": {
+   "description": "원천 x 날짜 x 지표 x 처리 방식(none, lenient, balanced, strict, cap_top1). 규칙 묶음(ruleset_id)마다 행을 쌓는다 (결정 24)",
+   "columns": {}
+  },
+  "policy_compare_released": {
+   "description": "분석가 기본 뷰. 가장 최근 공개 규칙 묶음의 policy_compare만",
+   "columns": {}
+  },
+  "ruleset_change_log": {
+   "description": "기본 규칙 묶음 대 다른 묶음, 지표 x 날짜 x 처리 방식마다 바뀐 폭",
+   "columns": {}
+  },
+  "metric_policy_proposal": {
+   "description": "지표별 기본 정책 제안(자연 변동 대비 규칙). 사람이 보고 seeds/metric_policy.csv에 옮긴다",
+   "columns": {}
+  },
+  "actor_policy_status": {
+   "description": "원천 x 대상 x 날짜 x 정책 -> 실유저 여부, 빠지게 한 근거, AI 에이전트 여부, 규칙 묶음 id. 매크로 real_users가 읽는다",
+   "columns": {
+    "source": null,
+    "entity_type": null,
+    "entity_key": null,
+    "event_date": null,
+    "policy": null,
+    "is_real": null,
+    "category": null,
+    "excluded_by": null,
+    "is_ai_agent": null,
+    "ruleset_id": null
+   }
+  },
+  "why_excluded": {
+   "description": "정책에서 실유저가 아닌 대상의 hit 근거마다 규칙 버전, 점수, metrics, 판정 시각, SQL 지문",
+   "columns": {
+    "source": null,
+    "entity_type": null,
+    "entity_key": null,
+    "event_date": null,
+    "policy": null,
+    "category": null,
+    "evidence_id": null,
+    "rule_version": null,
+    "family": null,
+    "score": null,
+    "metrics": null,
+    "judged_at": null,
+    "sql_sha256": null,
+    "ruleset_id": null
+   }
+  }
+ }
+}

@@ -7,7 +7,7 @@ with v as (
          bool_or(policy = 'balanced' and category = 'human') as real_balanced,
          bool_or(policy = 'strict'   and category = 'human') as real_strict
   from {{ ref('entity_verdict') }}
-  where entity_type = 'gh_account'
+  where entity_type in ('gh_account', 'web_client')  -- 원천마다 이벤트를 내는 대상 (sources/registry.yml entity)
   group by entity_key, event_date
 )
 select e.source, e.event_id, e.event_ts, e.event_date, e.actor_key, e.actor_name, e.action, e.target, e.target_name,

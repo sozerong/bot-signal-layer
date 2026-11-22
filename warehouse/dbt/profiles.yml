@@ -4,6 +4,6 @@ bot:
   outputs:
     local:
       type: duckdb
-      path: /work/warehouse_local/gold.duckdb
+      path: "{{ env_var('BOT_WAREHOUSE', '/work/warehouse_local') }}/gold.duckdb"  # 표본 시험과 데모는 BOT_WAREHOUSE로 다른 창고를 준다
       extensions: [iceberg]
       threads: 4

@@ -16,15 +16,17 @@ from jobs import SILVER_WRITE, job
 # 근거 목록, 지금 규칙 버전, 저장소 피처 버전은 rules/registry.yml 한 곳에서 읽는다 (결정 9의 "잃는 것", 지시서 H4-2).
 # Airflow 컨테이너에 rules/가 /opt/airflow/rules로 붙는다 (docker-compose.yml). registry를 바꾸면 다음 파싱부터 반영된다
 REG = yaml.safe_load((Path(__file__).resolve().parents[1] / "rules" / "registry.yml").read_text(encoding="utf-8"))
-EVIDENCE = [f"{k}/{v['current']}" for k, v in REG.items() if "family" in v]
+# GitHub 대상 근거만. 웹 원천(AUTH, 대상 web_client)은 한 달치 고정 파일이라 이 매일 빌드에 넣지 않는다 (결정 26, docs/runbook.md)
+EVIDENCE = [f"{k}/{v['current']}" for k, v in REG.items()
+            if "family" in v and all(e.startswith("gh_") for e in ([v["entity"]] if isinstance(v["entity"], str) else v["entity"]))]
 FEAT = REG["features_repo"]["current"]
 FEATURES_REPO = f"sql/silver/features_repo{'' if FEAT == 'f1' else '_' + FEAT}.sql"  # f1만 이름에 버전이 없다 (lineage/impact.py와 같은 규칙)
 DAYS = "{{ ti.xcom_pull(task_ids='days') }}"
-P = "--param window_start=$d --param window_end=$d --param run_id={{ run_id }}"
 
 
-def each_day(cmd):
-    return f"for d in {DAYS}; do {cmd}; done"
+def each_day(task):
+    """태스크 하나 = Spark 앱 하나, 날짜는 그 안에서 차례로 (결정 32, M-38. 전에는 날짜마다 앱 하나)"""
+    return f"python -m spark_jobs.run_days --task {task} --run-id {{{{ run_id }}}} {DAYS}"
 
 
 with DAG(
@@ -48,11 +50,11 @@ with DAG(
     d = days()
     # 상한은 M-10 최대 메모리에 여유를 두고 정한다. 힙은 job()이 상한에서 계산한다 (F-12, 결정 13, M-17)
     create = job("create_tables", "python -m spark_jobs.create_tables", mem="4g", pool=SILVER_WRITE)
-    load = job("load_events", each_day(f"python -m spark_jobs.load_events --input raw/dt=$d {P}"), mem="8g", pool=SILVER_WRITE)
-    acct = job("features_account", each_day(f"python -m spark_jobs.run_sql --sql sql/silver/features_account.sql {P}"), mem="12g", pool=SILVER_WRITE)
-    repo = job("features_repo", each_day(f"python -m spark_jobs.run_sql --sql {FEATURES_REPO} {P}"), mem="12g", pool=SILVER_WRITE)
+    load = job("load_events", each_day("load_events"), mem="8g", pool=SILVER_WRITE)
+    acct = job("features_account", each_day("sql/silver/features_account.sql"), mem="4g", pool=SILVER_WRITE)  # 결정 31, M-37
+    repo = job("features_repo", each_day(FEATURES_REPO), mem="12g", pool=SILVER_WRITE)
     # 근거 다섯 개는 풀 때문에 하나씩 돈다. 쓴 뒤 확인(run_sql.run)이 실패를 내면 한 번 다시 돈다 (F-7)
-    ev = [job(f"evidence_{e.split('/')[0]}", each_day(f"python -m spark_jobs.run_sql --sql sql/evidence/{e}.sql {P}"), mem="4g",
+    ev = [job(f"evidence_{e.split('/')[0]}", each_day(f"sql/evidence/{e}.sql"), mem="4g",
               pool=SILVER_WRITE, retries=1) for e in EVIDENCE]
     gold = job("dbt_build", "python -m warehouse.dbt_build", mem="8g")  # DuckDB는 상한의 80%를 스스로 잡는다
     record = job("record_build", "python -m warehouse.record_build", mem="2g")

@@ -6,6 +6,9 @@ select entity_type, entity_key, window_end as event_date,
        bool_or(evidence_id = 'lockstep_ratio' and hit) as lockstep_ratio,
        bool_or(evidence_id = 'burst_5m'       and hit) as burst_5m,
        bool_or(evidence_id = 'multi_repo_burst' and hit) as multi_repo_burst,
+       bool_or(evidence_id = 'declared_ua'       and hit) as declared_ua,        -- 웹 (web_client, 결정 26)
+       bool_or(evidence_id = 'assetless_browser' and hit) as assetless_browser,
+       bool_or(evidence_id = 'ai_agent_ua'       and hit) as ai_agent_ua,        -- 범주. 판정을 바꾸지 않는다
        max(judged_at) as judged_at
 from {{ ref('stg_evidence') }}
 group by entity_type, entity_key, window_end

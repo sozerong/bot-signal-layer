@@ -1,186 +1,227 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1300" viewBox="0 0 2000 1300">
-<defs><marker id="ah7A8494" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7A8494"/></marker><marker id="ahE07B39" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#E07B39"/></marker><marker id="ah7C5CC4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7C5CC4"/></marker></defs>
-<rect x="0" y="0" width="2000" height="1300" rx="0" fill="#fff" stroke="none" stroke-width="1.5"/>
-<rect x="35" y="60" width="260" height="1200" rx="14" fill="#F4F5F7" stroke="none" stroke-width="1.5"/>
-<text x="50" y="95" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#4B5563" text-anchor="start">원천</text>
-<rect x="330" y="60" width="280" height="1200" rx="14" fill="#F4F5F7" stroke="none" stroke-width="1.5"/>
-<text x="345" y="95" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#4B5563" text-anchor="start">Bronze</text>
-<rect x="645" y="60" width="320" height="1200" rx="14" fill="#F4F5F7" stroke="none" stroke-width="1.5"/>
-<text x="660" y="95" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#4B5563" text-anchor="start">Silver</text>
-<rect x="1000" y="60" width="320" height="1200" rx="14" fill="#F4F5F7" stroke="none" stroke-width="1.5"/>
-<text x="1015" y="95" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#4B5563" text-anchor="start">근거</text>
-<rect x="1355" y="60" width="320" height="1200" rx="14" fill="#F4F5F7" stroke="none" stroke-width="1.5"/>
-<text x="1370" y="95" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#4B5563" text-anchor="start">Gold</text>
-<rect x="1710" y="60" width="255" height="1200" rx="14" fill="#F4F5F7" stroke="none" stroke-width="1.5"/>
-<text x="1725" y="95" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#4B5563" text-anchor="start">쓰는 쪽</text>
-<text x="50" y="140" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="700" fill="#7A8494" text-anchor="start">① 일별 정상 경로  ·  날짜 파티션 단위, 몇 번 다시 돌려도 같은 결과</text>
-<text x="50" y="770" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="700" fill="#E07B39" text-anchor="start">② 정답 경로  ·  사람 라벨은 한 번, 생존 확인은 주 1회, IP 대역은 갱신될 때</text>
-<text x="50" y="1000" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="700" fill="#7C5CC4" text-anchor="start">③ 규칙 변경 재처리 경로  ·  수동, 영향 범위만</text>
-<rect x="50" y="165" width="230" height="74" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="66" y="197" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">GH Archive</text>
-<text x="66" y="223" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">시간별 json.gz</text>
-<rect x="50" y="249" width="230" height="74" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="66" y="281" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">Zanbil</text>
-<text x="66" y="307" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">nginx 로그 파일</text>
-<rect x="50" y="333" width="230" height="74" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="66" y="365" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">EClog</text>
-<text x="66" y="391" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">CSV · 들어올 때</text>
-<rect x="50" y="417" width="230" height="74" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="66" y="449" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">Iliou</text>
-<text x="66" y="475" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">로그 + 마우스 파일</text>
-<rect x="345" y="165" width="250" height="325" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="361" y="197" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">lake/</text>
-<text x="361" y="223" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">소스/date=YYYY-MM-DD/</text>
-<text x="361" y="247" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">받은 그대로 · 수정 금지</text>
-<rect x="361" y="262" width="218" height="44" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="373" y="284" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="600" fill="#1F2329" text-anchor="start">gh/date=…</text>
-<text x="569" y="284" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="12.5" font-weight="400" fill="#6B7280" text-anchor="end">JSON</text>
-<rect x="361" y="317" width="218" height="44" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="373" y="339" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="600" fill="#1F2329" text-anchor="start">zanbil/date=…</text>
-<text x="569" y="339" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="12.5" font-weight="400" fill="#6B7280" text-anchor="end">nginx</text>
-<rect x="361" y="372" width="218" height="44" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="373" y="394" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="600" fill="#1F2329" text-anchor="start">eclog/date=…</text>
-<text x="569" y="394" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="12.5" font-weight="400" fill="#6B7280" text-anchor="end">CSV</text>
-<rect x="361" y="427" width="218" height="44" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="373" y="449" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="600" fill="#1F2329" text-anchor="start">iliou/…</text>
-<text x="569" y="449" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="12.5" font-weight="400" fill="#6B7280" text-anchor="end">파일</text>
-<polyline points="280,202 340,202" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
-<polyline points="280,286 340,286" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
-<polyline points="280,370 340,370" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
-<polyline points="280,454 340,454" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
-<text x="312" y="190" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="600" fill="#7A8494" text-anchor="middle">ingest</text>
-<text x="470" y="560" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13" font-weight="400" fill="#6B7280" text-anchor="middle">소스마다 어댑터만 다르다</text>
-<rect x="381.75" y="513" width="176.5" height="26" rx="13" fill="#FFF7D6" stroke="#E5C34A" stroke-width="1.2"/>
-<text x="470" y="531" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="12.5" font-weight="600" fill="#8A6A00" text-anchor="middle">검사: 0건 · 파일 수</text>
-<rect x="660" y="165" width="290" height="150" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="676" y="197" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">events</text>
-<text x="676" y="223" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">date 파티션 · 공통 이벤트 모델</text>
-<text x="676" y="247" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">주체, 세션, 시각, 행동, 대상, 소스</text>
-<rect x="660" y="340" width="290" height="150" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="676" y="372" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">entity_features</text>
-<text x="676" y="398" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">대상 × 날짜 · 최근 N일 창</text>
-<text x="676" y="422" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">무거운 집계는 여기서 한 번</text>
-<polyline points="595,290 655,240" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
-<text x="625" y="228" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="600" fill="#7A8494" text-anchor="middle">silver_build</text>
-<polyline points="805,315 805,335" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
-<rect x="698.0" y="510" width="214.0" height="26" rx="13" fill="#FFF7D6" stroke="#E5C34A" stroke-width="1.2"/>
-<text x="805" y="528" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="12.5" font-weight="600" fill="#8A6A00" text-anchor="middle">검사: 행 수 대조 · 스키마</text>
-<rect x="1015" y="165" width="290" height="325" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="1031" y="197" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">evidence</text>
-<text x="1031" y="223" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">대상 × 근거 × rule_version</text>
-<rect x="1031" y="230" width="258" height="42" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="1043" y="252" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="600" fill="#1F2329" text-anchor="start">자기 신고</text>
-<text x="1279" y="252" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="12.5" font-weight="400" fill="#6B7280" text-anchor="end">UA · [bot]</text>
-<rect x="1031" y="280" width="258" height="42" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="1043" y="302" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="600" fill="#1F2329" text-anchor="start">행동</text>
-<text x="1279" y="302" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="12.5" font-weight="400" fill="#6B7280" text-anchor="end">속도 · 활동 시간</text>
-<rect x="1031" y="330" width="258" height="42" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="1043" y="352" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="600" fill="#1F2329" text-anchor="start">조직</text>
-<text x="1279" y="352" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="12.5" font-weight="400" fill="#6B7280" text-anchor="end">lockstep · burst</text>
-<rect x="1031" y="380" width="258" height="42" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="1043" y="402" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="600" fill="#1F2329" text-anchor="start">확정 사람</text>
-<text x="1279" y="402" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="12.5" font-weight="400" fill="#6B7280" text-anchor="end">구매</text>
-<rect x="1031" y="430" width="258" height="42" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="1043" y="452" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="600" fill="#1F2329" text-anchor="start">클라이언트</text>
-<text x="1279" y="452" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="12.5" font-weight="400" fill="#6B7280" text-anchor="end">마우스</text>
-<polyline points="950,415 1010,415" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
-<text x="980" y="403" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="600" fill="#7A8494" text-anchor="middle">evidence</text>
-<text x="1160" y="516" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13" font-weight="400" fill="#6B7280" text-anchor="middle">근거마다 독립 태스크 · 실패 격리</text>
-<rect x="1084.25" y="530" width="151.5" height="26" rx="13" fill="#FFF7D6" stroke="#E5C34A" stroke-width="1.2"/>
-<text x="1160" y="548" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="12.5" font-weight="600" fill="#8A6A00" text-anchor="middle">검사: 봇 비율 급변</text>
-<rect x="1370" y="165" width="290" height="325" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="1386" y="197" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">실유저 마트 외</text>
-<text x="1386" y="223" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">dbt · 현재 규칙 버전</text>
-<rect x="1386" y="230" width="258" height="42" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="1398" y="257.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="600" fill="#1F2329" text-anchor="start">real_user_strict</text>
-<rect x="1386" y="280" width="258" height="42" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="1398" y="307.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="600" fill="#1F2329" text-anchor="start">real_user_balanced</text>
-<rect x="1386" y="330" width="258" height="42" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="1398" y="357.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="600" fill="#1F2329" text-anchor="start">real_user_lenient</text>
-<rect x="1386" y="380" width="258" height="42" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="1398" y="402" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="600" fill="#1F2329" text-anchor="start">impact</text>
-<text x="1634" y="402" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="12.5" font-weight="400" fill="#6B7280" text-anchor="end">지표 영향</text>
-<rect x="1386" y="430" width="258" height="42" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="1398" y="452" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="600" fill="#1F2329" text-anchor="start">disagreement</text>
-<text x="1634" y="452" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="12.5" font-weight="400" fill="#6B7280" text-anchor="end">근거 간 불일치</text>
-<polyline points="1305,330 1365,330" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
-<text x="1335" y="318" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="600" fill="#7A8494" text-anchor="middle">gold_build</text>
-<rect x="1445.5" y="510" width="139.0" height="26" rx="13" fill="#FFF7D6" stroke="#E5C34A" stroke-width="1.2"/>
-<text x="1515" y="528" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="12.5" font-weight="600" fill="#8A6A00" text-anchor="middle">검사: 계약 스키마</text>
-<rect x="1725" y="165" width="225" height="110" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="1741" y="197" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">분석팀</text>
-<text x="1741" y="223" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">실유저 마트</text>
-<text x="1741" y="247" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">데이터 계약 + manifest</text>
-<rect x="1725" y="295" width="225" height="95" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="1741" y="327" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">BI</text>
-<text x="1741" y="353" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">영향 · 평가</text>
-<rect x="1725" y="410" width="225" height="95" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
-<text x="1741" y="442" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">플랫폼 · 보안</text>
-<text x="1741" y="468" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">불일치 · 평가</text>
-<polyline points="1660,220 1720,220" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
-<polyline points="1660,342 1720,342" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
-<polyline points="1660,455 1720,455" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
-<rect x="50" y="785" width="230" height="60" rx="10" fill="#fff" stroke="#E07B39" stroke-width="1.5" stroke-dasharray="6 5"/>
-<text x="66" y="817" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="16" font-weight="700" fill="#1F2329" text-anchor="start">생존 확인 (주 1회)</text>
-<rect x="50" y="855" width="230" height="60" rx="10" fill="#fff" stroke="#E07B39" stroke-width="1.5"/>
-<text x="66" y="887" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="16" font-weight="700" fill="#1F2329" text-anchor="start">라벨 · IP 대역 파일</text>
-<rect x="345" y="785" width="250" height="130" rx="10" fill="#fff" stroke="#E07B39" stroke-width="1.5"/>
-<text x="361" y="817" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">truth_raw/</text>
-<text x="361" y="843" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">받은 그대로 보관</text>
-<text x="361" y="867" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">적재일 · 출처 기록</text>
-<polyline points="280,815 340,815" fill="none" stroke="#E07B39" stroke-width="2" marker-end="url(#ahE07B39)"/>
-<polyline points="280,885 340,885" fill="none" stroke="#E07B39" stroke-width="2" marker-end="url(#ahE07B39)"/>
-<rect x="660" y="790" width="290" height="110" rx="10" fill="#fff" stroke="#E07B39" stroke-width="1.5"/>
-<text x="676" y="822" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">truth</text>
-<text x="676" y="848" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">대상 × 정답 출처</text>
-<text x="676" y="872" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">확인 시각을 함께 쌓음</text>
-<rect x="1370" y="790" width="290" height="110" rx="10" fill="#fff" stroke="#E07B39" stroke-width="1.5"/>
-<text x="1386" y="822" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">evaluation</text>
-<text x="1386" y="848" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">근거별 · 정책별 정밀도 · 재현율</text>
-<text x="1386" y="872" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">독립 정답만 사용</text>
-<polyline points="595,845 655,845" fill="none" stroke="#E07B39" stroke-width="2" marker-end="url(#ahE07B39)"/>
-<text x="625" y="833" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="600" fill="#E07B39" text-anchor="middle">truth</text>
-<polyline points="950,845 1365,845" fill="none" stroke="#E07B39" stroke-width="2" marker-end="url(#ahE07B39)"/>
-<text x="1160" y="833" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="600" fill="#E07B39" text-anchor="middle">gold_build: evaluation 재생성</text>
-<polyline points="1265,490 1265,600 1520,600 1520,785" fill="none" stroke="#E07B39" stroke-width="2" marker-end="url(#ahE07B39)" stroke-dasharray="5 5"/>
-<text x="1400" y="590" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="600" fill="#E07B39" text-anchor="middle">evidence와 truth를 대상 키로 조인</text>
-<polyline points="1660,845 1837,845 1837,510" fill="none" stroke="#E07B39" stroke-width="2" marker-end="url(#ahE07B39)"/>
-<rect x="50" y="1020" width="230" height="120" rx="10" fill="#fff" stroke="#7C5CC4" stroke-width="1.5"/>
-<text x="66" y="1052" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">규칙 변경</text>
-<text x="66" y="1078" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">임계값 · 조합 · 새 근거</text>
-<text x="66" y="1102" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">PR로 rule_version 올림</text>
-<rect x="345" y="1020" width="250" height="120" rx="10" fill="#fff" stroke="#7C5CC4" stroke-width="1.5"/>
-<text x="361" y="1052" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">리니지로 범위 계산</text>
-<text x="361" y="1078" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">바뀐 근거 컬럼 →</text>
-<text x="361" y="1102" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">영향받는 Gold 컬럼</text>
-<rect x="660" y="1020" width="290" height="120" rx="10" fill="#fff" stroke="#7C5CC4" stroke-width="1.5"/>
-<text x="676" y="1052" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">rule_backfill</text>
-<text x="676" y="1078" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">바뀐 근거 태스크만</text>
-<text x="676" y="1102" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">× 지정한 날짜 범위</text>
-<rect x="1015" y="1020" width="290" height="120" rx="10" fill="#fff" stroke="#7C5CC4" stroke-width="1.5"/>
-<text x="1031" y="1052" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">evidence 새 버전</text>
-<text x="1031" y="1078" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">옛 버전은 남김</text>
-<text x="1031" y="1102" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">그때 판정 재현 가능</text>
-<rect x="1370" y="1020" width="290" height="120" rx="10" fill="#fff" stroke="#7C5CC4" stroke-width="1.5"/>
-<text x="1386" y="1052" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">Gold 재생성</text>
-<text x="1386" y="1078" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">영향받은 마트만</text>
-<text x="1386" y="1102" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="400" fill="#6B7280" text-anchor="start">manifest 규칙 버전 갱신</text>
-<polyline points="280,1080 340,1080" fill="none" stroke="#7C5CC4" stroke-width="2" marker-end="url(#ah7C5CC4)"/>
-<polyline points="595,1080 655,1080" fill="none" stroke="#7C5CC4" stroke-width="2" marker-end="url(#ah7C5CC4)"/>
-<polyline points="950,1080 1010,1080" fill="none" stroke="#7C5CC4" stroke-width="2" marker-end="url(#ah7C5CC4)"/>
-<polyline points="1305,1080 1365,1080" fill="none" stroke="#7C5CC4" stroke-width="2" marker-end="url(#ah7C5CC4)"/>
-<polyline points="1160,1015 1160,960 1290,960 1290,495" fill="none" stroke="#7C5CC4" stroke-width="2" marker-end="url(#ah7C5CC4)" stroke-dasharray="5 5"/>
-<polyline points="1515,1015 1515,960 1685,960 1685,480 1665,480" fill="none" stroke="#7C5CC4" stroke-width="2" marker-end="url(#ah7C5CC4)" stroke-dasharray="5 5"/>
-<text x="1420" y="950" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="600" fill="#7C5CC4" text-anchor="middle">같은 표에 새 버전으로 씀</text>
-<text x="50" y="1180" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="700" fill="#4B5563" text-anchor="start">범례</text>
-<polyline points="100,1175 150,1175" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
-<text x="160" y="1180" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14" font-weight="400" fill="#6B7280" text-anchor="start">일별 정상 경로</text>
-<polyline points="310,1175 360,1175" fill="none" stroke="#E07B39" stroke-width="2" marker-end="url(#ahE07B39)"/>
-<text x="370" y="1180" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14" font-weight="400" fill="#6B7280" text-anchor="start">정답 경로</text>
-<polyline points="540,1175 590,1175" fill="none" stroke="#7C5CC4" stroke-width="2" marker-end="url(#ah7C5CC4)"/>
-<text x="600" y="1180" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14" font-weight="400" fill="#6B7280" text-anchor="start">규칙 변경 재처리 (수동)</text>
-<rect x="820.5" y="1160" width="39.0" height="26" rx="13" fill="#FFF7D6" stroke="#E5C34A" stroke-width="1.2"/>
-<text x="840" y="1178" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="12.5" font-weight="600" fill="#8A6A00" text-anchor="middle">검사</text>
-<text x="875" y="1180" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14" font-weight="400" fill="#6B7280" text-anchor="start">품질 검사 · 실패하면 다음 단계로 안 넘어감</text>
-<text x="50" y="1210" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14" font-weight="400" fill="#6B7280" text-anchor="start">화살표 위 글자 = Airflow DAG 이름. 엔진은 범용 후보(Spark, dbt 등)이며 실제 선택은 결정 대기.</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1420" viewBox="0 0 2000 1420">
+<defs><marker id="ah7A8494" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7A8494"/></marker><marker id="ah8B5CF6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8B5CF6"/></marker><marker id="ahE07B39" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#E07B39"/></marker></defs>
+<rect x="0" y="0" width="2000" height="1420" fill="#fff"/>
+<text x="50" y="95" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="20" font-weight="700" fill="#1F2329" text-anchor="start">원천</text>
+<text x="345" y="95" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="20" font-weight="700" fill="#1F2329" text-anchor="start">Bronze</text>
+<text x="660" y="95" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="20" font-weight="700" fill="#1F2329" text-anchor="start">Silver</text>
+<text x="1015" y="95" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="20" font-weight="700" fill="#1F2329" text-anchor="start">근거 (Silver evidence)</text>
+<text x="1370" y="95" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="20" font-weight="700" fill="#1F2329" text-anchor="start">Gold (dbt)</text>
+<text x="1725" y="95" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="20" font-weight="700" fill="#1F2329" text-anchor="start">쓰는 쪽</text>
+<text x="50" y="46" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="24" font-weight="700" fill="#1F2329" text-anchor="start">파이프라인 · 세 경로</text>
+<rect x="30" y="120" width="1940" height="700" rx="14" fill="#FAFBFC" stroke="none" stroke-width="1.5"/>
+<text x="50" y="152" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="17" font-weight="600" fill="#4B5563" text-anchor="start">① 일별 경로  ·  ingest_gh → (Asset raw.gharchive) → bot_build  ·  날짜 파티션을 덮어써서 몇 번 다시 돌려도 같다</text>
+<rect x="50" y="180" width="250" height="130" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="70" y="218" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="21" font-weight="700" fill="#1F2329" text-anchor="start">GH Archive</text>
+<text x="70" y="248" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">시간별 json.gz × 24</text>
+<text x="70" y="275" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">하루 360만 ~ 490만 줄</text>
+<text x="70" y="296" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">ingest.py</text>
+<rect x="50" y="330" width="250" height="150" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="70" y="368" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="21" font-weight="700" fill="#1F2329" text-anchor="start">참조 목록</text>
+<text x="70" y="398" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">크롤러 UA · AI 봇</text>
+<text x="70" y="425" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">웹 근거용 · GH 근거는 안 씀</text>
+<text x="70" y="466" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">spark_jobs/load_ref.py</text>
+<rect x="345" y="180" width="270" height="300" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="365" y="218" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="21" font-weight="700" fill="#1F2329" text-anchor="start">raw/</text>
+<text x="365" y="248" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">받은 그대로 · 수정 금지</text>
+<text x="365" y="275" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">시간 파일마다</text>
+<text x="365" y="302" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">_manifest.json (줄 수)</text>
+<text x="365" y="466" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">ingest.py · load_ref.py fetch</text>
+<rect x="360" y="335" width="240" height="40" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="374" y="361.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start">dt=…/hour=…</text>
+<text x="587" y="360.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="end">json.gz</text>
+<rect x="360" y="385" width="240" height="40" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="374" y="411.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start">ref/&lt;목록&gt;/dt=…</text>
+<text x="587" y="410.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="end">json</text>
+<polyline points="300,245 340,245" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
+<polyline points="300,405 340,405" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
+<rect x="660" y="180" width="320" height="160" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="680" y="218" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="21" font-weight="700" fill="#1F2329" text-anchor="start">events</text>
+<text x="680" y="248" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">한 행 = 이벤트 하나</text>
+<text x="680" y="274" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">파싱만 Python · 변환은 SQL</text>
+<text x="680" y="326" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">load_events.py · silver/events.sql</text>
+<rect x="660" y="360" width="320" height="160" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="680" y="398" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="21" font-weight="700" fill="#1F2329" text-anchor="start">entity_features</text>
+<text x="680" y="428" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">계정 · 저장소 × 날짜 × 피처 버전</text>
+<text x="680" y="454" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">무거운 집계는 여기서 한 번</text>
+<text x="680" y="506" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">sql/silver/features_*.sql</text>
+<rect x="660" y="540" width="320" height="120" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="680" y="578" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="21" font-weight="700" fill="#1F2329" text-anchor="start">ref_ua_patterns</text>
+<text x="680" y="608" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">(list, 적재일) 파티션</text>
+<text x="680" y="646" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">spark_jobs/load_ref.py load</text>
+<polyline points="615,260 655,260" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
+<polyline points="615,405 635,405 635,600 655,600" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
+<polyline points="820,340 820,355" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
+<rect x="660" y="684" width="44.0" height="22" rx="11" fill="#F5C451" stroke="none" stroke-width="1.5"/>
+<text x="669" y="700" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13" font-weight="600" fill="#1F2329" text-anchor="start">검사</text>
+<text x="718" y="700" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="start">파일 날짜와 다른 event_date가 한 행이라도</text>
+<text x="718" y="722" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="start">있으면 쓰기 전에 멈춘다 (F-16, 결정 22)</text>
+<rect x="1015" y="180" width="320" height="480" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1035" y="218" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="21" font-weight="700" fill="#1F2329" text-anchor="start">evidence</text>
+<text x="1035" y="248" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">대상 × 근거 × 규칙 버전 × 구간</text>
+<text x="1035" y="646" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">sql/evidence/&lt;근거&gt;/&lt;버전&gt;.sql</text>
+<rect x="1030" y="265" width="290" height="38" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1044" y="290" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start">자기 신고</text>
+<text x="1306" y="290" font-family="Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#4A6FA5" text-anchor="end">declared_app</text>
+<rect x="1030" y="311" width="290" height="38" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1044" y="336" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start">행동</text>
+<text x="1306" y="336" font-family="Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#4A6FA5" text-anchor="end">always_on</text>
+<rect x="1030" y="357" width="290" height="38" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1044" y="382" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start"></text>
+<text x="1306" y="382" font-family="Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#4A6FA5" text-anchor="end">multi_repo_burst</text>
+<rect x="1030" y="403" width="290" height="38" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1044" y="428" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start">조직</text>
+<text x="1306" y="428" font-family="Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#4A6FA5" text-anchor="end">low_activity</text>
+<rect x="1030" y="449" width="290" height="38" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1044" y="474" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start"></text>
+<text x="1306" y="474" font-family="Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#4A6FA5" text-anchor="end">lockstep_ratio</text>
+<rect x="1030" y="495" width="290" height="38" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1044" y="520" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start"></text>
+<text x="1306" y="520" font-family="Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#4A6FA5" text-anchor="end">burst_5m</text>
+<rect x="1030" y="541" width="290" height="38" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5" stroke-dasharray="6 5"/>
+<text x="1044" y="566" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start">인프라</text>
+<text x="1306" y="566" font-family="Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#4A6FA5" text-anchor="end">(근거 없음)</text>
+<polyline points="980,440 1010,440" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
+<rect x="1015" y="684" width="44.0" height="22" rx="11" fill="#F5C451" stroke="none" stroke-width="1.5"/>
+<text x="1024" y="700" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13" font-weight="600" fill="#1F2329" text-anchor="start">검사</text>
+<text x="1073" y="700" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="start">쓴 뒤 행을 다시 세고, 비면 한 번 더</text>
+<text x="1073" y="722" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="start">돈다 (F-7). 버전은 rules/registry.yml</text>
+<rect x="1370" y="180" width="320" height="480" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1390" y="218" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="21" font-weight="700" fill="#1F2329" text-anchor="start">dbt_build</text>
+<text x="1390" y="248" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">규칙 묶음 id를 계산해 넘긴다</text>
+<text x="1390" y="646" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">warehouse/dbt/models/gold/</text>
+<rect x="1385" y="262" width="290" height="36" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1399" y="286.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start">stg_evidence</text>
+<text x="1662" y="285.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="end">지금 버전만</text>
+<rect x="1385" y="306" width="290" height="36" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1399" y="330.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start">evidence_flags</text>
+<text x="1662" y="329.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="end">대상 × 날짜 한 행</text>
+<rect x="1385" y="350" width="290" height="36" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1399" y="374.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start">fake_star_repo</text>
+<text x="1662" y="373.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="end">조직 조합</text>
+<rect x="1385" y="394" width="290" height="36" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1399" y="418.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start">entity_verdict</text>
+<text x="1662" y="417.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="end">정책 × 범주</text>
+<rect x="1385" y="438" width="290" height="36" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1399" y="462.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start">real_user_*</text>
+<text x="1662" y="461.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="end">정책별 마트</text>
+<rect x="1385" y="482" width="290" height="36" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1399" y="506.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start">actor_policy_status</text>
+<text x="1662" y="505.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="end">+ why_excluded</text>
+<rect x="1385" y="526" width="290" height="36" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1399" y="550.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start">policy_compare</text>
+<text x="1662" y="549.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="end">묶음마다 쌓음</text>
+<rect x="1385" y="570" width="290" height="36" rx="6" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1399" y="594.0" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14.5" font-weight="600" fill="#1F2329" text-anchor="start">metric_policy_proposal</text>
+<polyline points="1335,440 1365,440" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
+<rect x="1370" y="684" width="44.0" height="22" rx="11" fill="#F5C451" stroke="none" stroke-width="1.5"/>
+<text x="1379" y="700" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13" font-weight="600" fill="#1F2329" text-anchor="start">검사</text>
+<text x="1428" y="700" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="start">행 수 = manifest 줄 수, 판정 빠진 계정 0,</text>
+<text x="1428" y="722" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="start">근거가 날마다 다 돎, 금지 쌍 0 (dbt 시험)</text>
+<rect x="1725" y="180" width="225" height="130" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1745" y="218" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="21" font-weight="700" fill="#1F2329" text-anchor="start">분석가</text>
+<text x="1745" y="248" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">real_user_*</text>
+<text x="1745" y="275" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">real_users() 매크로</text>
+<rect x="1725" y="330" width="225" height="150" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1745" y="368" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="21" font-weight="700" fill="#1F2329" text-anchor="start">화면</text>
+<text x="1745" y="398" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">공개 묶음 숫자만</text>
+<text x="1745" y="425" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">→ site/data/</text>
+<text x="1745" y="466" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">scripts/export_site.py</text>
+<rect x="1725" y="500" width="225" height="160" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1745" y="538" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="21" font-weight="700" fill="#1F2329" text-anchor="start">빌드 기록</text>
+<text x="1745" y="568" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">ops.build_record</text>
+<text x="1745" y="595" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">버전 · SQL 해시 · 커밋</text>
+<text x="1745" y="646" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">warehouse/record_build.py</text>
+<polyline points="1690,440 1707,440 1707,245 1720,245" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
+<polyline points="1690,440 1707,440 1707,405 1720,405" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
+<polyline points="1690,440 1707,440 1707,580 1720,580" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
+<text x="50" y="790" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13.5" font-weight="400" fill="#6B7280" text-anchor="start">화살표 = 위가 끝나야 다음이 돈다 (dags/bot_build.py: create_tables → load_events → features_account → features_repo → 근거 6개 → dbt_build → record_build)</text>
+<rect x="30" y="840" width="1940" height="260" rx="14" fill="#FFF8F3" stroke="none" stroke-width="1.5"/>
+<text x="50" y="866" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="17" font-weight="600" fill="#E07B39" text-anchor="start">② 정답 경로  ·  late_truth  ·  주 1회  ·  정답은 추가만 한다  ·  evidence와 대상 키 · 판정 구간으로 짝 짓는다</text>
+<rect x="50" y="900" width="250" height="180" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="70" y="938" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="21" font-weight="700" fill="#1F2329" text-anchor="start">생존 확인</text>
+<text x="70" y="968" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">GitHub HEAD</text>
+<text x="70" y="994" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">의심 + 같은 수 대조군</text>
+<text x="70" y="1020" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">429면 다 같이 쉼 (F-15)</text>
+<text x="70" y="1066" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">truth/repo_alive.py</text>
+<rect x="345" y="900" width="270" height="180" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="365" y="938" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="21" font-weight="700" fill="#1F2329" text-anchor="start">raw/truth_raw/</text>
+<text x="365" y="968" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">repo_alive/checked_date=…</text>
+<text x="365" y="994" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">새 파일만 더함</text>
+<text x="365" y="1020" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">확인 실패 5% 넘으면 멈춤</text>
+<rect x="660" y="900" width="320" height="180" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="680" y="938" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="21" font-weight="700" fill="#1F2329" text-anchor="start">truth</text>
+<text x="680" y="968" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">대상 × 정답 출처 × 확인</text>
+<text x="680" y="994" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">MERGE로 추가만</text>
+<text x="680" y="1020" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">target_window = 고른 구간</text>
+<text x="680" y="1066" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">truth/build_truth.py</text>
+<rect x="1015" y="900" width="320" height="180" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1035" y="938" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="21" font-weight="700" fill="#1F2329" text-anchor="start">대상 고르기</text>
+<text x="1035" y="968" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">그 구간 fake_star_repo</text>
+<text x="1035" y="994" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">+ star 수 맞춘 대조군</text>
+<text x="1035" y="1020" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">지금 규칙 버전만 본다</text>
+<text x="1035" y="1066" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">sql/truth/pick_targets.sql</text>
+<rect x="1370" y="900" width="320" height="180" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1390" y="938" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">eval_pairs → evaluation</text>
+<text x="1390" y="968" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">판정 뒤에 안 정답만</text>
+<text x="1390" y="994" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">같은 판정 구간끼리</text>
+<text x="1390" y="1020" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">dbt --select stg_truth+</text>
+<text x="1390" y="1066" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">models/gold/evaluation.sql</text>
+<rect x="1725" y="900" width="225" height="180" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1745" y="938" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="21" font-weight="700" fill="#1F2329" text-anchor="start">규칙 담당</text>
+<text x="1745" y="968" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">근거별 정밀도</text>
+<text x="1745" y="994" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">대조군 양성률</text>
+<text x="1745" y="1020" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">(재현율은 아직 없음)</text>
+<polyline points="1175,900 1175,882 175,882 175,895" fill="none" stroke="#E07B39" stroke-width="2" marker-end="url(#ahE07B39)"/>
+<text x="600" y="868" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="1" font-weight="400" fill="#6B7280" text-anchor="start"></text>
+<polyline points="300,990 340,990" fill="none" stroke="#E07B39" stroke-width="2" marker-end="url(#ahE07B39)"/>
+<polyline points="615,990 655,990" fill="none" stroke="#E07B39" stroke-width="2" marker-end="url(#ahE07B39)"/>
+<polyline points="980,990 995,990 995,1092 1352,1092 1352,990 1365,990" fill="none" stroke="#E07B39" stroke-width="2" marker-end="url(#ahE07B39)"/>
+<polyline points="1690,990 1720,990" fill="none" stroke="#E07B39" stroke-width="2" marker-end="url(#ahE07B39)"/>
+<rect x="30" y="1120" width="1940" height="230" rx="14" fill="#F8F5FF" stroke="none" stroke-width="1.5"/>
+<text x="50" y="1152" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="17" font-weight="600" fill="#8B5CF6" text-anchor="start">③ 규칙 변경 경로  ·  column_lineage → rule_backfill  ·  손으로, 영향 범위만</text>
+<rect x="50" y="1172" width="250" height="160" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="70" y="1210" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">규칙 바꾸기</text>
+<text x="70" y="1240" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">새 버전 SQL 파일</text>
+<text x="70" y="1266" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">등록부 current 올림</text>
+<text x="70" y="1318" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">rules/registry.yml</text>
+<rect x="345" y="1172" width="270" height="160" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="365" y="1210" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">범위 정하기</text>
+<text x="365" y="1240" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">컬럼 리니지로 넓게</text>
+<text x="365" y="1266" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">지금 버전 · 파티션으로 좁힘</text>
+<text x="365" y="1318" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">lineage/impact.py</text>
+<polyline points="300,1250 340,1250" fill="none" stroke="#8B5CF6" stroke-width="2" marker-end="url(#ah8B5CF6)"/>
+<rect x="660" y="1172" width="320" height="160" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="680" y="1210" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">rerun_silver</text>
+<text x="680" y="1240" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">범위 안 SQL만 × 날짜</text>
+<text x="680" y="1266" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">옛 버전 파티션은 남김</text>
+<text x="680" y="1318" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">spark_jobs/run_sql.py</text>
+<polyline points="615,1250 655,1250" fill="none" stroke="#8B5CF6" stroke-width="2" marker-end="url(#ah8B5CF6)"/>
+<rect x="1015" y="1172" width="320" height="160" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1035" y="1210" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">evidence 새 버전 행</text>
+<text x="1035" y="1240" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">옛 버전 행으로</text>
+<text x="1035" y="1266" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">그때 판정을 다시 만든다</text>
+<polyline points="980,1250 1010,1250" fill="none" stroke="#8B5CF6" stroke-width="2" marker-end="url(#ah8B5CF6)"/>
+<rect x="1370" y="1172" width="320" height="160" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1390" y="1210" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">dbt (시드 아래 전부)</text>
+<text x="1390" y="1240" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">새 ruleset_id 행을 쌓음</text>
+<text x="1390" y="1266" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">ruleset_change_log로 비교</text>
+<text x="1390" y="1318" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">warehouse/dbt_build.py</text>
+<polyline points="1335,1250 1365,1250" fill="none" stroke="#8B5CF6" stroke-width="2" marker-end="url(#ah8B5CF6)"/>
+<rect x="1725" y="1172" width="225" height="160" rx="10" fill="#fff" stroke="#D5D9E0" stroke-width="1.5"/>
+<text x="1745" y="1210" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#1F2329" text-anchor="start">사람이 공개</text>
+<text x="1745" y="1240" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">공개 줄 한 줄 →</text>
+<text x="1745" y="1266" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15.5" font-weight="400" fill="#6B7280" text-anchor="start">_released 숫자 바뀜</text>
+<text x="1745" y="1318" font-family="Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#4A6FA5" text-anchor="start">seeds/ruleset_release.csv</text>
+<polyline points="1690,1250 1720,1250" fill="none" stroke="#8B5CF6" stroke-width="2" marker-end="url(#ah8B5CF6)"/>
+<text x="50" y="1385" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="15" font-weight="700" fill="#1F2329" text-anchor="start">범례</text>
+<polyline points="100,1380 150,1380" fill="none" stroke="#7A8494" stroke-width="2" marker-end="url(#ah7A8494)"/>
+<text x="160" y="1385" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14" font-weight="400" fill="#6B7280" text-anchor="start">일별</text>
+<polyline points="220,1380 270,1380" fill="none" stroke="#E07B39" stroke-width="2" marker-end="url(#ahE07B39)"/>
+<text x="280" y="1385" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14" font-weight="400" fill="#6B7280" text-anchor="start">정답</text>
+<polyline points="340,1380 390,1380" fill="none" stroke="#8B5CF6" stroke-width="2" marker-end="url(#ah8B5CF6)"/>
+<text x="400" y="1385" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14" font-weight="400" fill="#6B7280" text-anchor="start">규칙 변경 (손으로)</text>
+<rect x="560" y="1369" width="44.0" height="22" rx="11" fill="#F5C451" stroke="none" stroke-width="1.5"/>
+<text x="569" y="1385" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="13" font-weight="600" fill="#1F2329" text-anchor="start">검사</text>
+<text x="614.0" y="1385" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14" font-weight="400" fill="#6B7280" text-anchor="start">실패하면 다음 단계로 넘어가지 않는다</text>
+<text x="950" y="1385" font-family="Noto Sans CJK KR, Noto Sans KR, sans-serif" font-size="14" font-weight="400" fill="#6B7280" text-anchor="start">작은 글씨 = 레포 경로. 엔진: Spark 4.1.2 + Iceberg 1.11.0 (Silver), dbt-duckdb (Gold), Airflow 3.3.2.</text>
 </svg>

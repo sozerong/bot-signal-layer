@@ -43,6 +43,18 @@ TABLES = {
     "bot.silver.ref_ua_patterns": """
         pattern STRING, list STRING, name STRING, operator STRING, purpose STRING, load_date DATE
     """,
+    # 적재 기록표 (Q5, 결정 27). 적재 시도 하나 = 한 행, 추가만 한다 (막힌 시도도 status='rejected'로 남는다).
+    # manifest_lines: Bronze의 _manifest.json lines 합 (없으면 NULL). rows_read = Spark가 읽은 줄(깨진 줄 포함)
+    # rows_dropped: JSON으로 못 읽은 줄. rows_written = rows_read - rows_dropped (막히면 0)
+    # null_*: 깨지지 않은 줄 중 필수 필드가 NULL인 행. late_rows: 파일 날짜와 다른 event_date(NULL 포함)
+    # unknown_types: 등록부 known_types 밖의 type 이름(쉼표), n_unknown_type: 그 행 수 (Q6, 결정 28)
+    "bot.silver.load_audit": """
+        source STRING, event_date DATE, n_files BIGINT, manifest_lines BIGINT,
+        rows_read BIGINT, rows_written BIGINT, rows_dropped BIGINT,
+        null_id BIGINT, null_type BIGINT, null_created_at BIGINT, null_actor_login BIGINT, null_repo_name BIGINT,
+        late_rows BIGINT, n_unknown_type BIGINT, unknown_types STRING,
+        status STRING, reason STRING, run_id STRING, recorded_at TIMESTAMP
+    """,
 }
 PARTITIONS = {
     "bot.silver.events": "source, event_date",
@@ -50,6 +62,7 @@ PARTITIONS = {
     "bot.silver.evidence": "evidence_id, rule_version, window_end",
     "bot.silver.truth": "truth_source",  # 결정 7: 정답은 작고 출처별로 읽는다
     "bot.silver.ref_ua_patterns": "list, load_date",
+    "bot.silver.load_audit": "source",  # 작다. 날짜마다 몇 행
 }
 
 

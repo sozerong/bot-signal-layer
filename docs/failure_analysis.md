@@ -1,5 +1,8 @@
 # 오류 분석 기록
 
+이 문서는 만들고 돌리면서 실제로 만난 오류를 증상, 원인, 처방으로 남긴 기록이다(F-N).
+같은 증상을 만났을 때, 또는 알려진 한계가 무엇인지 볼 때 읽는다. 장애 대응 순서는 [런북](runbook.md)에 있다.
+
 구현과 측정 중 실제로 만난 오류를 원인까지 남긴다. 형식은 서울 동네 찾기 `docs/failure_analysis.md`와 같다. 원인이 자명하고 배울 것이 없는 일, 실행하는 PC 환경 탓인 일은 넣지 않는다.
 
 분류: `메모리` / `분포` / `저장` / `연결` / `타입·스키마` / `정확성` / `운영` / `계산량·인덱스` / `설계 가정`
@@ -68,7 +71,7 @@
 - 처방 후보 (고르지 않음): 하이브 파티션 읽기를 끄기, `dt` 컬럼을 날짜로 쓰기, manifest의 필드 이름을 폴더 키와 다르게.
 - **해결 (지시서 H2-3, 2026-11-17):** dbt 소스를 `read_json_auto(..., hive_partitioning = false)`로 바꿨다 (`warehouse/dbt/models/sources.yml`). 원본 manifest는 그대로다. `dbt build` 전체가 0으로 끝났고(PASS 22, WARN 1은 설계상 경고인 type_share_shift), 7일 모두 events 행 수 = manifest 줄 수 합으로 통과했다. 거꾸로 확인: raw는 읽기만 하므로 manifest를 스크래치에 복사해 07-16 03시 줄 수만 하나 늘리고 같은 시험 SQL을 돌리자 `(2024-07-16, 4870089, 4870090)` 한 행이 나왔다 (실패). 리니지 추출기가 이 소스 이름을 정규식으로 바꾸던 곳도 함께 고쳤다 (F-9 해결 참고).
 
-## F-5. Gold 모델 하나가 BigQuery 방언으로 바뀌지 않는다 [미해결]
+## F-5. Gold 모델 하나가 BigQuery 방언으로 바뀌지 않는다 [해결, 결정 25]
 
 - 태그: `타입·스키마`, `설계 가정`
 - 언제·어디: 2026-11-17, 8절 L5-3 이식 대비 시험, `pytest tests/test_gold_dialect.py` (sqlglot 30.32.0)
@@ -77,6 +80,9 @@
 - 가설 (확인 안 함): sqlglot이 DuckDB의 기본 NULL 순서를 명시적으로 옮기려 하는데, BigQuery `STRING_AGG ... ORDER BY` 안에서는 NULL 순서를 줄 수 없다고 보고 거부한다. 걸린 근거 목록은 NULL이 없으므로 결과에는 영향이 없을 수 있다 [확인 필요].
 - 막힌 것: 없음 (로컬 Gold는 정상). C3 이식 때 고칠 곳으로 미리 드러났다. 이 시험의 목적대로다.
 - 처방 후보 (고르지 않음): 정렬 없이 모으기, DISTINCT와 정렬을 하위 쿼리로 빼기, 이 모델만 BigQuery용 매크로.
+- 해결 (2026-11-22, 지시서 handoff_v7.md 1-3): 후보 꼴 다섯 개를 sqlglot으로 변환해 보니 `order by e.evidence_id nulls first`만 정렬을 지키며 통과했다. DISTINCT를 하위 쿼리로 빼도 같은 오류가 났다. 결정 25. 〔근거: 실행 출력 2026-11-22 f5.py: orig, sub_distinct, list_sort 실패, nulls_first_explicit, nosort 통과〕
+- 가설 확인: 오류는 DuckDB 기본값(NULLS LAST)을 BigQuery로 옮기지 못해서 났다. NULL 위치를 적으면 BigQuery 기본(오름차순 NULLS FIRST)과 같아 그대로 옮긴다. 〔근거: 실행 출력 `STRING_AGG(DISTINCT e, ',' ORDER BY e)`〕
+- 끝난 기준: `tests/test_gold_dialect.py` 21개 통과, entity_verdict 1,474만 행 해시 같음, Gold 기준값 같음. 〔근거: 실행 출력 2026-11-22 04:15〕
 
 ## F-6. DuckDB 2.0에서 관계 객체의 fetchone()이 없어졌다 (참고)
 
@@ -253,3 +259,75 @@
 - 원인: `run_sql.run`이 `overwritePartitions()`로 쓰고, 이 쓰기는 결과에 한 행이라도 있는 파티션을 통째로 바꾼다. `events.sql`은 날짜로 거르지 않는다. 〔근거: 코드: spark_jobs/run_sql.py 쓰기 줄, sql/silver/events.sql 2~3번째 줄〕
 - 지금까지 잃지 않은 이유: GH 7일 모두 그날 파일에 다른 날짜 행이 0개다. 관찰이지 보장이 아니었다. 〔근거: 측정: M-27(07-15, 07-20 다른 날짜 행 0), local_baseline.md 1절(manifest 줄 수 = events 행 수)〕
 - 처방: 쓰기 전에 다른 날짜 행을 세어 실패 (결정 22). 같은 표본을 가드를 켜고 적재하면 SystemExit로 끝나고 07-14 지문이 그대로, 07-15는 0행이다. 〔근거: 코드: test_late_guard.py 앞 세 assert 통과〕
+
+<a id="f-18"></a>
+## F-18. 판정이 빠진 계정이 실유저로 통과하고, 막는다던 시험은 늘 초록이었다 (재현, 시험 두 개로 막음) [해결] 〔근거: 지시서 handoff_v7.md 1-1 "기록: F-18". docs/review_logic.md R-6〕
+
+- 태그: `시험`, `설계 가정` 〔근거: 판단: 실제 7일 데이터에서 빠진 계정은 0개였다. 시험이 지키지 못하는 성질이었다〕
+- 언제·어디: 2026-11-22, 표본(`tests/fixtures/gh_sample.json.gz`, 07-15 3,407행)으로 만든 임시 창고. 〔근거: 코드: tests/test_judged_red.py〕
+- 옛 상태: `real_user_events`가 판정이 없으면 `coalesce(..., true)`로 실유저로 두었고, 이를 막는다던 `policy_account_sum`은 entity_verdict와 evidence_flags를 비교해 식으로 늘 같았다. 〔근거: 코드: 커밋 d2c8bd3의 real_user_events.sql 13 ~ 15행, tests/policy_account_sum.sql. review_logic.md R-6 재확인〕
+- 1차 처방(2026-11-22, Claude): 시험 `every_account_judged`(날짜별 stg_events 고유 계정마다 정책별 판정이 있나)와 기본값 false(real_users()와 같은 동작). 〔근거: 코드: 커밋 35f971c, warehouse/dbt/tests/every_account_judged.sql, real_user_events.sql〕
+- 재현 (Gold를 세 번 만든다):
+
+  | 표본 상태 | every_account_judged | every_evidence_ran | 예측 |
+  |---|---|---|---|
+  | 근거 0개 | 실패 | 실패 | 같음 〔근거: 코드: test_judged_red.py 첫 assert 통과〕 |
+  | always_on 하나만 안 돎 | **통과** | 실패 | 지시서는 실패를 예측, Claude Code는 실행 전 통과를 예측 〔근거: 코드: test_judged_red.py 둘째 assert 통과. handoff_v7.md 1-1 빨간 확인〕 |
+  | 근거 전부 | 통과 | 통과 | 같음 〔근거: 코드: test_judged_red.py 셋째 assert 통과〕 |
+
+- 원인 (둘째 줄): `evidence_flags`가 근거들을 (대상, 날짜) 한 행으로 모으므로, 근거 하나라도 돈 계정은 판정이 생긴다. always_on 행이 없는 계정은 `bool_or`가 false가 되어 strict가 그 계정을 사람으로 둔다. 숫자가 조용히 늘어나는 실패다. 〔근거: 코드: evidence_flags.sql `group by entity_type, entity_key, window_end`, entity_verdict.sql strict 줄〕
+- 2차 처방: 시험 `every_evidence_ran`을 더했다. 계정 근거마다 그날 이벤트를 낸 계정 전부에 행이 있는지, 지금 쓰는 근거(evidence_current)가 날마다 행이 있는지 본다. 기존 두 시험은 지우지 않았다. 〔근거: 코드: warehouse/dbt/tests/every_evidence_ran.sql. 판단: every_account_judged는 "근거가 하나도 안 돈 날"을, 새 시험은 "근거 하나가 빠진 날"을 잡는다. 반증 조건: 근거 SQL이 대상 일부에만 행을 내게 바뀌면 이 시험이 실패하고, 그때 근거 계약을 다시 정한다〕
+- 실제 7일 Gold: 두 시험 모두 행 0개(PASS), every_evidence_ran 2.7초. 〔근거: 실행 출력 2026-11-22 04:11 `dbt_build --select every_evidence_ran every_account_judged`〕
+- 숫자 변화: 기본값을 false로 바꾼 뒤 `scripts.baseline` gold 부분이 기준값과 같다. 판정 없는 계정이 0이라 기본값이 쓰이지 않는다. 〔근거: 실행 출력 b_g1.json 비교 "gold 같음". 계산: 지시서 1-1 예측〕
+- 덧붙여 바꾼 것: 표본으로 Gold를 따로 만들려고 dbt 프로필 경로와 Silver 위치를 `BOT_WAREHOUSE`(기본 `/work/warehouse_local`)로 받게 했다. Spark 세션과 같은 변수다. 〔근거: 코드: warehouse/dbt/profiles.yml, models/sources.yml, spark_jobs/session.py 27행〕
+- 남은 한계: 저장소 근거(lockstep_ratio, burst_5m)는 "날마다 행이 있나"만 본다. 저장소 대상 전부에 행이 있는지는 보지 않는다. 〔근거: 코드: every_evidence_ran.sql 둘째 부분. 판단: 저장소 대상 집합(entity_features)을 Gold가 읽지 않아 기준이 없다. 웹 원천(WP1-b) 때 대상 종류별로 넓힌다〕
+
+<a id="f-19"></a>
+## F-19. GH Archive 시간 파일 안에 같은 이벤트가 두 번 들어 있다 [기록, 처방은 사용자 결정 대기] 〔근거: 측정: M-36 (e)〕
+
+- 태그: `원천`, `설계 가정` 〔근거: 판단: 우리 적재가 아니라 원천 파일의 성질이다〕
+- 언제·어디: 2026-11-22, 지시서 handoff_v7.md 1-4 (e). 7일 stg_events. 〔근거: 코드: scripts/m36/e_event_id_dup.sql〕
+- 증상: 날짜 안 event_id 중복 하루 1 ~ 12개, 7일 44개. 예측은 0이었다. 〔근거: 측정: M-36 (e)〕
+- 관찰: 중복 행은 내용이 모두 같고 같은 시간에 있다. 07-17 id 하나는 원천 `2024-07-17-2.json.gz`에 두 줄로 들어 있다(앞뒤 시간 파일에는 0줄). 날짜를 넘는 중복은 없다. 〔근거: 실행 출력 2026-11-22. zcat 줄 세기〕
+- 영향: 이벤트 수가 하루 최대 12건(3.3×10⁻⁶) 부풀었다. 중복이 WatchEvent면 그 저장소의 star가 1 늘어 lockstep, burst 근거에 들어간다. 지금까지의 판정·지표가 눈에 띄게 바뀔 크기는 아니다 [확인 필요: 중복을 뺀 events로 근거를 다시 돌려 fake_star_repo 수를 비교]. 〔근거: 계산: 12 ÷ 3,615,363. 판단: 판정 문턱은 star 수십 개 단위(결정 12)〕
+- 지금 보증의 틈: `local_baseline.md`의 "manifest 줄 수 = events 행 수"는 중복 줄도 한 줄로 세므로 이 중복을 잡지 못한다. 〔근거: 코드: scripts/baseline.py manifest_lines. 측정: local_baseline.md 1절〕
+- 처방 후보 (사용자 결정): (가) 그대로 두고 기록만, (나) `events.sql`에서 event_id로 하나만 남기고 load_audit(Q5)에 버린 중복 수를 적는다(Silver 지문과 기준값이 바뀐다), (다) 경고 시험만 더한다(Gold 시험: 날짜 안 event_id 중복 > 0이면 경고). 〔근거: 판단: (나)는 Silver 숫자와 기준값을 바꾸므로 사람이 정한다. CLAUDE.md 3절 4번〕
+
+
+## F-17. 원천에서 필수 필드가 사라져도 적재가 오류 없이 NULL 행을 쓴다 (재현, 기록표 문턱으로 막음) [해결, 결정 27, 28] 〔근거: 지시서 handoff_v6.md Q6 "기록: F-17(재현)"〕
+
+- 태그: `원천 변화`, `설계 가정` 〔근거: 판단: 실제로 잃은 적은 없고, 읽기 방식의 성질이다〕
+- 언제·어디: 2026-11-22, `tests/test_load_audit.py`의 임시 창고. 〔근거: 코드: tests/test_load_audit.py `test_actor_removed_fails_and_unguarded_loads_silently`〕
+- 재현: 07-13으로 옮긴 표본 3,407줄에서 모든 줄의 `actor`를 지우고 가드를 끈 채(`gate_on=False`) 적재했다. 오류 없이 3,407행이 들어가고 actor_name, actor_key가 모두 NULL이었다(`count(actor_name) = 0`). 〔근거: 코드: 같은 시험의 마지막 assert `(3407, 0, 0)` 통과〕
+- 원인: 스키마를 지정한 JSON 읽기에서 없는 필드는 깨진 줄이 아니라 NULL이다. 옛 적재(DROPMALFORMED)는 깨진 줄만 버리므로 필드가 통째로 사라지면 아무것도 막지 않았다. 〔근거: 코드: 커밋 79ef270 load_events.py `option("mode", "DROPMALFORMED")`. 문서: [Spark JSON mode](https://spark.apache.org/docs/latest/sql-data-sources-json.html) "PERMISSIVE ... sets malformed fields to null"〕
+- 실제 사례: GitHub는 2025-10에 Events API의 PushEvent에서 `payload.commits` 등을 뺐고, 그 필드를 읽던 쪽은 오류 없이 빈 값을 받았다. 이 프로젝트는 payload를 읽지 않아 그 변화에는 영향이 없다. 〔근거: 문서: [GitHub changelog 2025-08-08](https://github.blog/changelog/2025-08-08-upcoming-changes-to-github-events-api-payloads/), [DEV 글](https://dev.to/flarecanary/github-silently-removed-payloadcommits-from-pushevent-heres-what-broke-and-how-to-catch-the-2i33). 코드: load_events.py `SCHEMA`에 payload 없음〕
+- 처방: 필수 필드 5개의 NULL 비율이 0.1%를 넘으면 쓰지 않고 실패한다(결정 27). 같은 파일을 가드를 켜고 적재하면 `actor.login NULL 3407 / 3407행`으로 SystemExit, 07-13 events 0행, 기록표 null_actor_login 3407. 〔근거: 코드: 같은 시험의 앞 세 assert 통과〕
+- 남는 틈: 필수 필드가 아닌 칸이 사라지는 것은 막지 않는다. 지금 events가 읽는 칸은 actor.id와 repo.id가 더 있는데 문턱에 넣지 않았다(login과 name이 같은 객체에서 오므로 객체째 사라지면 함께 걸린다). 〔근거: 코드: load_events.py `SCHEMA`, `REQUIRED`. 판단: 반증 조건은 actor.id만 사라지고 login은 남는 원천 변화가 생기는 경우. 그때 REQUIRED에 더한다〕
+
+## F-21. 새로 받은 레포에서 `docker compose build`/`run bot-job`이 멈춘다 [열림, 처방은 사용자 결정 대기] 〔근거: 측정: M-33 사본 copy1 `docker compose build bot-job` 종료 코드 1〕
+- 증상: `error while interpolating services.airflow-db.environment.POSTGRES_PASSWORD: required variable POSTGRES_PASSWORD is missing a value: set POSTGRES_PASSWORD in .env` 〔근거: 측정: copy1에서 docker compose build bot-job, 종료 코드 1, 0초〕
+- 조건: .env가 없는 사본(.env는 .gitignore). bot-job만 골라도 compose는 파일 전체의 `${VAR:?}`를 먼저 풀어 Airflow 서비스 변수 때문에 멈춘다. 〔근거: 코드: docker-compose.yml x-airflow-common, airflow-db의 `:?`. .gitignore `.env`〕
+- 처리: 데모와 CI는 compose 대신 `docker build --target bot-job` + `docker run -v <레포>:/work`로 돌렸다. compose 파일은 고치지 않았다. 〔근거: 코드: .github/workflows/ci.yml 머리말〕
+- 처방 후보(결정 필요): (가) .env.example을 두고 README에 복사 단계, (나) bot-job을 별도 compose 파일로 분리, (다) README 한 줄 실행을 docker run으로. 〔근거: 판단: (다)는 지금 바로 되고 (가)(나)는 compose 관례를 지킨다. 사용자가 고른다(CLAUDE.md 3절 4번)〕
+
+## F-22. 결과가 0행인 쓰기를 "다른 커밋에 덮였다(F-7)"로 보고한다 [열림, 고치지 않음] 〔근거: 코드: spark_jobs/run_sql.py 77 ~ 85행. 번호는 두 세션 합의(이 세션 F-21, F-22)〕
+
+- 태그: `진단`, `기존 코드` 〔근거: 판단: 시험 코드를 쓰다 만났고, 기존 run_sql.py라 고치지 않았다(CLAUDE.md 3절 8번, 작업 규칙)〕
+- 증상: `SystemExit: bot.silver.entity_features: 커밋이 표에 없다 (write-id 192f2c20-...). 다른 커밋에 덮였다 (F-7)` 〔근거: 실행 출력 2026-11-22 04:30 tests/test_pick_targets.py 첫 실행〕
+- 조건: 임시 창고에 features_account를 돌리지 않고 features_repo만 돌렸다. features_repo는 계정 피처를 읽으므로 결과가 0행이다. 동시에 쓰는 다른 프로세스는 없었다. 〔근거: 코드: sql/silver/features_repo.sql 1, 6행 `FROM bot.silver.entity_features`. 판단: 컨테이너 하나, 세션 하나〕
+- 원인 추정: 0행 `overwritePartitions()`는 Iceberg가 커밋을 건너뛰어 스냅샷이 생기지 않고, run_sql의 쓴 뒤 확인은 이를 동시 커밋 손실과 구분하지 못한다. 〔근거: 코드: run_sql.py 77 ~ 85행. 확인 필요: Iceberg 1.11.0 `SparkWrite` DynamicOverwrite의 빈 커밋 처리(소스에서 "skipping commit" 분기 확인)〕
+- 영향: 실제로는 결과가 비면 이 메시지가 원인을 F-7로 잘못 가리킨다. run_sql.py 주석은 "근거는 대상 전부에 행을 내서 0행이 안 나온다"고 가정한다. 피처를 빠뜨린 순서 실수가 동시성 문제로 보인다. 〔근거: 코드: run_sql.py 76행 ponytail 주석〕
+- 처방 후보(고르지 않음): (가) 쓰기 전에 결과 행 수를 세어 0이면 "결과 0행"으로 따로 실패, (나) 확인 실패 메시지에 "결과가 0행이었을 수도 있다"를 더함. 〔근거: 판단: (가)는 한 번 더 읽고, (나)는 비용이 없다〕
+- 이번 처리: 시험 쪽에서 features_account를 먼저 돌리게 고쳤다(내가 새로 쓴 시험이라 고침). 〔근거: 코드: tests/test_pick_targets.py fixture〕
+- 갱신(2026-11-22): 웹 근거 셋(대상 web_client)이 registry에 들어온 뒤 같은 기제가 GH 날짜를 도는 곳에서 나타났다. scripts/demo.py가 웹 근거를 GH 표본에 돌려 0행 쓰기를 F-7로 알렸다(다른 세션이 실행해 찾음). run_sql.py는 그대로 두고, GH 날짜를 도는 곳(demo, 시험 셋, dags/bot_build.py)이 `dbt_build.is_gh`로 GH 근거만 고르게 비켜 갔다. 열림 상태는 그대로다. 〔근거: 코드: warehouse/dbt_build.py is_gh, scripts/demo.py 74행. 실행: demo rc=0, dbt PASS 35 (2026-11-22 06:52Z). 결정 26〕
+
+<a id="f-23"></a>
+## F-23. AUTH 원본에 요청 없이 끊긴 줄 30,763개가 있어 적재 가드가 막았다 (가드가 제대로 막음, 결정 34로 계약을 맞춤) [해결] 〔근거: 실행: spark_jobs/load_web.py 첫 실행 2026-11-22 07:0xZ〕
+
+- 태그: `새 원천`, `계약` 〔근거: 판단: 오늘 쓴 적재기의 필수 필드 가정이 원본과 달랐다〕
+- 증상: `auth_lib: 쓰지 않고 멈춘다. resource NULL 30763 / 4091155행 > 문턱 0.1%`. 적재 기록표에 status='rejected' 한 행이 남고 events는 쓰지 않았다. 〔근거: 실행 출력 스크래치 auth/log_load.txt. 코드: load_web.py gate〕
+- 원인: resource가 없는 줄은 깨진 줄이 아니라 nginx가 남긴 정상 줄이다. 30,752줄이 응답 408(연결만 열고 요청을 보내지 않아 시간 초과), 10줄이 400, 1줄이 200이다. 모두 요청 줄이 "-"이고 UA도 "-"이며, JSON에 resource와 method 키가 아예 없다. 〔근거: 계산: 원본 4,091,155줄을 파이썬으로 훑어 키 묶음과 (method, response)를 셈. 문서: [nginx 408](https://nginx.org/en/docs/http/ngx_http_core_module.html#client_header_timeout) client_header_timeout〕
+- 영향: 막지 않았다면 없음(이 줄들은 UA가 "-"라 사전 실험도 세션에서 뺐다). 가드가 원천의 실제 모양을 처음 적재에서 드러냈다. 〔근거: 코드: experiments/p0_bot_detection/web/02_detect.py `ua NOT IN ('', '-')`〕
+- 처방: 응답 408, 400 줄은 resource NULL을 문턱에서 빼고 따로 센다(`no_request`). 그 밖의 줄에서 resource가 빠지면 여전히 막는다. events에는 action = 'no_request'로 남긴다(원본 그대로). 〔근거: 코드: load_web.py no_req, sql/silver/events_auth_lib.sql. 결정 34〕
+- 재발 방지: 새 원천은 필수 필드를 정하기 전에 원본 전체의 키 묶음을 한 번 센다. 원천 붙이는 비용(M-30)에 이 한 번을 넣었다. 〔근거: 판단: 표본 몇 줄로는 0.75%짜리 줄을 못 봤다〕
+

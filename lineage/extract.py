@@ -100,7 +100,7 @@ def build_schema(manifest):
     return schema, models
 
 
-REGISTRY = "rules.registry"  # 원천 노드 이름. 컬럼 = 시드 컬럼 (근거 이름, 지금 버전, 계열)
+REGISTRY = "rules.registry"  # 원천 노드 이름. 컬럼 = 시드 컬럼 (근거 이름, 지금 버전, 계열, 대상 종류)
 
 
 def registry_edges(manifest):
@@ -108,7 +108,7 @@ def registry_edges(manifest):
     seed = next(n for n in manifest["nodes"].values() if n["resource_type"] == "seed" and n["name"] == "evidence_current")
     return [{"sql_file": "rules/registry.yml", "file_kind": "registry", "target_table": f"{seed['database']}.{seed['schema']}.{seed['alias']}",
              "target_column": c, "source_table": REGISTRY, "source_column": c, "kind": "DIRECT", "subkind": "IDENTITY",
-             "status": "ok", "detail": "warehouse/dbt_build.py write_evidence_current"} for c in ("evidence_id", "rule_version", "family")]
+             "status": "ok", "detail": "warehouse/dbt_build.py write_evidence_current"} for c in ("evidence_id", "rule_version", "family", "entity")]
 
 
 def git(*args):

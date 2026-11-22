@@ -93,6 +93,8 @@ python -m scripts.baseline compare docs/local_baseline.json /tmp/b.json
 | dbt_build | 8g | 3.62GiB | 22초 |
 | record_build | 2g | 0.37GiB | 4초 |
 
+- 갱신(2026-11-22, handoff_v7.md 단계 6): features_account의 6.09GiB는 필요량이 아니었다. 12g ~ 2g 모두 성공, spill은 2g에서만. 상한은 4g로 내렸다. 〔근거: 측정: M-37. 결정 31〕
+
 - 클러스터에서는 시간과 메모리 모두 다를 것이다. 같아야 하는 것은 1절뿐이다.
 - 생존 확인(late_truth)의 시간은 GitHub 응답에 기대어 비교하지 않는다 (M-21: 다섯 구간 요청 2,445번에 7분 38초).
 

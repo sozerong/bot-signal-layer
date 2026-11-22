@@ -23,6 +23,7 @@ TARGETS = {
     "silver/features_account.sql": "bot.silver.entity_features",
     "silver/features_repo.sql": "bot.silver.entity_features",
     "silver/features_repo_f2.sql": "bot.silver.entity_features",  # 피처 버전 f2 (결정 9). 같은 파티션을 f1 대신 채운다
+    "silver/events_auth_lib.sql": "bot.silver.events",  # 웹 원천 AUTH (load_web.py, 결정 26)
 }
 EVIDENCE = "bot.silver.evidence"
 

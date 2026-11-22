@@ -370,17 +370,18 @@ const panels = { lab: { rows: [], cols: [], types: {}, sql: "", name: "결과" }
 
 /* ---------- 거름 강도 ---------- */
 const LEVELS = [
-  { v: "default", n: "지표별 기본", d: "지표마다 정해 둔 정책" },
+  { v: "default", n: "지표별 기본", d: "지표마다 정해 둔 정책. 잣대는 정답으로 채점된 balanced" },
   { v: "none", n: "거르지 않음", d: "봇을 빼지 않은 원본" },
   { v: "lenient", n: "lenient", d: "스스로 봇이라고 밝힌 계정만" },
-  { v: "balanced", n: "balanced", d: "사칭 계정, 무리 지어 움직인 계정까지" },
-  { v: "strict", n: "strict", d: "행동 근거로 걸린 계정까지 뺌" },
+  { v: "balanced", n: "balanced", d: "무리 지어 star를 누른 계정까지. 정답으로 채점됨" },
+  { v: "strict", n: "strict", d: "하루 20시간 넘게 돌거나 한 시간에 저장소 100개 넘게 움직인 계정까지. 채점 안 됨, 보고용 상한" },
 ];
 // 각 단계 밑의 막대: 그날 이벤트 중 남는 몫 (summary()가 채운다)
 $("sieve").insertAdjacentHTML("beforeend", LEVELS.map((l, i) =>
   `<label><input type="radio" name="lvl" value="${l.v}" ${i === 0 ? "checked" : ""}><span class="n">${l.n}</span><span class="d">${l.d}</span><span class="k"><i></i><b></b><em></em></span></label>`).join(""));
 const level = () => document.querySelector("input[name=lvl]:checked").value;
 let POLICY = {};
+const METRIC_KO = { active_accounts: "활동 계정", events: "이벤트", events_per_account: "계정당 이벤트", top100_kept: "star 상위 100", repos_flagged: "가짜 star 판정 저장소" };
 const policyFor = (metric) => (level() === "default" ? POLICY[metric] || "lenient" : level());
 
 /* ---------- 탭 ---------- */
@@ -581,9 +582,9 @@ async function summary() {
   const pname = (p) => (p === "none" ? "거르지 않으면" : `${p}로 거르면`);
   let html = `<p>${Number(d.slice(5, 7))}월 ${Number(d.slice(8))}일 이벤트 <mark>${nf(ev.none.value)}</mark>건 중 ${pname(ev.p)} <mark>${nf(ev.kept.value)}</mark>건이 남습니다. <span class="q">${down(ev.kept.change_vs_none)}.</span></p>`;
   if (ac.none.value != null) html += `<p>활동 계정은 ${pname(ac.p)} <mark>${nf(ac.none.value)}</mark>개에서 <mark>${nf(ac.kept.value)}</mark>개가 됩니다. <span class="q">${down(ac.kept.change_vs_none)}.</span></p>`;
-  if (top.kept.value != null) html += `<p>star 상위 100개 저장소 가운데 ${pname(top.p)} <mark>${nf(top.kept.value)}</mark>개만 그대로 남습니다.</p>`;
-  if (mde.none.rel_mde != null) html += `<p>반반 실험으로 계정당 이벤트를 비교하면 잡을 수 있는 최소 효과가 <mark>${pf(mde.none.rel_mde)}</mark>에서 <mark>${pf(mde.kept.rel_mde)}</mark>로 바뀝니다.</p>`;
-  if (level() === "default") html += `<p class="q" style="font-size:14px">지표별 기본 정책: ${Object.entries(POLICY).map(([m, p]) => `${m} ${p}`).join(", ")}</p>`;
+  if (top.kept.value != null) html += `<p>star 상위 100개 저장소 가운데 ${pname(top.p)} <mark>${nf(top.kept.value)}</mark>개만 그대로 남습니다. <span class="q">상위 100 목록은 거르지 않아도 날마다 73 ~ 89% 바뀝니다.</span></p>`;
+  if (mde.none.rel_mde != null) html += `<p>반반 실험으로 계정당 이벤트를 비교하면 잡을 수 있는 최소 효과가 <mark>${pf(mde.none.rel_mde)}</mark>에서 <mark>${pf(mde.kept.rel_mde)}</mark>로 바뀝니다. <span class="q">거르지 않은 값이 큰 것은 대부분 스스로 봇이라고 밝힌 계정 하나 때문입니다.</span></p>`;
+  if (level() === "default") html += `<p class="q" style="font-size:14px">지표별 기본 정책: ${Object.entries(POLICY).map(([m, p]) => `${METRIC_KO[m] || m} ${p}`).join(", ")}</p>`;
   $("story").innerHTML = html;
   // 거름 강도 막대: 같은 날 events 값을 단계마다
   const all = get("events", "none").value;
@@ -651,7 +652,7 @@ order by rank_all` },
 from suspects
 where entity_type = 'gh_account' and event_date = '{{date}}'::date
 order by n_events desc limit 50` },
-  { t: "근거별로 몇 명을 뺐나", s: "정책마다 근거가 걸린 대상 수", needs: "why_excluded", sql: `select policy, evidence_id, family, count(distinct entity_key) as entities
+  { t: "근거별로 몇 명이 걸렸나", s: "정책마다 근거가 걸린 대상 수. 범주를 바꾸지 않은 근거도 센다(R-13)", needs: "why_excluded", sql: `select policy, evidence_id, family, count(distinct entity_key) as entities
 from why_excluded group by all order by policy, entities desc` },
   { t: "가짜 star 판정의 정밀도", s: "정답(저장소 삭제)으로 채점한 결과", sql: `select evidence_id, rule_version, window_end, n_hit, n_hit_with_truth, "precision", control_positive_rate
 from evaluation order by evidence_id, window_end nulls last` },
@@ -872,7 +873,7 @@ try {
   take(); await schema(); drawHist(); await pickReq(0);
   $("about").innerHTML = `${meta.event_date_min}부터 ${meta.event_date_max}까지의 GitHub 이벤트입니다. 규칙 묶음 <b>${meta.released_ruleset}</b> 기준, ${meta.exported_at.replace("T", " ").slice(0, 16)} UTC에 내보냈습니다.` +
     (meta.with_entities ? " 계정과 저장소 이름이 든 로컬 데이터라 밖에 공개하면 안 됩니다." : " 공개용 집계라 계정과 저장소 이름은 없습니다.");
-  $("foot").innerHTML = `<p>Gold 표 ${Object.keys(meta.tables).length}개를 작게 줄여 브라우저 안의 DuckDB로 읽습니다. 서버와 로그인이 없고, 숫자는 내보낸 시각 기준입니다. 필요한 요청은 저장소 이슈로 남겨 주세요. 설계 근거는 <code>docs/site_design.md</code>에 있습니다.</p>`;
+  $("foot").innerHTML = `<p>Gold 표 ${Object.keys(meta.tables).length}개를 작게 줄여 브라우저 안의 DuckDB로 읽습니다. 서버와 로그인이 없고, 숫자는 내보낸 시각 기준입니다. 원하는 요구사항은 <a href="https://github.com/sozerong/GH/issues/new?template=requirement.yml">이슈 양식</a>(무엇을, 어느 지표, 어느 기간)으로 남겨 주세요. 받은 요청은 요구사항 카드로 더합니다. 설계 근거는 <code>docs/site_design.md</code>에 있습니다.</p>`;
   const h = location.hash.slice(1); if (h && tab(h) && !tab(h).hidden) tab(h).click();
 } catch (e) {
   $("about").className = "about err"; $("about").textContent = "데이터를 불러오지 못했습니다: " + (e.message || e) + ". 인터넷 연결과 data/meta.json을 확인하세요.";

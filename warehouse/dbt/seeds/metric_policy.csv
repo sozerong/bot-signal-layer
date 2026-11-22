@@ -1,6 +1,9 @@
 metric,default_policy,reason,measurement
-active_accounts,lenient,"규칙 제안 그대로(사람 확인 전): 더 엄격해도 변화 0.34%가 자연 변동 2.55%보다 작다",M-26
-events,lenient,"규칙 제안 그대로(사람 확인 전): balanced 단계 1.36%가 자연 변동 2.45%보다 작아 멈춘다. strict 단계는 13.68%라 규칙 고칠지 결정 필요",M-26
-events_per_account,strict,"규칙 제안 그대로(사람 확인 전): balanced 1.05%, strict 13.61%가 자연 변동 0.62%보다 크다",M-26
-top100_kept,balanced,"규칙 제안 그대로(사람 확인 전): balanced 단계 67.0%가 자연 변동 0.99%보다 크고 strict 단계는 0%",M-26
+active_accounts,lenient,"규칙 제안 그대로(사람 확인 전, D10 잣대 balanced): balanced와 차이 0.34%가 자연 변동 2.55%보다 작다",M-26
+events,lenient,"규칙 제안 그대로(사람 확인 전, D10 잣대 balanced): balanced와 차이 1.36%가 자연 변동 2.44%보다 작다. strict 13.68%는 채점되지 않은 행동 근거라 보고용 상한",M-26 M-36
+events_per_account,balanced,"규칙 제안 그대로(사람 확인 전, D10 잣대 balanced): balanced와 차이 1.05%가 자연 변동 0.62%보다 크다. 실험 대상 선정용은 D10 (다) 설계안(배정 전 행동으로 거름)을 따로 본다",M-26 M-36
+top100_kept,balanced,"규칙 제안 그대로(사람 확인 전, D10 잣대 balanced): 차이 67.0%가 자연 변동 0.99%보다 크다. 다만 자연 변동은 남은 개수의 날짜 변화라 목록 교체(날마다 73 ~ 89%)와 다른 양이다",M-26 M-36
 repos_flagged,balanced,"봇 판정 수 자체(detection)라 기본 정책 규칙 대상이 아니다. 조직 계열이 처음 드는 정책",M-26
+sessions,lenient,"웹(AUTH). 웹에는 조직·인프라 근거가 없어 balanced가 lenient와 같다(차이 0). 규칙 제안 그대로 lenient. strict(assetless_browser)는 도서관 로그에서 무해한 자동화만 잡혀 보고용",M-32
+detail_views,lenient,"웹(AUTH). balanced = lenient(차이 0)라 lenient. 선언 봇이 상세 조회를 크게 부풀려 lenient만으로도 값이 크게 준다",M-32
+search_to_detail,lenient,"웹(AUTH). balanced = lenient(차이 0)라 lenient. 비율 지표라 분자·분모 변화율을 함께 본다",M-32

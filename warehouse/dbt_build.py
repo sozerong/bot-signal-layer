@@ -34,11 +34,18 @@ def write_evidence_current():
     reg = yaml.safe_load((ROOT / "rules" / "registry.yml").read_text(encoding="utf-8"))
     with open(DBT / "seeds" / "evidence_current.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f, lineterminator="\n")
-        w.writerow(["evidence_id", "rule_version", "family"])
+        w.writerow(["evidence_id", "rule_version", "family", "entity"])
         for k, v in sorted(reg.items()):
             if "family" not in v:  # 피처 버전 항목(features_repo)은 근거가 아니다
                 continue
-            w.writerow([k, v["current"], v["family"]])
+            ent = v["entity"] if isinstance(v["entity"], str) else "|".join(v["entity"])  # 시험 every_evidence_ran이 원천을 가른다
+            w.writerow([k, v["current"], v["family"], ent])
+
+
+def is_gh(v):
+    """registry 근거 항목이 GitHub 대상인가. 웹 근거(web_client)는 GH 날짜에 돌면 0행이라 Iceberg가 커밋을 건너뛰고
+    쓰기 확인(run_sql.run)이 "다른 커밋에 덮였다"로 실패한다 (F-22). GH 날짜를 도는 곳(시험, dags/bot_build.py)은 이것으로 거른다 (결정 26)"""
+    return "family" in v and all(e.startswith("gh_") for e in ([v["entity"]] if isinstance(v["entity"], str) else v["entity"]))
 
 
 # 판정을 정하는 모델 (docs/review_logic.md R-1). 판정 경로에 모델이 늘면 여기에 더한다
