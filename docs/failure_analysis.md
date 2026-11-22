@@ -331,3 +331,13 @@
 - 처방: 응답 408, 400 줄은 resource NULL을 문턱에서 빼고 따로 센다(`no_request`). 그 밖의 줄에서 resource가 빠지면 여전히 막는다. events에는 action = 'no_request'로 남긴다(원본 그대로). 〔근거: 코드: load_web.py no_req, sql/silver/events_auth_lib.sql. 결정 34〕
 - 재발 방지: 새 원천은 필수 필드를 정하기 전에 원본 전체의 키 묶음을 한 번 센다. 원천 붙이는 비용(M-30)에 이 한 번을 넣었다. 〔근거: 판단: 표본 몇 줄로는 0.75%짜리 줄을 못 봤다〕
 
+
+<a id="f-24"></a>
+## F-24. CI 이미지 빌드가 Maven Central의 429(요청 너무 많음)로 실패했다 (일시적, 다시 돌려 통과) [기록만] 〔근거: 실행: GitHub Actions run 45001102955 1회차 "invalid response status 429"〕
+
+- 태그: `CI`, `바깥 의존` 〔근거: 판단: 우리 코드가 아니라 바깥 저장소 응답〕
+- 증상: 2026-11-22 08:04Z push(커밋 3d022cf)의 ci가 "bot-job 이미지" 단계 7초 만에 실패. `failed to load cache key: invalid response status 429`. 뒤 단계는 모두 건너뜀. 〔근거: gh run view --log-failed〕
+- 원인: Dockerfile 9행 `ADD https://repo1.maven.org/…/iceberg-spark-runtime-4.1_2.13-1.11.0.jar`는 이미지 캐시가 있어도 캐시 열쇠를 정하려고 빌드마다 Maven Central에 요청한다. 그 요청이 GitHub 공용 러너 주소에서 요청 수 제한에 걸렸다. 〔근거: 코드: Dockerfile 9행. 로그 "#6 … ADD … ERROR: invalid response status 429". 확인 필요: Maven Central의 정확한 제한 기준〕
+- 영향: 그 push의 시험 결과가 빠졌다. 실패한 작업만 다시 돌리자(2회차) 이미지 44초, 전체 3분 56초로 모두 통과했다. 코드 결함은 아니다. 〔근거: gh run view attempt 2 success〕
+- 처방 제안(만들지 않음): jar를 `ADD` URL 대신 `RUN curl … && sha256sum -c`로 받거나 `ADD --checksum=sha256:…`을 쓰면, 내용 지문이 고정돼 캐시가 맞을 때 Maven에 다시 묻지 않는다. 〔근거: 문서: Dockerfile reference "ADD --checksum". 판단: 고치기 전 사용자 확인(기존 이미지 정의)〕
+- 재발 방지: 지금은 빨간 CI가 이 오류면 "실패한 작업 다시 실행"을 먼저 한다. 〔근거: 이번 2회차 통과〕
