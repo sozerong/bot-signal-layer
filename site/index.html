@@ -750,7 +750,8 @@ async function schema() {
     where table_schema = 'main' order by case when table_name = 'policy_compare_released' then 0 else 1 end, table_name, ordinal_position`);
   const by = {}; for (const r of rows) (by[r.t] ??= []).push(r);
   $("s-tree").innerHTML = Object.entries(by).map(([t, cs]) => {
-    const desc = meta.models?.[t]?.columns || meta.models?.[t.replace(/_released$/, "")]?.columns || {};
+    // policy_compare_released는 policy_compare와 컬럼이 같아 그 설명을 쓴다 (gold.yml에 뷰 항목은 있지만 컬럼 설명은 원래 표에만 있다)
+    const desc = meta.models?.[t.replace(/_released$/, "")]?.columns || {};
     const n = meta.tables[t]?.rows;
     return `<details data-t="${esc(t)}"><summary><button class="t" data-preview="${esc(t)}">${esc(t)}</button><span class="rc">${n != null ? nf(n) + "행" : "뷰"}</span></summary>
       <p class="g">${esc(GRAIN[t] || meta.tables[t]?.grain || "")}</p>
