@@ -20,6 +20,7 @@
 ## 정책
 
 - **정책**: 어느 계열까지 봇으로 뺄지 정한 묶음이다. 같은 데이터라도 쓰는 목적마다 알맞은 거름 강도가 달라서 셋을 함께 둔다. 〔근거: criteria.md 4절〕
+- **화면 이름**: 사이트(site/index.html)에서는 정책을 "봇 필터 강도"로 부르고 원본(none), 약하게(lenient), 보통(balanced), 강하게(strict)로 보인다. 지표별 기본 정책은 "지표별 추천", 규칙 묶음은 "규칙 버전"으로 보인다. SQL과 데이터 값은 영문 그대로다. 〔근거: site_design.md 12절〕
 - **lenient**: 스스로 봇이라고 밝힌 계정만 뺀다. 상용 분석 도구가 기본으로 거르는 수준이다. 〔근거: 코드: policy_family.csv lenient 줄〕
 - **balanced**: lenient에 더해, 저활동이면서 그날 가짜 star 저장소에 star를 누른 계정과 가짜 star 저장소를 뺀다. 정답(나중에 확인된 저장소 삭제)으로 채점된 정책이다. 〔근거: 코드: entity_verdict.sql 조직 계열 줄. measurements.md M-21〕
 - **strict**: balanced에 더해, 행동 근거(`always_on`: 하루 20시간 넘게 활동, `multi_repo_burst`: 한 시간에 저장소 100개 넘게 같은 행동)로 걸린 계정까지 뺀다. 웹 원천에서는 자산 없는 브라우저(`assetless_browser`)로 걸린 대상까지 뺀다. 저활동 하나만으로는 빼지 않는다. 채점되지 않았고, 그날 이벤트가 많은 계정만 빼므로 실험 대상 선정에 쓰면 치우친다. 보고용 상한으로만 쓴다. 〔근거: 코드: entity_verdict.sql 행동 계열 줄. measurements.md M-36 (b)〕

@@ -64,6 +64,7 @@ nav button:focus-visible{outline-offset:-2px}
 .sieve label{position:relative;display:grid;grid-template-rows:auto 1fr auto;gap:2px;padding:8px 0 0;cursor:pointer;color:var(--muted)}
 .sieve input{position:absolute;opacity:0;pointer-events:none}
 .sieve .n{font-weight:600;font-size:15px;color:var(--ink)}
+.sieve .n small{font:400 12px var(--mono);color:var(--muted);margin-left:6px}
 .sieve .d{font-size:13px;line-height:1.4}
 .sieve .k{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:6px 8px;margin-top:6px;font-size:13px}
 .sieve .k i{grid-column:1/-1;display:block;height:8px;border-radius:1px;
@@ -245,14 +246,14 @@ footer p{max-width:52em;margin:0}
 <div class="wrap">
 <header>
   <h1>실유저 데이터 실험실</h1>
-  <p class="lede">GitHub 공개 이벤트 일주일 치에서 봇을 뺀 숫자입니다. SQL로 뽑아서 엑셀이나 구글 시트로 가져갈 수 있습니다.</p>
-  <p class="about" id="about">데이터를 불러오는 중입니다.</p>
+  <p class="lede">GitHub 공개 이벤트 일주일 치에서 봇을 걸러 낸 숫자예요. SQL로 뽑아서 엑셀이나 구글 시트로 가져갈 수 있어요.</p>
+  <p class="about" id="about">데이터를 불러오고 있어요.</p>
 </header>
 
 <nav role="tablist" id="tabs" aria-label="화면"></nav>
 
 <fieldset class="sieve" id="sieve">
-  <legend><b>거름 강도</b>요약과 정책 비교 표에 적용됩니다. 막대는 그날 이벤트 중 남는 몫입니다.</legend>
+  <legend><b>봇 필터 강도</b>요약과 강도별 비교 표에 적용돼요. 막대는 그날 이벤트 중 남는 비율이에요.</legend>
 </fieldset>
 
 <main>
@@ -272,23 +273,23 @@ footer p{max-width:52em;margin:0}
       </aside>
       <div>
         <div class="editor">
-          <div class="ed-head"><b>DuckDB SQL</b><span>여러 쿼리 중 일부만 골라 실행하면 고른 부분만 돕니다</span></div>
+          <div class="ed-head"><b>DuckDB SQL</b><span>일부만 선택하고 실행하면 선택한 부분만 실행돼요</span></div>
           <textarea id="q-sql" spellcheck="false" aria-label="SQL" placeholder="select * from policy_compare_released limit 100"></textarea>
         </div>
         <div class="out-bar" data-panel="q"></div>
-        <div id="q-out"><div class="empty"><b>실행한 쿼리가 아직 없습니다.</b>왼쪽에서 표 이름을 누르면 처음 100행이 나오고, 컬럼 이름을 누르면 커서 자리에 이름이 들어갑니다.</div></div>
+        <div id="q-out"><div class="empty"><b>아직 실행한 쿼리가 없어요.</b>왼쪽에서 표 이름을 누르면 처음 100행이 나오고, 컬럼 이름을 누르면 커서 위치에 이름이 들어가요.</div></div>
       </div>
     </div>
   </section>
 
-  <section id="t-lab" data-title="요구사항" hidden>
-    <p class="note">자주 받는 요청을 SQL로 만들어 두었습니다. 고르면 바로 실행되고, SQL을 고친 뒤 Ctrl+Enter로 다시 돌릴 수 있습니다.</p>
+  <section id="t-lab" data-title="자주 쓰는 쿼리" hidden>
+    <p class="note">자주 받는 요청을 SQL로 만들어 두었어요. 고르면 바로 실행되고, SQL을 고친 뒤 Ctrl+Enter로 다시 실행할 수 있어요.</p>
     <div class="lab">
       <ul class="reqs" id="reqs"></ul>
       <div>
         <div class="row" id="req-params"></div>
         <div class="editor">
-          <div class="ed-head"><b>DuckDB SQL</b><span>표와 컬럼 목록은 SQL 콘솔 탭 왼쪽에 있습니다</span></div>
+          <div class="ed-head"><b>DuckDB SQL</b><span>표와 컬럼 목록은 SQL 콘솔 탭 왼쪽에 있어요</span></div>
           <textarea id="lab-sql" spellcheck="false" aria-label="SQL"></textarea>
         </div>
         <div class="out-bar" data-panel="lab"></div>
@@ -298,7 +299,7 @@ footer p{max-width:52em;margin:0}
   </section>
 
   <section id="t-take" data-title="가져가기" hidden>
-    <p class="note">표를 고르면 아래 주소와 코드가 그 표로 바뀝니다. 파일 주소는 고정이라 시트나 노트북에서 다시 불러오면 가장 최근에 내보낸 데이터를 받습니다.</p>
+    <p class="note">표를 고르면 아래 주소와 코드가 그 표에 맞게 바뀌어요. 파일 주소는 바뀌지 않아서, 시트나 노트북에서 다시 불러오면 가장 최근에 내보낸 데이터를 받아요.</p>
     <div class="row">
       <label class="f">표<select id="k-pick"></select></label>
       <button class="plain" id="k-all">모든 표를 엑셀 파일 하나로 받기</button>
@@ -307,8 +308,8 @@ footer p{max-width:52em;margin:0}
     <div class="take" id="take"></div>
   </section>
 
-  <section id="t-metric" data-title="정책 비교" data-ref data-sieve hidden>
-    <p class="note">지표 하나를 네 정책으로 나란히 봅니다. 색칠한 줄이 위에서 고른 거름 강도입니다. extra_vs_lenient는 자기 신고 봇을 뺀 뒤 더 빠지는 몫, rel_mde는 반반 실험에서 잡을 수 있는 최소 효과입니다.</p>
+  <section id="t-metric" data-title="강도별 비교" data-ref data-sieve hidden>
+    <p class="note">지표 하나를 네 가지 필터 강도로 나란히 봐요. 색칠한 줄이 위에서 고른 강도예요. '약하게 대비 추가'는 스스로 봇이라고 밝힌 계정을 뺀 뒤 더 빠지는 비율이고, '최소 탐지 효과'는 50:50 A/B 테스트로 잡아낼 수 있는 가장 작은 차이예요. 열 이름에 마우스를 올리면 SQL 컬럼 이름이 보여요.</p>
     <div class="row">
       <label class="f">날짜<select id="m-date"></select></label>
       <label class="f">지표<select id="m-metric"></select></label>
@@ -316,26 +317,26 @@ footer p{max-width:52em;margin:0}
     <div id="m-out"></div>
   </section>
 
-  <section id="t-mde" data-title="실험 감도" data-ref hidden>
-    <p class="note">자르기 백분위마다 미리 계산해 둔 평균과 분산으로 MDE를 냅니다. 처리를 바꿔 봇을 거를 때와, 상위 값을 자를 때 MDE가 얼마나 줄어드는지 비교합니다.</p>
+  <section id="t-mde" data-title="MDE 계산기" data-ref hidden>
+    <p class="note">상위 값을 자르는 비율마다 미리 계산해 둔 평균과 분산으로 MDE(최소 탐지 효과)를 구해요. 봇 필터를 걸 때와 상위 값을 자를 때 MDE가 얼마나 줄어드는지 비교해 보세요.</p>
     <div class="row">
       <label class="f">날짜<select id="x-date"></select></label>
-      <label class="f">처리<select id="x-treat"><option>none</option><option>lenient</option><option>balanced</option><option>strict</option></select></label>
-      <label class="f"><span>상위 자르기 <output id="x-qv">100</output> 백분위</span><input type="range" id="x-q" min="90" max="100" step="0.5" value="100"></label>
+      <label class="f">필터 강도<select id="x-treat"><option value="none">원본 (none)</option><option value="lenient">약하게 (lenient)</option><option value="balanced">보통 (balanced)</option><option value="strict">강하게 (strict)</option></select></label>
+      <label class="f"><span>상위 <output id="x-qv">0</output>% 자르기</span><input type="range" id="x-q" min="0" max="10" step="0.5" value="0"></label>
       <label class="f">목표 MDE (%)<input type="number" id="x-target" value="2" step="0.5" min="0.1" style="width:96px"></label>
     </div>
     <div class="cells" id="x-cells"></div>
-    <p class="note small">MDE = (1.96 + 0.84) × √(2σ² ÷ (n/2)) ÷ 평균. 양측 5%, 검정력 80%. 자르기는 그날 계정당 이벤트를 그 백분위 값으로 낮춥니다.</p>
+    <p class="note small">MDE = (1.96 + 0.84) × √(2σ² ÷ (n/2)) ÷ 평균. 양측 검정, 유의수준 5%, 검정력 80% 기준이에요. 자르기는 그날 계정당 이벤트가 기준값을 넘으면 기준값으로 낮춰요.</p>
   </section>
 
-  <section id="t-ruleset" data-title="규칙 묶음" data-ref hidden>
-    <p class="note">이 화면의 숫자는 공개한 규칙 묶음 기준입니다. 새 묶음은 공개하기 전에 지표가 얼마나 바뀌는지 여기서 먼저 확인합니다.</p>
-    <h3>공개한 묶음</h3><div id="r-release"></div>
+  <section id="t-ruleset" data-title="규칙 버전" data-ref hidden>
+    <p class="note">이 화면의 숫자는 공개한 규칙 버전 기준이에요. 새 버전은 공개하기 전에 지표가 얼마나 바뀌는지 여기서 먼저 확인해요.</p>
+    <h3>공개한 버전</h3><div id="r-release"></div>
     <h3>지표별 차이</h3><div id="r-summary"></div>
   </section>
 
   <section id="t-dict" data-title="데이터 사전" data-ref hidden>
-    <p class="note">표마다 한 행이 무엇인지, 몇 행인지 적었습니다. 날짜별 상태는 이벤트 양과 봇 비율을 직전 날짜들의 중앙값과 비교해서, 0.5배 미만이거나 2배를 넘으면 확인 필요로 표시합니다.</p>
+    <p class="note">표마다 한 행이 무엇을 뜻하는지, 몇 행인지 적었어요. 날짜별 상태는 이벤트 수와 봇 비율을 직전 7일 중앙값과 비교해서, 0.5배보다 작거나 2배보다 크면 '확인 필요'로 표시해요.</p>
     <div id="d-tables"></div>
     <h3>컬럼</h3>
     <div class="row"><label class="f">표<select id="d-pick"></select></label></div>
@@ -343,14 +344,14 @@ footer p{max-width:52em;margin:0}
     <h3>날짜별 상태</h3><div id="d-health"></div>
   </section>
 
-  <section id="t-why" data-title="왜 빠졌나" data-ref hidden>
-    <p class="note">계정이나 저장소 이름을 넣으면 정책별로 빠졌는지, 어떤 근거가 어떤 규칙 버전과 점수로 걸렸는지 나옵니다. 이름이 든 로컬 묶음에서만 보이는 탭입니다.</p>
+  <section id="t-why" data-title="제외 이유" data-ref hidden>
+    <p class="note">계정이나 저장소 이름을 넣으면 강도별로 빠졌는지, 어떤 근거가 어떤 규칙 버전과 점수로 걸렸는지 보여 줘요. 이름이 들어 있는 로컬 데이터에서만 보이는 탭이에요.</p>
     <div class="row">
       <label class="f">이름<input type="text" id="w-name" list="w-names" placeholder="계정 또는 저장소 이름" size="28"></label>
       <button class="go" id="w-go">찾기</button>
       <datalist id="w-names"></datalist>
     </div>
-    <h3>정책별 상태</h3><div id="w-status"></div>
+    <h3>강도별 상태</h3><div id="w-status"></div>
     <h3>걸린 근거</h3><div id="w-evidence"></div>
   </section>
 </main>
@@ -370,18 +371,22 @@ const panels = { lab: { rows: [], cols: [], types: {}, sql: "", name: "결과" }
 
 /* ---------- 거름 강도 ---------- */
 const LEVELS = [
-  { v: "default", n: "지표별 기본", d: "지표마다 정해 둔 정책. 잣대는 정답으로 채점된 balanced" },
-  { v: "none", n: "거르지 않음", d: "봇을 빼지 않은 원본" },
-  { v: "lenient", n: "lenient", d: "스스로 봇이라고 밝힌 계정만" },
-  { v: "balanced", n: "balanced", d: "무리 지어 star를 누른 계정까지. 정답으로 채점됨" },
-  { v: "strict", n: "strict", d: "하루 20시간 넘게 돌거나 한 시간에 저장소 100개 넘게 움직인 계정까지. 채점 안 됨, 보고용 상한" },
+  { v: "default", d: "지표마다 맞는 강도를 써요. 어떤 강도인지는 요약 맨 아래에 있어요" },
+  { v: "none", d: "봇을 빼기 전 그대로예요" },
+  { v: "lenient", d: "스스로 봇이라고 밝힌 계정만 빼요" },
+  { v: "balanced", d: "무리 지어 스타를 누른 계정까지 빼요. 정답 데이터로 채점한 기준이에요" },
+  { v: "strict", d: "하루 20시간 넘게 활동하거나 한 시간에 저장소 100곳 넘게 건드린 계정까지 빼요. 채점하지 않았으니 최대치로만 보세요" },
 ];
+// 화면 이름. 값(none/lenient/balanced/strict)은 SQL의 treatment 값이라 바꾸지 않고 옆에 같이 보여 준다 (docs/site_design.md 12절)
+const LABEL = { default: "지표별 추천", none: "원본", lenient: "약하게", balanced: "보통", strict: "강하게" };
+const plab = (p) => (LABEL[p] && p !== "default" ? `${LABEL[p]} (${p})` : LABEL[p] || p);
+const ro = (w) => { const c = (w.charCodeAt(w.length - 1) - 0xac00) % 28; return c === 0 || c === 8 ? "로" : "으로"; }; // 받침 따라 로/으로
 // 각 단계 밑의 막대: 그날 이벤트 중 남는 몫 (summary()가 채운다)
 $("sieve").insertAdjacentHTML("beforeend", LEVELS.map((l, i) =>
-  `<label><input type="radio" name="lvl" value="${l.v}" ${i === 0 ? "checked" : ""}><span class="n">${l.n}</span><span class="d">${l.d}</span><span class="k"><i></i><b></b><em></em></span></label>`).join(""));
+  `<label><input type="radio" name="lvl" value="${l.v}" ${i === 0 ? "checked" : ""}><span class="n">${LABEL[l.v]}${l.v === "default" ? "" : `<small>${l.v}</small>`}</span><span class="d">${l.d}</span><span class="k"><i></i><b></b><em></em></span></label>`).join(""));
 const level = () => document.querySelector("input[name=lvl]:checked").value;
 let POLICY = {};
-const METRIC_KO = { active_accounts: "활동 계정", events: "이벤트", events_per_account: "계정당 이벤트", top100_kept: "star 상위 100", repos_flagged: "가짜 star 판정 저장소" };
+const METRIC_KO = { active_accounts: "활동 계정", events: "이벤트", events_per_account: "계정당 이벤트", top100_kept: "스타 상위 100", repos_flagged: "가짜 스타로 판정한 저장소" };
 const policyFor = (metric) => (level() === "default" ? POLICY[metric] || "lenient" : level());
 
 /* ---------- 탭 ---------- */
@@ -394,7 +399,7 @@ sections.forEach((s, i) => {
   if (s.hasAttribute("data-ref") && !sections[i - 1].hasAttribute("data-ref")) b.className = "gap";
   b.onclick = () => {
     sections.forEach((x) => (x.hidden = x !== s));
-    $("sieve").hidden = !s.hasAttribute("data-sieve"); // 거름 강도는 그것이 바꾸는 탭에서만
+    $("sieve").hidden = !s.hasAttribute("data-sieve"); // 봇 필터 강도는 그것이 바꾸는 탭에서만
     [...$("tabs").children].forEach((y) => y.setAttribute("aria-selected", y === b));
     history.replaceState(null, "", location.search + "#" + s.id);
   };
@@ -414,7 +419,7 @@ async function boot() {
   conn = await db.connect();
   meta = await (await fetch(DATA + "meta.json")).json();
   for (const name of Object.keys(meta.tables)) {
-    if (!/^\w+$/.test(name)) throw new Error("표 이름이 이상합니다: " + name);
+    if (!/^\w+$/.test(name)) throw new Error("표 이름에 쓸 수 없는 문자가 있어요: " + name);
     await db.registerFileURL(name + ".parquet", DATA + name + ".parquet", duckdb.DuckDBDataProtocol.HTTP, false);
     await conn.query(`create view ${name} as select * from '${name}.parquet'`);
   }
@@ -445,27 +450,34 @@ async function q(sql) {
 const nf = (v, d = 0) => (v == null || isNaN(v) ? "" : v.toLocaleString("ko-KR", { maximumFractionDigits: d }));
 const pf = (v, d = 1) => (v == null || isNaN(v) ? "" : (v * 100).toLocaleString("ko-KR", { maximumFractionDigits: d }) + "%");
 const PCT = /(change|extra|rate|share|mde|precision|ratio)/i;
-function fmt(col, v) {
+function fmt(col, v, cell) {
   if (v == null) return "";
+  if (cell?.[col]) return cell[col](v);
   if (typeof v === "number") return PCT.test(col) && Math.abs(v) <= 50 ? pf(v, 2) : nf(v, Number.isInteger(v) ? 0 : 4);
   if (typeof v === "boolean") return v ? "예" : "아니오";
   return String(v);
 }
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-function grid(el, { rows, cols }, { highlight, hlClass = "hl", barCol, max = 500 } = {}) {
-  if (!rows.length) { el.innerHTML = '<div class="empty"><b>결과가 0행입니다.</b>조건에 맞는 행이 없습니다. 날짜나 값을 바꿔 보세요.</div>'; return; }
+function grid(el, { rows, cols }, { highlight, hlClass = "hl", barCol, max = 500, heads, cell } = {}) {
+  if (!rows.length) { el.innerHTML = '<div class="empty"><b>조건에 맞는 행이 없어요.</b>날짜나 값을 바꿔 보세요.</div>'; return; }
   const top = barCol ? Math.max(...rows.map((r) => Math.abs(r[barCol] ?? 0))) || 1 : 0;
   // 숫자 컬럼은 머리줄도 오른쪽 정렬
   const isNum = (c) => rows.some((r) => typeof r[c] === "number");
-  const head = `<tr><th class="rn"></th>${cols.map((c) => `<th class="${isNum(c) ? "num" : ""}">${esc(c)}</th>`).join("")}${barCol ? "<th></th>" : ""}</tr>`;
+  const head = `<tr><th class="rn"></th>${cols.map((c) => `<th class="${isNum(c) ? "num" : ""}"${heads?.[c] ? ` title="${esc(c)}"` : ""}>${esc(heads?.[c] ?? c)}</th>`).join("")}${barCol ? "<th></th>" : ""}</tr>`;
   const body = rows.slice(0, max).map((r, i) =>
     `<tr class="${highlight && highlight(r) ? hlClass : ""}"><td class="rn">${i + 1}</td>${cols.map((c) =>
-      `<td class="${typeof r[c] === "number" ? "num" : ""}">${esc(fmt(c, r[c]))}</td>`).join("")}${barCol ?
+      `<td class="${typeof r[c] === "number" ? "num" : ""}">${esc(fmt(c, r[c], cell))}</td>`).join("")}${barCol ?
       `<td><span class="bar" style="width:${Math.round((Math.abs(r[barCol] ?? 0) / top) * 140)}px"></span></td>` : ""}</tr>`).join("");
   el.innerHTML = `<div class="grid"><table><thead>${head}</thead><tbody>${body}</tbody></table></div>` +
-    (rows.length > max ? `<div class="more">${nf(rows.length)}행 중 ${max}행만 보입니다. 전체는 내려받으세요.</div>` : "");
+    (rows.length > max ? `<div class="more">${nf(rows.length)}행 중 ${max}행만 보여요. 전체는 내려받아서 보세요.</div>` : "");
 }
-const fill = (sel, values, pick) => { sel.innerHTML = values.map((v) => `<option ${v === pick ? "selected" : ""}>${esc(v)}</option>`).join(""); };
+const fill = (sel, values, pick, show = String) => { sel.innerHTML = values.map((v) => `<option value="${esc(v)}" ${v === pick ? "selected" : ""}>${esc(show(v))}</option>`).join(""); };
+const HEAD = { treatment: "필터 강도", value: "값", change_vs_none: "원본 대비", extra_vs_lenient: "약하게 대비 추가", rel_mde: "최소 탐지 효과",
+  traffic_x_vs_none: "필요 트래픽 (원본 대비 배수)", metric: "지표", other_ruleset: "비교한 버전", days_changed: "바뀐 날 수", min_change: "최소 변화",
+  max_change: "최대 변화", event_date: "날짜", events: "이벤트", events_ratio: "이벤트 (중앙값 대비)", bot_lenient: "봇 비율 (약하게)",
+  bot_strict: "봇 비율 (강하게)", bot_ratio: "봇 비율 (중앙값 대비)", status: "상태", grain: "한 행의 뜻", rows: "행 수", bytes: "크기 (바이트)",
+  type: "타입", description: "설명" };
+const CELL = { treatment: plab, metric: (m) => METRIC_KO[m] || m };
 const lit = (s) => "'" + String(s).replace(/'/g, "''") + "'";
 
 /* ---------- 내보내기: CSV, JSON, XLSX, Parquet, 표 복사 ---------- */
@@ -507,7 +519,7 @@ function zip(files) {
 const xe = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "");
 const colRef = (i) => { let s = ""; for (i++; i; i = Math.floor((i - 1) / 26)) s = String.fromCharCode(65 + ((i - 1) % 26)) + s; return s; };
 function sheetXml({ rows, cols, types }) {
-  if (rows.length >= 1048576) throw new Error("엑셀 한 시트에 들어가지 않습니다(1,048,576행). CSV나 Parquet으로 받으세요.");
+  if (rows.length >= 1048576) throw new Error("엑셀 시트 한 장에는 1,048,576행까지만 들어가요. CSV나 Parquet으로 받아 주세요.");
   const cell = (v, ref, c, head) => {
     if (v == null) return "";
     if (head) return `<c r="${ref}" s="2" t="inlineStr"><is><t>${xe(v)}</t></is></c>`;
@@ -545,15 +557,15 @@ async function parquetBlob(sql) {
 }
 async function exportResult(pid, kind) {
   const last = panels[pid], msg = $(pid + "-msg");
-  if (!last.rows.length) { msg.textContent = "먼저 실행해서 결과를 만드세요."; return; }
+  if (!last.rows.length) { msg.textContent = "먼저 쿼리를 실행해 주세요."; return; }
   const n = fileName(last.name);
   try {
     if (kind === "csv") save(csvBlob(last), n + ".csv");
     else if (kind === "json") save(jsonBlob(last), n + ".json");
     else if (kind === "xlsx") save(xlsx([{ ...last, name: "결과" }, { name: "SQL", cols: ["sql", "data", "ruleset"], rows: [{ sql: last.sql, data: `${meta.event_date_min} ~ ${meta.event_date_max}`, ruleset: meta.released_ruleset }], types: {} }]), n + ".xlsx");
     else if (kind === "parquet") save(await parquetBlob(last.sql), n + ".parquet");
-    else if (kind === "tsv") { await navigator.clipboard.writeText(delimited(last, "\t")); msg.textContent = `${nf(last.rows.length)}행을 복사했습니다. 시트에 붙여 넣으세요.`; return; }
-    msg.textContent = `${kind.toUpperCase()}로 내려받았습니다.`;
+    else if (kind === "tsv") { await navigator.clipboard.writeText(delimited(last, "\t")); msg.textContent = `${nf(last.rows.length)}행을 복사했어요. 시트에 붙여 넣으면 돼요.`; return; }
+    msg.textContent = `${{ xlsx: "엑셀", csv: "CSV", json: "JSON", parquet: "Parquet" }[kind]} 파일을 받았어요.`;
   } catch (e) { msg.className = "status err"; msg.textContent = String(e.message || e); }
 }
 // 실행 버튼, 상태, 내려받기 버튼 한 줄 (패널마다 같은 모양)
@@ -562,7 +574,7 @@ document.querySelectorAll(".out-bar[data-panel]").forEach((bar) => {
   bar.innerHTML = `<button class="go" data-run>실행</button><kbd>Ctrl+Enter</kbd><span class="status" id="${pid}-msg" role="status"></span><span class="sep"></span>` +
     `<span class="dl"><span>내려받기</span>` +
     [["xlsx", "엑셀"], ["csv", "CSV"], ["json", "JSON"], ["parquet", "Parquet"]].map(([k, t]) => `<button class="plain" data-out="${k}">${t}</button>`).join("") +
-    `</span><button class="plain copyt" data-out="tsv" title="탭으로 구분해 복사합니다. 엑셀이나 시트에 바로 붙여 넣으세요">표 복사</button>`;
+    `</span><button class="plain copyt" data-out="tsv" title="탭으로 구분해 복사해요. 엑셀이나 시트에 바로 붙여 넣을 수 있어요">표 복사</button>`;
   bar.querySelector("[data-run]").onclick = () => runSql(pid);
   bar.querySelectorAll("[data-out]").forEach((b) => (b.onclick = () => exportResult(pid, b.dataset.out)));
   $(pid + "-sql").addEventListener("keydown", (e) => {
@@ -578,15 +590,19 @@ async function summary() {
   const get = (m, t) => rows.find((r) => r.metric === m && r.treatment === t) || {};
   const say = (m) => ({ p: policyFor(m), none: get(m, "none"), kept: get(m, policyFor(m)) });
   const ev = say("events"), ac = say("active_accounts"), top = say("top100_kept"), mde = say("events_per_account");
-  const down = (c) => (c == null ? "" : c <= 0 ? `${pf(-c)} 줄어듭니다` : `${pf(c)} 늘어납니다`);
-  const pname = (p) => (p === "none" ? "거르지 않으면" : `${p}로 거르면`);
-  let html = `<p>${Number(d.slice(5, 7))}월 ${Number(d.slice(8))}일 이벤트 <mark>${nf(ev.none.value)}</mark>건 중 ${pname(ev.p)} <mark>${nf(ev.kept.value)}</mark>건이 남습니다. <span class="q">${down(ev.kept.change_vs_none)}.</span></p>`;
-  if (ac.none.value != null) html += `<p>활동 계정은 ${pname(ac.p)} <mark>${nf(ac.none.value)}</mark>개에서 <mark>${nf(ac.kept.value)}</mark>개가 됩니다. <span class="q">${down(ac.kept.change_vs_none)}.</span></p>`;
-  if (top.kept.value != null) html += `<p>star 상위 100개 저장소 가운데 ${pname(top.p)} <mark>${nf(top.kept.value)}</mark>개만 그대로 남습니다. <span class="q">상위 100 목록은 거르지 않아도 날마다 73 ~ 89% 바뀝니다.</span></p>`;
-  if (mde.none.rel_mde != null) html += `<p>반반 실험으로 계정당 이벤트를 비교하면 잡을 수 있는 최소 효과가 <mark>${pf(mde.none.rel_mde)}</mark>에서 <mark>${pf(mde.kept.rel_mde)}</mark>로 바뀝니다. <span class="q">거르지 않은 값이 큰 것은 대부분 스스로 봇이라고 밝힌 계정 하나 때문입니다.</span></p>`;
-  if (level() === "default") html += `<p class="q" style="font-size:14px">지표별 기본 정책: ${Object.entries(POLICY).map(([m, p]) => `${METRIC_KO[m] || m} ${p}`).join(", ")}</p>`;
+  const down = (c) => (c == null || c === 0 ? "" : c < 0 ? `${pf(-c)} 줄어요.` : `${pf(c)} 늘어요.`);
+  const how = (p) => `봇 필터를 '${LABEL[p]}'${ro(LABEL[p])} 걸면`, at = (p) => `'${LABEL[p]}' 필터에서`;
+  const md = `${Number(d.slice(5, 7))}월 ${Number(d.slice(8))}일`;
+  // 원본을 고르면 비교할 것이 없으니 원본 숫자만 말한다
+  let html = ev.p === "none"
+    ? `<p>${md} 이벤트는 <mark>${nf(ev.none.value)}</mark>건이에요. <span class="q">봇을 빼기 전 원본 그대로예요.</span></p>`
+    : `<p>${md} 이벤트 <mark>${nf(ev.none.value)}</mark>건 중 ${how(ev.p)} <mark>${nf(ev.kept.value)}</mark>건이 남아요. <span class="q">${down(ev.kept.change_vs_none)}</span></p>`;
+  if (ac.p !== "none" && ac.none.value != null) html += `<p>활동 계정은 ${at(ac.p)} <mark>${nf(ac.none.value)}</mark>개에서 <mark>${nf(ac.kept.value)}</mark>개가 돼요. <span class="q">${down(ac.kept.change_vs_none)}</span></p>`;
+  if (top.p !== "none" && top.kept.value != null) html += `<p>스타 상위 100개 저장소는 ${at(top.p)} <mark>${nf(top.kept.value)}</mark>개만 그대로 남아요. <span class="q">상위 100 목록은 필터를 걸지 않아도 날마다 73~89%가 바뀌어요.</span></p>`;
+  if (mde.p !== "none" && mde.none.rel_mde != null) html += `<p>계정당 이벤트로 50:50 A/B 테스트를 하면, 잡아낼 수 있는 가장 작은 차이(MDE)가 원본 <mark>${pf(mde.none.rel_mde)}</mark>에서 '${LABEL[mde.p]}' 필터 <mark>${pf(mde.kept.rel_mde)}</mark>로 바뀌어요. <span class="q">원본 값이 큰 건 대부분 스스로 봇이라고 밝힌 계정 하나 때문이에요.</span></p>`;
+  if (level() === "default") html += `<p class="q" style="font-size:14px">지표별 추천 강도: ${Object.entries(POLICY).map(([m, p]) => `${METRIC_KO[m] || m} ${LABEL[p] || p}`).join(", ")}</p>`;
   $("story").innerHTML = html;
-  // 거름 강도 막대: 같은 날 events 값을 단계마다
+  // 봇 필터 강도 막대: 같은 날 events 값을 단계마다
   const all = get("events", "none").value;
   document.querySelectorAll("#sieve label").forEach((l) => {
     const v = l.querySelector("input").value, k = get("events", v === "default" ? POLICY.events || "lenient" : v).value, k$ = l.querySelector(".k");
@@ -612,57 +628,57 @@ async function chart() {
   }).join("");
   $("chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="날짜별 이벤트 중 남은 비율">
     <defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--bg)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--gone)" stroke-width="2"/></pattern></defs>${bars}</svg>
-    <div class="legend"><span><i style="background:var(--keep)"></i>${p}로 남은 이벤트 (진한 막대가 고른 날짜)</span><span><i style="background:repeating-linear-gradient(45deg,var(--gone) 0 2px,transparent 2px 5px);border:1px solid var(--gone)"></i>걸러진 이벤트</span><span>막대 위 숫자는 남은 비율</span></div>`;
+    <div class="legend"><span><i style="background:var(--keep)"></i>'${LABEL[p]}' 필터를 건 뒤 남은 이벤트 (진한 막대가 고른 날짜)</span><span><i style="background:repeating-linear-gradient(45deg,var(--gone) 0 2px,transparent 2px 5px);border:1px solid var(--gone)"></i>걸러 낸 이벤트</span><span>막대 위 숫자: 남은 비율</span></div>`;
 }
 
 /* ---------- 요구사항 ---------- */
 const REQS = [
-  { t: "기본 정책으로 날짜별 실유저 이벤트", s: "지표마다 정해 둔 정책을 적용",
-    sql: `-- 지표마다 정해 둔 기본 정책(metric_policy)으로 거른 값
+  { t: "지표별 추천 강도로 본 날짜별 이벤트", s: "지표마다 정해 둔 강도를 적용해요",
+    sql: `-- 지표마다 정해 둔 추천 강도(metric_policy)로 거른 값
 select event_date, m.default_policy as policy, value as events, change_vs_none
 from policy_compare_released p join metric_policy m on m.metric = p.metric and m.default_policy = p.treatment
 where p.metric = 'events'
 order by event_date` },
-  { t: "특정 이벤트 종류를 낸 실유저 계정 수", s: "이벤트 종류와 정책을 골라서", params: [
+  { t: "특정 이벤트를 낸 실유저 계정 수", s: "이벤트 종류와 필터 강도를 골라요", params: [
       { k: "action", label: "이벤트 종류", from: "select distinct action from daily_action order by 1", def: "PushEvent" },
-      { k: "policy", label: "정책", list: ["none", "lenient", "balanced", "strict"], def: "strict" } ],
+      { k: "policy", label: "필터 강도", list: ["none", "lenient", "balanced", "strict"], def: "strict" } ],
     sql: `select event_date, action, accounts_none, accounts_{{policy}} as accounts_kept,
        accounts_{{policy}} * 1.0 / accounts_none - 1 as change_vs_none
 from daily_action where action = '{{action}}'
 order by event_date` },
-  { t: "평일과 주말의 봇 비율", s: "정책이 지운 이벤트 몫, 요일별", params: [
-      { k: "policy", label: "정책", list: ["lenient", "balanced", "strict"], def: "strict" } ],
+  { t: "평일과 주말의 봇 비율", s: "필터가 걸러 낸 이벤트 비율을 날짜와 요일로", params: [
+      { k: "policy", label: "필터 강도", list: ["lenient", "balanced", "strict"], def: "strict" } ],
     sql: `select event_date, dayname(event_date) as day,
        1 - sum(events_{{policy}}) * 1.0 / sum(events_none) as bot_share
 from daily_action group by event_date order by event_date` },
-  { t: "이벤트 종류별로 봇이 많은 곳", s: "어떤 행동에 봇이 몰렸나", params: [
-      { k: "policy", label: "정책", list: ["lenient", "balanced", "strict"], def: "strict" } ],
+  { t: "봇이 많은 이벤트 종류", s: "어떤 행동에 봇이 몰렸는지 봐요", params: [
+      { k: "policy", label: "필터 강도", list: ["lenient", "balanced", "strict"], def: "strict" } ],
     sql: `select action, sum(events_none) as events_none,
        1 - sum(events_{{policy}}) * 1.0 / sum(events_none) as bot_share
 from daily_action group by action order by bot_share desc` },
-  { t: "star 상위 100에서 밀려난 저장소", s: "봇 star를 빼면 바뀌는 순위", needs: "impact_top", params: [
+  { t: "스타 상위 100에서 밀려난 저장소", s: "봇 스타를 빼면 바뀌는 순위 (보통 기준)", needs: "impact_top", params: [
       { k: "date", label: "날짜", from: "select distinct event_date::varchar from impact_top order by 1", def: null } ],
     sql: `select repo_name, stars_all, stars_balanced, rank_all, rank_balanced
 from impact_top
 where event_date = '{{date}}'::date and rank_all <= 100 and rank_balanced > 100
 order by rank_all` },
-  { t: "많이 빠진 계정 상위", s: "strict에서 빠진 계정, 이벤트 수 순", needs: "suspects", params: [
+  { t: "많이 빠진 계정 상위 50", s: "'강하게'에서 빠진 계정, 이벤트 수 순", needs: "suspects", params: [
       { k: "date", label: "날짜", from: "select distinct event_date::varchar from suspects order by 1", def: null } ],
     sql: `select name, n_events, top_action, excluded_lenient, excluded_balanced, excluded_strict, excluded_by_strict
 from suspects
 where entity_type = 'gh_account' and event_date = '{{date}}'::date
 order by n_events desc limit 50` },
-  { t: "근거별로 몇 명이 걸렸나", s: "정책마다 근거가 걸린 대상 수. 범주를 바꾸지 않은 근거도 센다(R-13)", needs: "why_excluded", sql: `select policy, evidence_id, family, count(distinct entity_key) as entities
+  { t: "근거별로 걸린 대상 수", s: "강도마다 근거가 걸린 대상 수. 제외 여부를 바꾸지 않은 근거도 세요", needs: "why_excluded", sql: `select policy, evidence_id, family, count(distinct entity_key) as entities
 from why_excluded group by all order by policy, entities desc` },
-  { t: "가짜 star 판정의 정밀도", s: "정답(저장소 삭제)으로 채점한 결과", sql: `select evidence_id, rule_version, window_end, n_hit, n_hit_with_truth, "precision", control_positive_rate
+  { t: "가짜 스타 판정의 정밀도", s: "저장소 삭제 여부를 정답으로 놓고 채점한 결과", sql: `select evidence_id, rule_version, window_end, n_hit, n_hit_with_truth, "precision", control_positive_rate
 from evaluation order by evidence_id, window_end nulls last` },
-  { t: "자르기와 봇 거르기의 MDE 비교", s: "정책별 MDE와 필요한 트래픽 배수", sql: `select event_date, treatment, n, mean, rel_mde, traffic_x_vs_none
+  { t: "자르기와 봇 필터의 MDE 비교", s: "강도별 MDE와 필요한 트래픽 배수", sql: `select event_date, treatment, n, mean, rel_mde, traffic_x_vs_none
 from policy_compare_released where metric = 'events_per_account'
 order by event_date, rel_mde` },
-  { t: "규칙 묶음을 바꾸면 바뀌는 지표", s: "공개 묶음 대비 다른 묶음의 차이", sql: `select metric, treatment, other_ruleset, count(*) as days,
+  { t: "규칙 버전을 바꾸면 달라지는 지표", s: "공개 버전 대비 다른 버전의 차이", sql: `select metric, treatment, other_ruleset, count(*) as days,
        min(rel_change) as min_change, max(rel_change) as max_change
 from ruleset_change_log where diff <> 0 group by all order by abs(max(rel_change)) desc` },
-  { t: "새 지표 직접 만들기", s: "예시: 주말 이틀의 star 계정·일 수 (날짜별 계정 수의 합이라 같은 계정이 두 번 셀 수 있음)", sql: `-- 고쳐서 실행해 보세요. 표와 컬럼은 "SQL 콘솔" 탭 왼쪽에 있습니다
+  { t: "새 지표 직접 만들기", s: "예시: 주말 이틀의 스타 계정 수 합계 (날짜별로 더해서 같은 계정이 두 번 셀 수 있어요)", sql: `-- 고쳐서 실행해 보세요. 표와 컬럼은 "SQL 콘솔" 탭 왼쪽에 있어요
 select dayname(event_date) as day, sum(accounts_strict) as account_days_strict, sum(accounts_none) as account_days_none
 from daily_action
 where dayofweek(event_date) in (0, 6) and action = 'WatchEvent'
@@ -677,7 +693,7 @@ async function pickReq(i) {
     const lab = document.createElement("label"); lab.className = "f"; lab.textContent = p.label;
     const sel = document.createElement("select"); sel.dataset.k = p.k;
     const lv = level();
-    fill(sel, values, p.k === "policy" && values.includes(lv) ? lv : p.def ?? values[values.length - 1]);
+    fill(sel, values, p.k === "policy" && values.includes(lv) ? lv : p.def ?? values[values.length - 1], p.k === "policy" ? plab : String);
     sel.onchange = () => renderReq(i);
     lab.append(sel); $("req-params").append(lab);
   }
@@ -694,7 +710,7 @@ async function runSql(pid) {
   // 일부를 골라 두었으면 그 부분만 (콘솔에서 여러 쿼리를 적어 두고 하나씩 돌릴 때)
   const picked = ed.value.slice(ed.selectionStart, ed.selectionEnd).trim();
   const sql = (picked.length > 5 ? picked : ed.value).trim().replace(/;\s*$/, "");
-  if (!sql) { msg.textContent = "실행할 SQL이 없습니다."; return; }
+  if (!sql) { msg.textContent = "실행할 SQL을 입력해 주세요."; return; }
   msg.className = "status"; msg.textContent = "실행 중";
   try {
     const res = await q(sql);
@@ -704,14 +720,14 @@ async function runSql(pid) {
     if (pid === "q") remember(sql);
   } catch (e) {
     panels[pid] = { rows: [], cols: [], types: {}, sql, name: panels[pid].name };
-    msg.className = "status err"; msg.textContent = "SQL 오류";
+    msg.className = "status err"; msg.textContent = "실행하지 못했어요";
     // 오류 전문은 결과 자리에. DuckDB 메시지에 고칠 곳(후보 컬럼 등)이 들어 있다
-    out.innerHTML = `<div class="error" role="alert"><b>SQL을 실행하지 못했습니다. 고친 뒤 다시 실행하세요.</b><pre>${esc(String(e.message || e))}</pre></div>`;
+    out.innerHTML = `<div class="error" role="alert"><b>쿼리를 실행하지 못했어요. 아래 메시지를 보고 고친 뒤 다시 실행해 주세요.</b><pre>${esc(String(e.message || e))}</pre></div>`;
   }
 }
 
 /* ---------- SQL 콘솔: 스키마, 넣기, 최근 실행 ---------- */
-const GRAIN = { policy_compare_released: "policy_compare에서 공개한 규칙 묶음만. 분석은 보통 이 뷰로 한다" };
+const GRAIN = { policy_compare_released: "policy_compare에서 공개한 규칙 버전만 남긴 뷰예요. 분석할 때는 보통 이 뷰를 써요" };
 async function schema() {
   const { rows } = await q(`select table_name as t, column_name as c, data_type as ty from information_schema.columns
     where table_schema = 'main' order by case when table_name = 'policy_compare_released' then 0 else 1 end, table_name, ordinal_position`);
@@ -749,7 +765,7 @@ function remember(sql) {
   drawHist();
 }
 function drawHist() {
-  $("s-hist").innerHTML = HIST.length ? HIST.map((x, i) => `<li><button data-h="${i}" title="${esc(x)}">${esc(x.replace(/\s+/g, " "))}</button></li>`).join("") : "<li>실행한 쿼리가 여기에 쌓입니다</li>";
+  $("s-hist").innerHTML = HIST.length ? HIST.map((x, i) => `<li><button data-h="${i}" title="${esc(x)}">${esc(x.replace(/\s+/g, " "))}</button></li>`).join("") : "<li>실행한 쿼리가 여기에 쌓여요</li>";
   $("s-hist").querySelectorAll("[data-h]").forEach((b) => (b.onclick = () => { $("q-sql").value = HIST[b.dataset.h]; $("q-sql").focus(); }));
 }
 
@@ -759,7 +775,7 @@ async function metric() {
   const res = await q(`select treatment, value, change_vs_none, extra_vs_lenient, rel_mde, traffic_x_vs_none
     from policy_compare_released where event_date = ${lit(d)}::date and metric = ${lit(m)}
     order by case treatment when 'none' then 0 when 'lenient' then 1 when 'balanced' then 2 when 'strict' then 3 else 4 end`);
-  grid($("m-out"), res, { highlight: (r) => r.treatment === pick, barCol: "value" });
+  grid($("m-out"), res, { highlight: (r) => r.treatment === pick, barCol: "value", heads: HEAD, cell: CELL });
 }
 
 /* ---------- 왜 빠졌나 (로컬만) ---------- */
@@ -774,20 +790,21 @@ async function why() {
 
 /* ---------- 실험 감도 ---------- */
 async function mde() {
-  const d = $("x-date").value, t = $("x-treat").value, qq = Number($("x-q").value) / 100, target = Number($("x-target").value) / 100;
-  $("x-qv").textContent = $("x-q").value;
+  // 슬라이더 값은 자르는 비율(0~10%). 데이터의 q는 백분위라 100에서 뺀다
+  const cut = Number($("x-q").value), qv = 100 - cut, d = $("x-date").value, t = $("x-treat").value, qq = qv / 100, target = Number($("x-target").value) / 100;
+  $("x-qv").textContent = nf(cut, 1);
   // 백분위마다 미리 센 평균·분산을 읽는다. 계정당 이벤트 분포 원본은 공개하지 않는다 (docs/review_logic.md R-5)
   const { rows: [r] } = await q(`select n, cap_value, mean, variance from mde_cap
-    where event_date = ${lit(d)}::date and treatment = ${lit(t)} and q = ${Number($("x-q").value)}`);
-  if (!r) { $("x-cells").innerHTML = '<div class="empty">이 날짜와 처리에는 값이 없습니다.</div>'; return; }
+    where event_date = ${lit(d)}::date and treatment = ${lit(t)} and q = ${qv}`);
+  if (!r) { $("x-cells").innerHTML = '<div class="empty">이 날짜와 강도에는 값이 없어요.</div>'; return; }
   const m = 2.8 * Math.sqrt((2 * r.variance) / (r.n / 2)) / r.mean;
   const need = (4 * 7.84 * r.variance) / Math.pow(target * r.mean, 2);
   const cell = (k, v, s) => `<div><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
   $("x-cells").innerHTML =
-    cell("계정 수", nf(r.n), `${t}, ${d}`) +
-    cell("계정당 평균 이벤트", nf(r.mean, 2), qq < 1 ? `${nf(r.cap_value)}건에서 자름` : "자르지 않음") +
-    cell("상대 MDE", pf(m, 2), "반반 배정, 이 날 계정 전부") +
-    cell(`MDE ${$("x-target").value}%에 필요한 계정`, nf(Math.ceil(need)), need > r.n ? "지금 계정 수로는 모자랍니다" : "지금 계정 수로 충분합니다");
+    cell("계정 수", nf(r.n), `${plab(t)}, ${d}`) +
+    cell("계정당 평균 이벤트", nf(r.mean, 2), qq < 1 ? `${nf(r.cap_value)}건 넘는 값을 잘랐어요` : "자르지 않았어요") +
+    cell("상대 MDE", pf(m, 2), "50:50 배정, 이날 계정 전부") +
+    cell(`MDE ${$("x-target").value}%에 필요한 계정`, nf(Math.ceil(need)), need > r.n ? "지금 계정 수로는 모자라요" : "지금 계정 수로 충분해요");
 }
 
 /* ---------- 규칙 묶음 ---------- */
@@ -795,17 +812,17 @@ async function ruleset() {
   grid($("r-release"), await q("select * from ruleset_release order by seq desc"));
   grid($("r-summary"), await q(`select metric, treatment, other_ruleset, count(*) filter (where diff <> 0) as days_changed,
       min(rel_change) as min_change, max(rel_change) as max_change
-    from ruleset_change_log group by all order by days_changed desc, metric`));
+    from ruleset_change_log group by all order by days_changed desc, metric`), { heads: HEAD, cell: CELL });
 }
 
 /* ---------- 데이터 사전 ---------- */
 const tableRows = () => Object.entries(meta.tables).map(([name, v]) => ({ name, grain: v.grain, rows: v.rows, bytes: v.bytes }));
 async function dict() {
-  grid($("d-tables"), { rows: tableRows(), cols: ["name", "grain", "rows", "bytes"] });
+  grid($("d-tables"), { rows: tableRows(), cols: ["name", "grain", "rows", "bytes"] }, { heads: { ...HEAD, name: "표" } });
   fill($("d-pick"), Object.keys(meta.tables), "policy_compare");
   const showCols = () => {
     const name = $("d-pick").value, desc = meta.models?.[name]?.columns || {};
-    grid($("d-cols"), { rows: meta.tables[name].columns.map((c) => ({ ...c, description: desc[c.name] || "" })), cols: ["name", "type", "description"] });
+    grid($("d-cols"), { rows: meta.tables[name].columns.map((c) => ({ ...c, description: desc[c.name] || "" })), cols: ["name", "type", "description"] }, { heads: { ...HEAD, name: "컬럼" } });
   };
   $("d-pick").onchange = showCols; showCols();
   grid($("d-health"), await q(`
@@ -817,7 +834,7 @@ async function dict() {
            case when med_events is null then '비교값 없음'
                 when events / med_events < 0.5 or events / med_events > 2 or bot_strict / med_bot < 0.5 or bot_strict / med_bot > 2 then '확인 필요'
                 else '정상' end as status
-    from w order by event_date`), { highlight: (r) => r.status === "확인 필요", hlClass: "warn" });
+    from w order by event_date`), { highlight: (r) => r.status === "확인 필요", hlClass: "warn", heads: HEAD });
 }
 
 /* ---------- 가져가기 ---------- */
@@ -825,23 +842,23 @@ function take() {
   const name = $("k-pick").value, pq = DATA + name + ".parquet", csv = DATA + "csv/" + name + ".csv";
   const block = (title, how, code) => `<div><h3>${title}</h3><p>${how}</p><pre>${esc(code)}</pre><button class="plain copy" data-copy="${esc(code)}">복사</button></div>`;
   $("take").innerHTML =
-    block("엑셀", "[데이터] 탭의 [웹에서]를 누르고 이 주소를 붙여 넣습니다. 새로 고침하면 다시 받습니다.", csv) +
-    block("구글 시트", "빈 셀에 붙여 넣습니다.", `=IMPORTDATA("${csv}")`) +
-    block("파이썬 (pandas)", "pyarrow가 설치되어 있어야 합니다.", `import pandas as pd\ndf = pd.read_parquet("${pq}")`) +
-    block("DuckDB", "주소를 표 이름 자리에 씁니다.", `select * from '${pq}' limit 10;`) +
-    `<div><h3>JSON</h3><p>앱이나 다른 서비스로 넘길 때 씁니다. 행 하나가 객체 하나인 배열입니다.</p><button class="plain" data-json="1">${esc(name)}.json 받기</button></div>` +
+    block("엑셀", "[데이터] 탭에서 [웹에서]를 누르고 이 주소를 붙여 넣으세요. 새로 고침하면 다시 받아 와요.", csv) +
+    block("구글 시트", "빈 셀에 붙여 넣으세요.", `=IMPORTDATA("${csv}")`) +
+    block("파이썬 (pandas)", "pyarrow가 설치되어 있어야 해요.", `import pandas as pd\ndf = pd.read_parquet("${pq}")`) +
+    block("DuckDB", "표 이름 자리에 주소를 쓰면 돼요.", `select * from '${pq}' limit 10;`) +
+    `<div><h3>JSON</h3><p>앱이나 다른 서비스로 넘길 때 써요. 행 하나가 객체 하나인 배열이에요.</p><button class="plain" data-json="1">${esc(name)}.json 받기</button></div>` +
     `<div><h3>${esc(name)}</h3><p>${esc(meta.tables[name].grain)}</p><p>${nf(meta.tables[name].rows)}행, 컬럼 ${meta.tables[name].columns.length}개</p></div>`;
-  $("take").querySelectorAll("[data-copy]").forEach((b) => (b.onclick = async () => { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "복사했습니다"; }));
+  $("take").querySelectorAll("[data-copy]").forEach((b) => (b.onclick = async () => { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "복사했어요"; }));
   $("take").querySelector("[data-json]").onclick = async () => save(jsonBlob(await q(`select * from ${name}`)), name + ".json");
 }
 async function allTables() {
-  $("k-msg").textContent = "엑셀 만드는 중";
+  $("k-msg").textContent = "엑셀 파일을 만들고 있어요";
   const info = [...tableRows(), {}, { name: "데이터 기간", grain: `${meta.event_date_min} ~ ${meta.event_date_max}` },
-    { name: "공개 규칙 묶음", grain: meta.released_ruleset }, { name: "내보낸 시각(UTC)", grain: meta.exported_at }];
+    { name: "공개 규칙 버전", grain: meta.released_ruleset }, { name: "내보낸 시각(UTC)", grain: meta.exported_at }];
   const sheets = [{ name: "설명", cols: ["name", "grain", "rows", "bytes"], rows: info, types: {} }];
   for (const name of Object.keys(meta.tables)) sheets.push({ name, ...(await q(`select * from ${name}`)) });
   save(xlsx(sheets), `실유저_데이터_${meta.event_date_min}_${meta.event_date_max}.xlsx`);
-  $("k-msg").textContent = `표 ${sheets.length - 1}개를 시트로 담았습니다.`;
+  $("k-msg").textContent = `표 ${sheets.length - 1}개를 시트로 나눠 담았어요.`;
 }
 
 /* ---------- 시작 ---------- */
@@ -850,7 +867,7 @@ try {
   POLICY = Object.fromEntries((await q("select metric, default_policy from metric_policy")).rows.map((r) => [r.metric, r.default_policy]));
   const dates = (await q("select distinct event_date::varchar as d from policy_compare_released order by 1")).rows.map((r) => r.d);
   for (const id of ["sum-date", "m-date", "x-date"]) fill($(id), dates, dates.at(-1));
-  fill($("m-metric"), (await q("select distinct metric from policy_compare_released order by 1")).rows.map((r) => r.metric), "events");
+  fill($("m-metric"), (await q("select distinct metric from policy_compare_released order by 1")).rows.map((r) => r.metric), "events", (m) => METRIC_KO[m] || m);
   // 공개 묶음에는 대상 단위 표가 없다: 그 표를 쓰는 탭과 요구사항은 숨긴다
   const has = (t) => t in meta.tables;
   tab("t-why").hidden = !has("suspects");
@@ -871,12 +888,12 @@ try {
   $("w-go").onclick = why; $("w-name").onkeydown = (e) => e.key === "Enter" && why();
   await Promise.all([summary(), metric(), mde(), ruleset(), dict()]);
   take(); await schema(); drawHist(); await pickReq(0);
-  $("about").innerHTML = `${meta.event_date_min}부터 ${meta.event_date_max}까지의 GitHub 이벤트입니다. 규칙 묶음 <b>${meta.released_ruleset}</b> 기준, ${meta.exported_at.replace("T", " ").slice(0, 16)} UTC에 내보냈습니다.` +
-    (meta.with_entities ? " 계정과 저장소 이름이 든 로컬 데이터라 밖에 공개하면 안 됩니다." : " 공개용 집계라 계정과 저장소 이름은 없습니다.");
-  $("foot").innerHTML = `<p>Gold 표 ${Object.keys(meta.tables).length}개를 작게 줄여 브라우저 안의 DuckDB로 읽습니다. 서버와 로그인이 없고, 숫자는 내보낸 시각 기준입니다. 원하는 요구사항은 <a href="https://github.com/sozerong/bot-signal-layer/issues/new?template=requirement.yml">이슈 양식</a>(무엇을, 어느 지표, 어느 기간)으로 남겨 주세요. 받은 요청은 요구사항 카드로 더합니다. 설계 근거는 <code>docs/site_design.md</code>에 있습니다.</p>`;
+  $("about").innerHTML = `${meta.event_date_min}부터 ${meta.event_date_max}까지의 GitHub 이벤트예요. 규칙 버전 <b>${meta.released_ruleset}</b> 기준이고, ${meta.exported_at.replace("T", " ").slice(0, 16)} UTC에 내보냈어요.` +
+    (meta.with_entities ? " 계정과 저장소 이름이 들어 있는 로컬 데이터라 밖에 공개하면 안 돼요." : " 공개용 집계라 계정과 저장소 이름은 없어요.");
+  $("foot").innerHTML = `<p>Gold 표 ${Object.keys(meta.tables).length}개를 작게 줄여 브라우저 안의 DuckDB로 읽어요. 서버와 로그인이 없고, 숫자는 내보낸 시각 기준이에요. 필요한 쿼리는 <a href="https://github.com/sozerong/bot-signal-layer/issues/new?template=requirement.yml">이슈 양식</a>(무엇을, 어느 지표, 어느 기간)으로 남겨 주세요. 받은 요청은 '자주 쓰는 쿼리'에 추가해요. 설계 근거는 <code>docs/site_design.md</code>에 있어요.</p>`;
   const h = location.hash.slice(1); if (h && tab(h) && !tab(h).hidden) tab(h).click();
 } catch (e) {
-  $("about").className = "about err"; $("about").textContent = "데이터를 불러오지 못했습니다: " + (e.message || e) + ". 인터넷 연결과 data/meta.json을 확인하세요.";
+  $("about").className = "about err"; $("about").textContent = "데이터를 불러오지 못했어요 (" + (e.message || e) + "). 인터넷 연결을 확인하고 새로 고침해 주세요.";
   console.error(e);
 }
 </script>

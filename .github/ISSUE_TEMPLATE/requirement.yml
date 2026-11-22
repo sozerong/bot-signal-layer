@@ -1,6 +1,6 @@
 # 요구사항 받는 길 (docs/direction_v6.md Q14). 받은 요청은 화면(site/index.html)의 요구사항 카드(REQS)로 더하고, 이슈에 카드 이름을 답한다
 name: 요구사항
-description: 보고 싶은 숫자나 거르는 방식을 알려 주세요. 받은 요청은 화면의 요구사항 카드로 더합니다
+description: 보고 싶은 숫자나 거르는 방식을 알려 주세요. 받은 요청은 화면의 "자주 쓰는 쿼리"에 추가해요
 title: "[요구사항] "
 labels: [requirement]
 body:
@@ -25,6 +25,6 @@ body:
   - type: dropdown
     id: policy
     attributes:
-      label: 거름 강도 (모르면 비워 두세요)
-      options: [지표별 기본, lenient, balanced, strict, 모름]
+      label: 봇 필터 강도 (모르면 비워 두세요)
+      options: [지표별 추천, 약하게 (lenient), 보통 (balanced), 강하게 (strict), 모름]
     validations: {required: false}

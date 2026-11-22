@@ -25,21 +25,21 @@ ROOT = Path(__file__).resolve().parents[1]
 # 파일 이름 -> (한 행의 뜻, SQL). 표 이름은 dbt가 main 스키마에 만든 이름 그대로다.
 EXPORTS = {
     "policy_compare": (
-        "원천 x 날짜 x 지표 x 처리 방식 x 규칙 묶음. 지표 값, 거르지 않음 대비 변화율, lenient 대비 추가 변화율, MDE",
+        "원천 x 날짜 x 지표 x 필터 강도 x 규칙 버전. 지표 값, 원본 대비 변화율, 약하게 대비 추가 변화율, MDE",
         "select * from main.policy_compare",
     ),
     "ruleset_change_log": (
-        "원천 x 날짜 x 지표 x 처리 방식 x 비교 묶음. 기본 묶음 대비 다른 묶음의 값 차이",
+        "원천 x 날짜 x 지표 x 필터 강도 x 비교한 버전. 공개 버전 대비 다른 버전의 값 차이",
         "select * from main.ruleset_change_log",
     ),
-    "ruleset_release": ("공개한 규칙 묶음 하나", "select * from main.ruleset_release"),
-    "metric_policy": ("지표 하나와 그 기본 정책, 이유", "select * from main.metric_policy where metric in (select metric from main.policy_compare where source = 'gh')"),  # 원천 칸이 없어 GH 지표로 거른다
+    "ruleset_release": ("공개한 규칙 버전 하나", "select * from main.ruleset_release"),
+    "metric_policy": ("지표 하나와 그 추천 강도, 이유", "select * from main.metric_policy where metric in (select metric from main.policy_compare where source = 'gh')"),  # 원천 칸이 없어 GH 지표로 거른다
     "metric_policy_proposal": (
-        "원천 x 지표. 규칙이 제안한 기본 정책과 자연 변동, 단계별 변화",
+        "원천 x 지표. 규칙이 제안한 추천 강도와 자연 변동, 강도별 변화",
         "select * from main.metric_policy_proposal",
     ),
     "daily_action": (
-        "원천 x 날짜 x 이벤트 종류. 정책별 이벤트 수와 계정 수. 그날 그 종류를 낸 계정이 10개 미만이면 싣지 않는다",
+        "원천 x 날짜 x 이벤트 종류. 강도별 이벤트 수와 계정 수. 그날 그 종류를 낸 계정이 10개 미만이면 싣지 않아요",
         # 계정 몇 개짜리 칸은 정책 사이 차이로 누가 빠졌는지 좁혀진다 (docs/review_logic.md R-5)
         """
         select source, event_date, action,
@@ -57,7 +57,7 @@ EXPORTS = {
         """,
     ),
     "mde_cap": (
-        "원천 x 날짜 x 처리 방식 x 자르기 백분위(90 ~ 100, 0.5 간격). 계정 수, 자른 값, 계정당 이벤트 평균과 분산. 실험 감도 계산기의 재료",
+        "원천 x 날짜 x 필터 강도 x 자르기 백분위(90~100, 0.5 간격). 계정 수, 자른 값, 계정당 이벤트 평균과 분산. MDE 계산기에 써요",
         # 예전 acct_dist(계정당 이벤트 n별 계정 수)는 꼬리의 계정 하나짜리 칸이 none에는 있고 strict에는 없어서
         # 공개 데이터로 그 계정을 찾을 수 있었다 (docs/review_logic.md R-5). 백분위마다 모멘트만 내보낸다
         """
@@ -94,7 +94,7 @@ EXPORTS = {
         """,
     ),
     "suspects": (
-        "원천 x 대상 x 날짜. 어느 한 정책에서라도 실유저가 아닌 대상과 정책별 제외 여부, 이름, 이벤트 수",
+        "원천 x 대상 x 날짜. 어느 한 강도에서라도 실유저가 아닌 대상과 강도별 제외 여부, 이름, 이벤트 수",
         """
         with st as (
           select source, entity_type, entity_key, event_date,
@@ -121,11 +121,11 @@ EXPORTS = {
         """,
     ),
     "why_excluded": (
-        "원천 x 대상 x 날짜 x 정책 x 근거. 실유저가 아닌 대상에 걸린 근거, 규칙 버전, 점수, 판정 시각, SQL 지문",
+        "원천 x 대상 x 날짜 x 필터 강도 x 근거. 실유저가 아닌 대상에 걸린 근거, 규칙 버전, 점수, 판정 시각, SQL 지문",
         "select * exclude (metrics), cast(metrics as varchar) as metrics from main.why_excluded",
     ),
     "impact_top": (
-        "저장소 x 날짜 (그날 star 상위 200). 정책별 star 수와 순위",
+        "저장소 x 날짜 (그날 스타 상위 200). 강도별 스타 수와 순위",
         """
         select *,
                rank() over (partition by event_date order by stars_lenient desc) as rank_lenient,
