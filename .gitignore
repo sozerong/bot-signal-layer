@@ -21,3 +21,13 @@ warehouse/dbt/.user.yml
 
 # 로컬 Airflow 비밀 (L6)
 .env
+
+# 작업 문서 (공개하지 않음)
+CLAUDE.md
+.claude/
+docs/handoff_*.md
+docs/direction_v*.md
+docs/mentoring_*.md
+docs/review_mentor.md
+docs/review_logic.md
+docs/daangn_review.md

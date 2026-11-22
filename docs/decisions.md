@@ -390,3 +390,11 @@ engine_selection.md E8 A, E9 A.
 - 이유 3: 묶음 id가 바뀐 것은 판정 입력(근거 등록부, 시드)이 바뀌었기 때문이라 맞다. 같은 id로 다른 판정을 내면 안 된다. 〔근거: 결정 30〕
 - 잃는 것: ai_agent_ua에 오탐 3건(주소 속 "code")이 들어 있는 채로 낸다. 판정은 바뀌지 않는다(이미 신고된 봇). 〔근거: M-31〕
 - 되돌리기: ruleset_release.csv의 4행을 지우고 dbt를 다시 빌드하면 순번 3이 공개 묶음으로 돌아온다. policy_compare의 841ebd6f310f 행은 남는다(이력). 〔근거: 코드: ruleset_release.csv, policy_compare.sql incremental〕
+
+## 결정 36. 공개 전에 봇 의심과 함께 적힌 계정 이름 다섯 개를 기록 전체에서 "계정 A ~ E"로 바꾼다 [결정] (2026-11-22, 단계 7 공개) 〔근거: 사용자 2026-11-22 "커밋, U1 정리, push, 레포 공개 … 맡길게"〕
+
+- 고른 것: measurements.md M-6, M-15와 옛 q2_why_excluded.sql에 있던 GitHub 계정 이름 다섯 개를 작업 문서 빼기(U1)와 같은 filter-branch에서 모든 커밋에 걸쳐 "계정 A ~ E"로 바꿨다. github-actions[bot]은 GitHub가 운영하는 공식 봇이라 그대로 둔다. 〔근거: 코드: 기록 다시 쓰기 스크립트(스크래치 u1_tree.sh). 실행: git log -p main에서 다섯 이름 0줄〕
+- 이유 1: 레포를 공개하면 실제 사람일 수 있는 계정 이름이 "한 주체가 조종한 계정 무리로 보인다" 같은 의심과 함께 인터넷에 남는다. 판정은 확인된 사실이 아니다. 〔근거: measurements.md M-6 해석 줄 "[확인 필요]". 판단〕
+- 이유 2: 프로젝트 규칙과 같다. 화면과 내보내기는 이미 계정 이름을 싣지 않고, q2 쿼리도 이름을 뺐다(M-36 ②). 〔근거: scripts/export_site.py ENTITY_COLUMNS. M-36 표 ②줄〕
+- 잃는 것: 기록만 보고 그 계정을 다시 찾을 수 없다. 숫자(579건, 03:25:51 등)는 그대로라 같은 Silver 표에서 다시 찾을 수 있다. 〔근거: 판단〕
+- 되돌리기: 로컬 가지 backup-before-clean에 바꾸기 전 기록이 있다(원격에 올리지 않는다). 〔근거: 실행: git branch backup-before-clean〕
