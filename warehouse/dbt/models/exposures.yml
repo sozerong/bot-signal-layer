@@ -5,7 +5,7 @@ exposures:
     label: 분석가 세 쿼리 (기본 정책 실유저, 빠진 이유, 규칙 묶음 변경)
     type: analysis
     maturity: low
-    url: https://github.com/sozerong/GH#가져가는-법
+    url: https://github.com/sozerong/bot-signal-layer#가져가는-법
     description: analyses/q1_events_default_policy.sql, q2_why_excluded.sql, q3_ruleset_change.sql
     depends_on:
       - ref('real_user_events')

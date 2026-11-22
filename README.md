@@ -1,6 +1,6 @@
 # 봇 프로젝트: 사용자 분석에서 봇을 걸러내는 데이터 플랫폼
 
-[![ci](https://github.com/sozerong/GH/actions/workflows/ci.yml/badge.svg)](https://github.com/sozerong/GH/actions/workflows/ci.yml)
+[![ci](https://github.com/sozerong/bot-signal-layer/actions/workflows/ci.yml/badge.svg)](https://github.com/sozerong/bot-signal-layer/actions/workflows/ci.yml)
 
 봇 판정을 원본 데이터에 굽지 않고, 판정의 [근거](docs/glossary.md#문제와-판정)와 규칙 버전과 함께 따로 둔다. 그래서 규칙이 바뀌어도 분석가 숫자는 공개한 [규칙 묶음](docs/glossary.md#규칙의-버전)에 고정되고, 무엇이 얼마나 바뀌었는지는 다시 계산해 보여 준다.
 
@@ -32,7 +32,7 @@ GitHub 7일(2024-07-15 ~ 21)에서 잰 숫자 둘:
 
 **화면**: [site/index.html](site/index.html). 브라우저 안에서 집계 파일을 읽어 정책을 바꿔 보고 SQL을 돌린다. 집계만 싣고 계정 이름은 싣지 않는다. 공개 주소: (자리, 배포 뒤 채움). 로컬에서는 `python -m http.server 8000 --directory site`로 연다.
 
-**원하는 요구사항은 이슈로**: [요구사항 양식](https://github.com/sozerong/GH/issues/new?template=requirement.yml)에 무엇을, 어느 지표, 어느 기간을 적어 주면 화면의 요구사항 카드로 더한다.
+**원하는 요구사항은 이슈로**: [요구사항 양식](https://github.com/sozerong/bot-signal-layer/issues/new?template=requirement.yml)에 무엇을, 어느 지표, 어느 기간을 적어 주면 화면의 요구사항 카드로 더한다.
 
 **표본 한 줄 실행**: 표본 3,407행(2024-07-15 12시)으로 원본 → Silver → 근거 → Gold → 분석 쿼리 셋까지 Airflow 없이 돈다. 이 PC에서 39 ~ 47초 걸렸다. ([걸린 시간](docs/measurements.md#m-33))
 
@@ -138,7 +138,7 @@ docker compose run --rm bot-job python -m scripts.query "select policy, count(*)
 | 숫자를 따라가는 사람 | [측정 기록](docs/measurements.md)(맨 위에 먼저 볼 측정 5개), [결정 기록](docs/decisions.md), [오류 기록](docs/failure_analysis.md) |
 | 클라우드로 옮길 때 | [시간·비용 예측](docs/c1_forecast.md), [구현 순서](docs/implementation_design.md) |
 
-사전 실험은 [experiments/p0_bot_detection/REPORT.md](experiments/p0_bot_detection/REPORT.md), 이전 설계(가짜 star 한정, v0.3)는 [GH_PROJECT_DESIGN.md](GH_PROJECT_DESIGN.md)에 있다. 작업 지시서와 설계 초안은 공개하지 않는다. 기록 문서의 근거 줄이 그 파일을 가리키면 작업 당시의 근거다.
+사전 실험은 [experiments/p0_bot_detection/REPORT.md](experiments/p0_bot_detection/REPORT.md), 이전 설계(가짜 star 한정, v0.3)는 [GH_PROJECT_DESIGN.md](GH_PROJECT_DESIGN.md)에 있다. 작업 지시서·설계 초안·멘토링 기록은 공개하지 않는다. 기록 문서의 근거 줄이 그 파일을 가리키면 작업 당시의 근거다.
 
 ## 로컬에서 돌리기
 

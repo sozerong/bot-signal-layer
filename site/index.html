@@ -873,7 +873,7 @@ try {
   take(); await schema(); drawHist(); await pickReq(0);
   $("about").innerHTML = `${meta.event_date_min}부터 ${meta.event_date_max}까지의 GitHub 이벤트입니다. 규칙 묶음 <b>${meta.released_ruleset}</b> 기준, ${meta.exported_at.replace("T", " ").slice(0, 16)} UTC에 내보냈습니다.` +
     (meta.with_entities ? " 계정과 저장소 이름이 든 로컬 데이터라 밖에 공개하면 안 됩니다." : " 공개용 집계라 계정과 저장소 이름은 없습니다.");
-  $("foot").innerHTML = `<p>Gold 표 ${Object.keys(meta.tables).length}개를 작게 줄여 브라우저 안의 DuckDB로 읽습니다. 서버와 로그인이 없고, 숫자는 내보낸 시각 기준입니다. 원하는 요구사항은 <a href="https://github.com/sozerong/GH/issues/new?template=requirement.yml">이슈 양식</a>(무엇을, 어느 지표, 어느 기간)으로 남겨 주세요. 받은 요청은 요구사항 카드로 더합니다. 설계 근거는 <code>docs/site_design.md</code>에 있습니다.</p>`;
+  $("foot").innerHTML = `<p>Gold 표 ${Object.keys(meta.tables).length}개를 작게 줄여 브라우저 안의 DuckDB로 읽습니다. 서버와 로그인이 없고, 숫자는 내보낸 시각 기준입니다. 원하는 요구사항은 <a href="https://github.com/sozerong/bot-signal-layer/issues/new?template=requirement.yml">이슈 양식</a>(무엇을, 어느 지표, 어느 기간)으로 남겨 주세요. 받은 요청은 요구사항 카드로 더합니다. 설계 근거는 <code>docs/site_design.md</code>에 있습니다.</p>`;
   const h = location.hash.slice(1); if (h && tab(h) && !tab(h).hidden) tab(h).click();
 } catch (e) {
   $("about").className = "about err"; $("about").textContent = "데이터를 불러오지 못했습니다: " + (e.message || e) + ". 인터넷 연결과 data/meta.json을 확인하세요.";
