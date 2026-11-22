@@ -1332,3 +1332,22 @@ payload 키는 24개 시간 모두 같았다: WatchEvent `[action]`, ForkEvent `
 - 최소 관측 경고: daily_rows_vs_median AUTH 4행 (03-01은 앞날 02-28이 2시간이라 비 17.8, 03-31은 0.33, 토요일 03-17·03-24는 0.50·0.45), type_share_shift AUTH 12행 (도서관 로그의 검색·상세 비율이 날마다 흔들림). 원천의 실제 모양이라 문턱은 그대로 둔다. 〔근거: 실행: 컴파일된 시험 SQL을 Gold에 돌림. 결정 33〕
 - 화면 데이터: 공개 묶음이 바뀌어 site/data를 다시 내보냈다(07:17Z). 원천 칸이 없는 metric_policy와 evaluation에 웹 줄(지표 3개, assetless_browser 채점 33행)이 섞여 들어가는 것을 다시 내보내기 전 비교에서 찾아 막았다. 막은 뒤 줄 순서를 무시하면 daily_action, mde_cap, metric_policy, metric_policy_proposal, evaluation(32행)은 앞 내보내기와 같고, policy_compare에 새 묶음 161행이 더해졌다. 화면은 "규칙 묶음 841ebd6f310f 기준"으로 바뀌고 웹 숫자는 보이지 않는다. 브라우저 오류 0. 〔근거: 코드: scripts/export_site.py metric_policy, evaluation 거르기. 실행: 스크래치 sitecmp2.sh, 내장 브라우저 확인〕
 - 덧붙임: 같은 비교에서 옛 묶음 9eff1a5e22a6의 policy_compare 35행이 분산·MDE 끝자리(10⁻¹⁴ 크기)만 다르게 다시 쓰였다. 증분 표가 그 날짜를 다시 계산하며 부동소수 합 순서가 바뀐 것으로 본다. 값의 뜻은 같다. 〔근거: 실행: comm 비교 줄 예 variance 7288.898468613861 → …864. 판단: 결정 35 이유 1과 같은 크기〕
+
+<a id="m-42"></a>
+## M-42. 공개: 첫 push의 CI와 Pages 배포 (2026-11-22, 지시서 handoff_v7.md 단계 7) 〔근거: 지시서 7-6 "M-42로 남긴다"〕
+
+**조건** 작업 문서를 기록에서 빼고 계정 이름을 가린(결정 36) main을 `git push --force origin main`으로 올렸다(07:49Z, 원격의 옛 v0.3 커밋 하나를 대체). 레포를 공개로 바꾸고 Pages 원천을 GitHub Actions로 켠 뒤 pages 워크플로를 손으로 돌렸다. 〔근거: 실행: git ls-remote bb8c978, gh repo view visibility PUBLIC, gh api pages build_type workflow〕
+
+| 실행 | 결과 | 걸린 시간 | 근거 |
+|---|---|---|---|
+| ci (push, run 45000004436) | 성공 | 6분 23초 (07:50:01 ~ 07:56:24Z) | 〔근거: gh run view〕 |
+| ├ 이미지 빌드 (캐시 없음, 첫 실행) | 성공 | 3분 1초 | 〔근거: 단계 시각〕 |
+| ├ 표본 한 줄 실행 (Q3) | 성공 | 37초 | 〔근거: 단계 시각. 로컬 M-33 39 ~ 47초〕 |
+| ├ dbt 시험, dbt compile | 성공 | 4초, 5초 | 〔근거: 단계 시각〕 |
+| └ pytest | 성공 | 2분 15초 | 〔근거: 단계 시각. 로컬 116초〕 |
+| pages (손으로, run 45000032249) | 성공 | 15초 (07:50:24 ~ 07:50:38Z), 누른 때부터 20초 | 〔근거: gh run view〕 |
+
+- 주소 확인: `https://sozerong.github.io/bot-signal-layer/` 200(64,416바이트), `data/meta.json` 200, `data/policy_compare.parquet` 200, `data/csv/policy_compare.csv` 200(text/csv), 대상 단위 `data/suspects.parquet` 404(올리지 않음). 〔근거: 실행: curl -w http_code〕
+- 화면 시험(내장 브라우저, 실제 주소): 요약이 "규칙 묶음 841ebd6f310f 기준"과 7일 숫자를 보이고, SQL 콘솔에서 `select ruleset_id, seq from ruleset_release order by seq`가 4행을 61ms에 돌려준다. 콘솔 오류 0. 로컬과 다른 점(경로, 헤더)은 보이지 않았다. 〔근거: 실행: 내장 브라우저 화면과 콘솔〕
+- 하지 못한 것: 내려받기 단추(엑셀, CSV)는 누르지 않았다. 파일 내려받기는 따로 허락을 받는 일이라, 같은 파일이 주소에서 200으로 오는 것까지만 봤다. 〔근거: 판단: 내려받기는 허락이 필요한 동작. 위 curl 줄〕
+- 첫 CI 이미지 빌드 3분은 캐시가 없어서다. 다음 push부터는 이미지 캐시로 줄 것으로 본다 [확인 필요: 다음 push의 이미지 단계 시간]. 〔근거: 코드: .github/workflows/ci.yml 이미지 캐시. 판단〕

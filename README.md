@@ -30,7 +30,7 @@ GitHub 7일(2024-07-15 ~ 21)에서 잰 숫자 둘:
 
 ## 써 보기
 
-**화면**: [site/index.html](site/index.html). 브라우저 안에서 집계 파일을 읽어 정책을 바꿔 보고 SQL을 돌린다. 집계만 싣고 계정 이름은 싣지 않는다. 공개 주소: (자리, 배포 뒤 채움). 로컬에서는 `python -m http.server 8000 --directory site`로 연다.
+**화면**: [site/index.html](site/index.html). 브라우저 안에서 집계 파일을 읽어 정책을 바꿔 보고 SQL을 돌린다. 집계만 싣고 계정 이름은 싣지 않는다. 공개 주소: <https://sozerong.github.io/bot-signal-layer/>. 로컬에서는 `python -m http.server 8000 --directory site`로 연다.
 
 **원하는 요구사항은 이슈로**: [요구사항 양식](https://github.com/sozerong/bot-signal-layer/issues/new?template=requirement.yml)에 무엇을, 어느 지표, 어느 기간을 적어 주면 화면의 요구사항 카드로 더한다.
 
