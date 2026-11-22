@@ -341,3 +341,15 @@
 - 영향: 그 push의 시험 결과가 빠졌다. 실패한 작업만 다시 돌리자(2회차) 이미지 44초, 전체 3분 56초로 모두 통과했다. 코드 결함은 아니다. 〔근거: gh run view attempt 2 success〕
 - 처방 제안(만들지 않음): jar를 `ADD` URL 대신 `RUN curl … && sha256sum -c`로 받거나 `ADD --checksum=sha256:…`을 쓰면, 내용 지문이 고정돼 캐시가 맞을 때 Maven에 다시 묻지 않는다. 〔근거: 문서: Dockerfile reference "ADD --checksum". 판단: 고치기 전 사용자 확인(기존 이미지 정의)〕
 - 재발 방지: 지금은 빨간 CI가 이 오류면 "실패한 작업 다시 실행"을 먼저 한다. 〔근거: 이번 2회차 통과〕
+
+
+<a id="f-25"></a>
+## F-25. 규칙 버전 탭의 "바뀐 날 수"가 7 대신 700%로 보였다 (컬럼 이름으로 단위를 추측) [해결] 〔근거: handoff_delivery.md D3. 화면 확인 2026-11-22〕
+
+- 태그: `화면`, `표시` 〔근거: 판단: 데이터는 맞고 보이는 꼴만 틀림〕
+- 증상: 규칙 버전 탭 요약 표에서 바뀐 16조합의 "바뀐 날 수"가 모두 700%로 보였다. 실제 값은 7(날)이다. 〔근거: site/data/ruleset_change_log.parquet 집계: 115조합 중 diff <> 0인 날이 있는 조합 16개, 모두 7일〕
+- 원인: 표 그리기 함수가 컬럼 이름에 change, rate, ratio 같은 말이 들어 있고 값이 50 이하면 백분율로 바꿨다. 화면이 계산한 `days_changed`가 "change"에 걸렸다. 〔근거: 코드: site/index.html 옛 452행 `/(change|extra|rate|share|mde|precision|ratio)/i`, 456행 `Math.abs(v) <= 50`〕
+- 원인이 자명하지 않았던 이유: 정규식은 데이터 파일의 컬럼만 보고 만들었는데, 화면 SQL이 새 별칭을 만들면 그 별칭도 같은 규칙을 탄다. 별칭을 더한 쪽에서는 표시 규칙이 보이지 않는다. 〔근거: 코드: site/index.html 813행 별칭 days_changed〕
+- 처방: 백분율 컬럼을 이름 목록 13개로 적었다. 목록은 옛 정규식에 걸리던 이름 전부(데이터 파일 컬럼과 화면 SQL 별칭)에서 days_changed만 뺀 것이라, 다른 탭의 백분율 표시는 그대로다. `≤ 50` 조건도 뺐다(목록이면 필요 없다). 〔근거: 코드: site/index.html `PCT` Set. 실행: index.html과 site/data/*.parquet에서 옛 정규식에 걸리는 이름 grep〕
+- 남은 것: 같은 이유로 반대쪽 빈틈이 있다. `bot_lenient`, `bot_strict`(데이터 사전 탭 건강 표, 0~1 비율)와 `natural_var`, `step_balanced`(0~1 차이)는 이름이 안 걸려 소수로 보인다. D1에서 컬럼 단위를 meta.json에 실으면 목록 대신 단위로 판정한다. 〔근거: 코드: site/index.html 건강 표 SQL. handoff_delivery.md D3 할 일 둘째 문장〕
+- 재발 방지: 단위를 이름에서 추측하지 않는다. 화면이 새 별칭을 만들면 PCT 목록이나(D1 뒤에는) 단위 사전에 같이 적는다. 〔근거: 판단〕

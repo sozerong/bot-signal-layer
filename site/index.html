@@ -332,7 +332,9 @@ footer p{max-width:52em;margin:0}
   <section id="t-ruleset" data-title="규칙 버전" data-ref hidden>
     <p class="note">이 화면의 숫자는 공개한 규칙 버전 기준이에요. 새 버전은 공개하기 전에 지표가 얼마나 바뀌는지 여기서 먼저 확인해요.</p>
     <h3>공개한 버전</h3><div id="r-release"></div>
-    <h3>지표별 차이</h3><div id="r-summary"></div>
+    <h3>지표별 차이</h3>
+    <label class="small"><input type="checkbox" id="r-all"> 바뀌지 않은 조합도 보기</label>
+    <div id="r-summary"></div>
   </section>
 
   <section id="t-dict" data-title="데이터 사전" data-ref hidden>
@@ -449,11 +451,13 @@ async function q(sql) {
 /* ---------- 숫자와 표 ---------- */
 const nf = (v, d = 0) => (v == null || isNaN(v) ? "" : v.toLocaleString("ko-KR", { maximumFractionDigits: d }));
 const pf = (v, d = 1) => (v == null || isNaN(v) ? "" : (v * 100).toLocaleString("ko-KR", { maximumFractionDigits: d }) + "%");
-const PCT = /(change|extra|rate|share|mde|precision|ratio)/i;
+// 백분율로 보일 컬럼은 이름으로 추측하지 않고 적는다 (F-25: 이름 패턴이 days_changed에 걸려 7이 700%로 보였다)
+const PCT = new Set(["change_vs_none", "extra_vs_lenient", "num_change_vs_none", "den_change_vs_none", "rel_mde", "precision",
+  "control_positive_rate", "rel_change", "min_change", "max_change", "bot_share", "events_ratio", "bot_ratio"]);
 function fmt(col, v, cell) {
   if (v == null) return "";
   if (cell?.[col]) return cell[col](v);
-  if (typeof v === "number") return PCT.test(col) && Math.abs(v) <= 50 ? pf(v, 2) : nf(v, Number.isInteger(v) ? 0 : 4);
+  if (typeof v === "number") return PCT.has(col) ? pf(v, 2) : nf(v, Number.isInteger(v) ? 0 : 4);
   if (typeof v === "boolean") return v ? "예" : "아니오";
   return String(v);
 }
@@ -810,9 +814,12 @@ async function mde() {
 /* ---------- 규칙 묶음 ---------- */
 async function ruleset() {
   grid($("r-release"), await q("select * from ruleset_release order by seq desc"));
-  grid($("r-summary"), await q(`select metric, treatment, other_ruleset, count(*) filter (where diff <> 0) as days_changed,
+  // 기본은 바뀐 조합만 (D4). 대부분 0%라 바뀐 줄이 묻힌다
+  const draw = async () => grid($("r-summary"), await q(`select metric, treatment, other_ruleset, count(*) filter (where diff <> 0) as days_changed,
       min(rel_change) as min_change, max(rel_change) as max_change
-    from ruleset_change_log group by all order by days_changed desc, metric`), { heads: HEAD, cell: CELL });
+    from ruleset_change_log group by all ${$("r-all").checked ? "" : "having days_changed > 0"} order by days_changed desc, metric`), { heads: HEAD, cell: CELL });
+  $("r-all").onchange = draw;
+  await draw();
 }
 
 /* ---------- 데이터 사전 ---------- */
