@@ -1,5 +1,5 @@
-ruleset_id,seq,released_on,note
-ad4bfe93bcd9,1,2026-11-22,"첫 공개: lockstep_ratio v2, multi_repo_burst v2, 정책 3개 (결정 13, 15, 24)"
-56aead61a1fd,2,2026-11-22,"id 정의 변경(결정 30), 숫자 같음: ruleset_change_log 161행 다름 0 (M-28 덧붙임)"
-9eff1a5e22a6,3,2026-11-22,"F-5 방언 꼴 nulls first(결정 25), 숫자 같음: ruleset_change_log 161행 다름 0, entity_verdict 지문 같음"
-841ebd6f310f,4,2026-11-22,"웹 원천 AUTH 추가(결정 26, 34, 35). GH 숫자 같음: ruleset_change_log 161행 값 다름 0, MDE 차이 최대 1.6e-14(부동소수 합 순서)"
+ruleset_id,seq,released_on,note,label,impact
+ad4bfe93bcd9,1,2026-11-22,"첫 공개: lockstep_ratio v2, multi_repo_burst v2, 정책 3개 (결정 13, 15, 24)",v1,첫 공개(비교할 앞 버전 없음)
+56aead61a1fd,2,2026-11-22,"id 정의 변경(결정 30), 숫자 같음: ruleset_change_log 161행 다름 0 (M-28 덧붙임)",v2,숫자 변화 없음 · 버전 id 계산 방식만 바뀜
+9eff1a5e22a6,3,2026-11-22,"F-5 방언 꼴 nulls first(결정 25), 숫자 같음: ruleset_change_log 161행 다름 0, entity_verdict 지문 같음",v3,숫자 변화 없음 · SQL 표기만 바뀜
+841ebd6f310f,4,2026-11-22,"웹 원천 AUTH 추가(결정 26, 34, 35). GH 숫자 같음: ruleset_change_log 161행 값 다름 0, MDE 차이 최대 1.6e-14(부동소수 합 순서)",v4,숫자 변화 없음 · 웹 원천 추가(GitHub 숫자는 그대로)

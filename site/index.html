@@ -44,6 +44,14 @@ h1{font-size:22px;line-height:1.3;font-weight:700;margin:0;letter-spacing:-.01em
 .about{font-size:13px;color:var(--faint);margin:6px 0 0}
 .about b{color:var(--muted);font-weight:500;font-variant-numeric:slashed-zero}
 .about.err{color:var(--warn)}
+.about small{font:12px var(--mono);color:var(--faint);font-variant-numeric:slashed-zero}
+/* 데이터 상품 카드 (handoff_delivery.md 1절, D5). 값은 meta.json product에서 */
+.card{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;margin:14px 0 0;padding:12px 14px;
+  border:1px solid var(--line);border-radius:8px;background:var(--sub);font-size:13px;max-width:52em}
+.card dt{color:var(--muted)} .card dd{margin:0}
+.card ol{margin:0;padding-left:18px} .card details summary{cursor:pointer;color:var(--muted)}
+@media (max-width:560px){.card{grid-template-columns:1fr}.card dd{margin-bottom:6px}}
+.rel td small{font:12px var(--mono);color:var(--faint)} .rel details summary{cursor:pointer;color:var(--muted);font-size:13px}
 
 /* 탭: 앞의 넷은 매일 쓰는 것, 뒤는 참고용 */
 nav{display:flex;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none;margin:0 -4px}
@@ -245,9 +253,10 @@ footer p{max-width:52em;margin:0}
 <body>
 <div class="wrap">
 <header>
-  <h1>실유저 데이터 실험실</h1>
-  <p class="lede">GitHub 공개 이벤트 일주일 치에서 봇을 걸러 낸 숫자예요. SQL로 뽑아서 엑셀이나 구글 시트로 가져갈 수 있어요.</p>
+  <h1 id="p-name">실유저 데이터 실험실</h1>
+  <p class="lede" id="p-intro">GitHub 공개 이벤트 일주일 치에서 봇을 걸러 낸 숫자예요. SQL로 뽑아서 엑셀이나 구글 시트로 가져갈 수 있어요.</p>
   <p class="about" id="about">데이터를 불러오고 있어요.</p>
+  <dl class="card" id="card" hidden></dl>
 </header>
 
 <nav role="tablist" id="tabs" aria-label="화면"></nav>
@@ -367,7 +376,7 @@ const $ = (id) => document.getElementById(id);
 // ?data=data_local 로 열면 로컬에서 대상 단위 표까지 본다 (scripts/export_site.py --with-entities)
 const DIR = (new URLSearchParams(location.search).get("data") || "data").replace(/[^\w-]/g, "");
 const DATA = new URL(DIR + "/", location.href).href;
-let db, conn, meta;
+let db, conn, meta, VER = "";
 // 결과는 패널마다 따로 둔다: 콘솔에서 돌린 결과를 요구사항 탭의 버튼이 받지 않게
 const panels = { lab: { rows: [], cols: [], types: {}, sql: "", name: "결과" }, q: { rows: [], cols: [], types: {}, sql: "", name: "SQL_결과" } };
 
@@ -419,10 +428,13 @@ async function boot() {
   // DECIMAL·HUGEINT 합계가 Arrow 객체로 오지 않게 double로 받는다
   await db.open({ query: { castDecimalToDouble: true, castBigIntToDouble: true } });
   conn = await db.connect();
-  meta = await (await fetch(DATA + "meta.json")).json();
+  // meta.json은 매번 서버에 묻고, 표 파일 주소에는 내보낸 시각을 붙인다. 새로 배포한 뒤에도 브라우저가 옛 표를 새 meta와 섞지 않게 (F-26)
+  meta = await (await fetch(DATA + "meta.json", { cache: "no-cache" })).json();
+  VER = "?v=" + encodeURIComponent(meta.exported_at);
+  unitPct();
   for (const name of Object.keys(meta.tables)) {
     if (!/^\w+$/.test(name)) throw new Error("표 이름에 쓸 수 없는 문자가 있어요: " + name);
-    await db.registerFileURL(name + ".parquet", DATA + name + ".parquet", duckdb.DuckDBDataProtocol.HTTP, false);
+    await db.registerFileURL(name + ".parquet", DATA + name + ".parquet" + VER, duckdb.DuckDBDataProtocol.HTTP, false);
     await conn.query(`create view ${name} as select * from '${name}.parquet'`);
   }
   // 분석가 기본 뷰: 공개한 묶음만 (warehouse/dbt/models/gold/policy_compare_released.sql과 같은 뜻)
@@ -451,9 +463,10 @@ async function q(sql) {
 /* ---------- 숫자와 표 ---------- */
 const nf = (v, d = 0) => (v == null || isNaN(v) ? "" : v.toLocaleString("ko-KR", { maximumFractionDigits: d }));
 const pf = (v, d = 1) => (v == null || isNaN(v) ? "" : (v * 100).toLocaleString("ko-KR", { maximumFractionDigits: d }) + "%");
-// 백분율로 보일 컬럼은 이름으로 추측하지 않고 적는다 (F-25: 이름 패턴이 days_changed에 걸려 7이 700%로 보였다)
-const PCT = new Set(["change_vs_none", "extra_vs_lenient", "num_change_vs_none", "den_change_vs_none", "rel_mde", "precision",
-  "control_positive_rate", "rel_change", "min_change", "max_change", "bot_share", "events_ratio", "bot_ratio"]);
+// 백분율로 보일 컬럼은 이름으로 추측하지 않는다 (F-25: 이름 패턴이 days_changed에 걸려 7이 700%로 보였다).
+// 데이터 파일 컬럼은 컬럼 사전의 단위가 "비율"인 것(meta.json, D1), 화면 SQL이 만든 별칭은 아래 목록이다
+const PCT = new Set(["min_change", "max_change", "bot_share", "events_ratio", "bot_ratio", "bot_lenient", "bot_strict"]);
+const unitPct = () => Object.values(meta.tables).forEach((t) => t.columns.forEach((c) => c.unit === "비율" && PCT.add(c.name)));
 function fmt(col, v, cell) {
   if (v == null) return "";
   if (cell?.[col]) return cell[col](v);
@@ -813,7 +826,11 @@ async function mde() {
 
 /* ---------- 규칙 묶음 ---------- */
 async function ruleset() {
-  grid($("r-release"), await q("select * from ruleset_release order by seq desc"));
+  // 버전 이름, 공개일, 숫자 영향을 먼저. 해시는 작게, 엔지니어 기록(note)은 접는다 (D2)
+  const rel = (await q("select * from ruleset_release order by seq desc")).rows;
+  $("r-release").innerHTML = `<div class="grid rel"><table><thead><tr><th>버전</th><th>공개일</th><th>숫자 영향</th><th>자세히</th></tr></thead><tbody>${
+    rel.map((r) => `<tr><td><b>${esc(r.label ?? r.seq)}</b> <small>${esc(r.ruleset_id)}</small></td><td>${esc(r.released_on)}</td><td>${esc(r.impact ?? "")}</td>
+      <td><details><summary>공개 기록</summary>${esc(r.note ?? "")}</details></td></tr>`).join("")}</tbody></table></div>`;
   // 기본은 바뀐 조합만 (D4). 대부분 0%라 바뀐 줄이 묻힌다
   const draw = async () => grid($("r-summary"), await q(`select metric, treatment, other_ruleset, count(*) filter (where diff <> 0) as days_changed,
       min(rel_change) as min_change, max(rel_change) as max_change
@@ -828,8 +845,10 @@ async function dict() {
   grid($("d-tables"), { rows: tableRows(), cols: ["name", "grain", "rows", "bytes"] }, { heads: { ...HEAD, name: "표" } });
   fill($("d-pick"), Object.keys(meta.tables), "policy_compare");
   const showCols = () => {
-    const name = $("d-pick").value, desc = meta.models?.[name]?.columns || {};
-    grid($("d-cols"), { rows: meta.tables[name].columns.map((c) => ({ ...c, description: desc[c.name] || "" })), cols: ["name", "type", "description"] }, { heads: { ...HEAD, name: "컬럼" } });
+    const name = $("d-pick").value;
+    // 예시값은 문자로 보여 준다 (숫자 칸 서식이 붙지 않게). 모두 NULL인 컬럼은 비어 있다
+    grid($("d-cols"), { rows: meta.tables[name].columns.map((c) => ({ ...c, example: c.example == null ? "(모두 NULL)" : String(c.example) })),
+      cols: ["name", "ko", "unit", "type", "description", "example"] }, { heads: { ...HEAD, name: "컬럼", ko: "한글 이름", unit: "단위", example: "예시값" } });
   };
   $("d-pick").onchange = showCols; showCols();
   grid($("d-health"), await q(`
@@ -895,9 +914,26 @@ try {
   $("w-go").onclick = why; $("w-name").onkeydown = (e) => e.key === "Enter" && why();
   await Promise.all([summary(), metric(), mde(), ruleset(), dict()]);
   take(); await schema(); drawHist(); await pickReq(0);
-  $("about").innerHTML = `${meta.event_date_min}부터 ${meta.event_date_max}까지의 GitHub 이벤트예요. 규칙 버전 <b>${meta.released_ruleset}</b> 기준이고, ${meta.exported_at.replace("T", " ").slice(0, 16)} UTC에 내보냈어요.` +
+  const p = meta.product || {}, when = meta.exported_at.replace("T", " ").slice(0, 16);
+  const ver = p.released_label ? `규칙 ${esc(p.released_label)} (${esc(p.released_on)} 공개)` : "규칙 버전";
+  $("about").innerHTML = `${meta.event_date_min}부터 ${meta.event_date_max}까지의 GitHub 이벤트예요. <b>${ver}</b> 기준 <small>${esc(meta.released_ruleset)}</small>이고, ${when} UTC에 내보냈어요.` +
     (meta.with_entities ? " 계정과 저장소 이름이 들어 있는 로컬 데이터라 밖에 공개하면 안 돼요." : " 공개용 집계라 계정과 저장소 이름은 없어요.");
-  $("foot").innerHTML = `<p>Gold 표 ${Object.keys(meta.tables).length}개를 작게 줄여 브라우저 안의 DuckDB로 읽어요. 서버와 로그인이 없고, 숫자는 내보낸 시각 기준이에요. 필요한 쿼리는 <a href="https://github.com/sozerong/bot-signal-layer/issues/new?template=requirement.yml">이슈 양식</a>(무엇을, 어느 지표, 어느 기간)으로 남겨 주세요. 받은 요청은 '자주 쓰는 쿼리'에 추가해요. 설계 근거는 <code>docs/site_design.md</code>에 있어요.</p>`;
+  // 데이터 상품 카드 (D5). 값은 전부 meta.json product에서 온다. 옛 meta.json(카드 없음)이면 숨긴 채로 둔다
+  if (p.name) {
+    $("p-name").textContent = p.name; $("p-intro").textContent = p.intro;
+    const goDict = `<a href="#t-dict" data-go="t-dict">데이터 사전 탭</a>`;
+    $("card").innerHTML = [
+      ["주인", esc(p.owner)],
+      ["문의", `<a href="${esc(p.contact)}">이슈 양식</a>(무엇을, 어느 지표, 어느 기간)으로 남겨 주세요. 받은 요청은 '자주 쓰는 쿼리'에 추가해요.`],
+      ["갱신 약속", esc(p.refresh)],
+      ["마지막 갱신", `${when} UTC에 내보냈어요.`],
+      ["버전", `${ver}: ${esc(p.released_impact)}. 지난 버전과 차이는 규칙 버전 탭에 있어요. <details><summary>변경 정책</summary><ol>${p.change_policy.map((s) => `<li>${esc(s)}</li>`).join("")}</ol></details>`],
+      ["표와 컬럼", `표마다 한 행의 뜻, 컬럼마다 한글 이름, 단위, 설명, 예시값을 ${goDict}에 적어 두었어요.`],
+    ].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
+    $("card").querySelector("[data-go]").onclick = (e) => { e.preventDefault(); tab("t-dict").click(); };
+    $("card").hidden = false;
+  }
+  $("foot").innerHTML = `<p>Gold 표 ${Object.keys(meta.tables).length}개를 작게 줄여 브라우저 안의 DuckDB로 읽어요. 서버와 로그인이 없고, 숫자는 내보낸 시각 기준이에요. 설계 근거는 <code>docs/site_design.md</code>에 있어요.</p>`;
   const h = location.hash.slice(1); if (h && tab(h) && !tab(h).hidden) tab(h).click();
 } catch (e) {
   $("about").className = "about err"; $("about").textContent = "데이터를 불러오지 못했어요 (" + (e.message || e) + "). 인터넷 연결을 확인하고 새로 고침해 주세요.";

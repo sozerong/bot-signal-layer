@@ -412,3 +412,11 @@ engine_selection.md E8 A, E9 A.
 - 고른 것: Gold 모델의 컬럼 설명을 warehouse/dbt/models/gold/gold.yml에 둔다. 화면에서만 계산하는 컬럼(days_changed 등)만 내보내기 안에 둔다. 〔근거: handoff_delivery.md D1 표 (가)줄〕
 - 이유: dbt docs, 리니지, 화면이 한 곳의 설명을 쓴다. 분석가가 화면 밖에서 SQL로 볼 때도 같은 설명이다. 〔근거: handoff_delivery.md D1 추천 줄〕
 - 잃는 것: 서울의 public_columns.json과 형식이 다르다. 화면 전용 컬럼은 두 번째 장소에 산다. 〔근거: handoff_delivery.md D1 표 (가) 단점, (나) 장점〕
+
+## 결정 39. 공개 시드의 note 컬럼은 이름을 바꾸지 않고 두며, label과 impact를 더한다 [결정] (2026-11-22, handoff_delivery.md D2) 〔근거: 결정 37 변경 정책 3번〕
+
+- 고른 것: 지시서 D2는 note를 detail로 바꾸라고 했지만, note 그대로 두고 화면에서 '공개 기록'으로 접었다. label(v1 ~ v4)과 impact(숫자 영향 한 줄)는 더했다. 〔근거: 코드: warehouse/dbt/seeds/ruleset_release.csv, site/index.html ruleset()〕
+- 이유 1: 결정 37에서 정한 변경 정책 3번이 "컬럼 이름을 바꾸지 않고 더한다"다. 정책을 정한 같은 날 첫 변경에서 이름을 바꾸면 정책이 말뿐이 된다. 〔근거: 결정 37〕
+- 이유 2: ruleset_release는 공개 표다(화면, csv/ruleset_release.csv 고정 주소). note를 읽는 쿼리나 시트가 깨진다. D6 검사도 사유 없는 빠짐으로 실패시킨다. 〔근거: 코드: scripts/export_site.py removed_columns. tests/test_site_meta.py〕
+- 이유 3: 시드는 규칙 묶음 id 해시에 들지 않아 컬럼을 더해도 id(841ebd6f310f)가 그대로다. 〔근거: 코드: warehouse/dbt_build.py ruleset_parts 63 ~ 77행. 실행: 내보내기의 빌드 묶음 = 공개 묶음 검사 통과〕
+- 잃는 것: 컬럼 이름 note가 내용(엔지니어용 기록)을 덜 드러낸다. 컬럼 사전의 한글 이름 "자세한 기록"으로 보완한다. 〔근거: gold.yml seeds ruleset_release note〕

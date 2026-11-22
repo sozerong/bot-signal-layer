@@ -154,16 +154,62 @@ def git_commit():
         return None
 
 
+# 데이터 상품 카드 (handoff_delivery.md 1절, D5, 결정 37). 화면 맨 위 카드가 meta.json의 이 값을 그대로 쓴다. 비면 내보내기가 실패한다
+PRODUCT = {
+    "name": "실유저 데이터 실험실",
+    "intro": "GitHub 공개 이벤트 일주일 치에서 봇을 걸러 낸 숫자예요. SQL로 뽑아서 엑셀이나 구글 시트로 가져갈 수 있어요.",
+    "owner": "sozerong (GitHub)",
+    "contact": "https://github.com/sozerong/bot-signal-layer/issues/new?template=requirement.yml",
+    "refresh": "데이터 범위는 {start} ~ {end}로 고정되어 있고 정기 갱신은 없어요. 숫자는 규칙 버전을 새로 공개할 때만 바뀌어요.",
+    "change_policy": [
+        "숫자가 같은 내부 변경은 같음 증명을 붙여 공개해요.",
+        "숫자가 바뀌는 공개는 바뀐 지표와 폭을 먼저 보여 준 뒤 공개해요.",
+        "컬럼을 지우거나 이름을 바꾸지 않고 새 컬럼을 더해요. 꼭 지워야 하면 한 버전 동안 옛 컬럼을 남기고 미리 알려요.",
+    ],
+}
+
+
 def descriptions():
-    """gold.yml의 모델·컬럼 설명을 화면의 데이터 사전에 넘긴다 (없으면 빈 값)."""
-    try:
-        import yaml
-        doc = yaml.safe_load((ROOT / "warehouse/dbt/models/gold/gold.yml").read_text(encoding="utf-8"))
-        return {m["name"]: {"description": m.get("description"),
-                            "columns": {c["name"]: c.get("description") for c in m.get("columns", []) or []}}
-                for m in doc.get("models", [])}
-    except Exception:  # noqa: BLE001
-        return {}
+    """gold.yml 컬럼 사전 -> {표: {"description": 표 설명, "columns": {컬럼: {description, ko, unit, removed}}}} (결정 38).
+    dbt 모델(models), 시드(seeds), 내보내기가 만드는 표(x-site-tables)를 한 파일에서 읽는다."""
+    import yaml
+    doc = yaml.safe_load((ROOT / "warehouse/dbt/models/gold/gold.yml").read_text(encoding="utf-8"))
+    out = {}
+    for m in doc.get("models", []) + doc.get("seeds", []) + doc.get("x-site-tables", []):
+        out[m["name"]] = {"description": m.get("description"),
+                          "columns": {c["name"]: {"description": c.get("description"), **(c.get("meta") or {})}
+                                      for c in m.get("columns", []) or []}}
+    return out
+
+
+def missing_descriptions(tables, desc):
+    """공개 표 컬럼 중 설명, 한글 이름, 단위가 하나라도 빈 것 (D1). 빈 목록이면 통과."""
+    bad = []
+    for t, v in tables.items():
+        cols = desc.get(t, {}).get("columns", {})
+        for c in v["columns"]:
+            d = cols.get(c["name"], {})
+            bad += [f"{t}.{c['name']}"] if not all(d.get(k) for k in ("description", "ko", "unit")) else []
+    return bad
+
+
+def removed_columns(prev_tables, tables, desc):
+    """직전 meta.json에 있었는데 이번에 없는 컬럼 중, 컬럼 사전에 removed(사유)가 없는 것 (D6, 변경 정책 3번). 빈 목록이면 통과."""
+    bad = []
+    for t, v in prev_tables.items():
+        now = {c["name"] for c in tables.get(t, {}).get("columns", [])}
+        cols = desc.get(t, {}).get("columns", {})
+        bad += [f"{t}.{c['name']}" for c in v["columns"] if c["name"] not in now and not cols.get(c["name"], {}).get("removed")]
+    return bad
+
+
+def example(con, path, col):
+    """데이터에서 뽑은 예시값 하나 (모두 NULL이면 None)."""
+    v = con.execute(f'select "{col}" from \'{path}\' where "{col}" is not null limit 1').fetchall()
+    if not v:
+        return None
+    v = v[0][0]
+    return round(v, 4) if isinstance(v, float) else str(v) if not isinstance(v, (int, bool)) else v
 
 
 def main():
@@ -184,6 +230,9 @@ def main():
     built = [r[0] for r in con.execute("select distinct ruleset_id from main.actor_policy_status").fetchall()]
     if built != [released] and not args.allow_unreleased:
         raise SystemExit(f"빌드 묶음 {built}이 공개 묶음 {released}와 다르다. 공개 줄을 더하거나 공개 묶음으로 다시 빌드한 뒤 내보낸다 (--allow-unreleased는 로컬 확인용)")
+    desc = descriptions()
+    prev = out / "meta.json"
+    prev_tables = json.loads(prev.read_text(encoding="utf-8")).get("tables", {}) if prev.exists() else {}
     tables = {}
     for name, (grain, sql) in EXPORTS.items():
         path = out / f"{name}.parquet"
@@ -203,11 +252,26 @@ def main():
         rows = con.execute(f"select count(*) from '{path.as_posix()}'").fetchone()[0]
         leaked = ENTITY_COLUMNS & {c[0] for c in cols}
         assert args.with_entities or not leaked, f"{name}에 대상 단위 컬럼 {leaked}"
+        cd = desc.get(name, {}).get("columns", {})
         tables[name] = {"grain": grain, "rows": rows, "bytes": path.stat().st_size, "csv_bytes": csv_path.stat().st_size,
-                        "columns": [{"name": c[0], "type": c[1]} for c in cols]}
+                        "columns": [{"name": c[0], "type": c[1], "ko": cd.get(c[0], {}).get("ko"), "unit": cd.get(c[0], {}).get("unit"),
+                                     "description": cd.get(c[0], {}).get("description"),
+                                     "example": example(con, path.as_posix(), c[0])} for c in cols]}
         print(f"{name}: {rows:,}행, {path.stat().st_size:,}바이트")
 
+    # 공개 표는 컬럼마다 설명이 있어야 하고(D1), 직전 공개에서 컬럼이 말없이 사라지면 안 된다(D6). 대상 단위 표는 공개하지 않아 뺀다
+    public = {k: v for k, v in tables.items() if k not in ENTITY_TABLES}
+    if bad := missing_descriptions(public, desc):
+        raise SystemExit(f"컬럼 설명(description, meta.ko, meta.unit)이 빈 컬럼 {len(bad)}개: {bad}. warehouse/dbt/models/gold/gold.yml에 적는다")
+    if bad := removed_columns({k: v for k, v in prev_tables.items() if k not in ENTITY_TABLES}, public, desc):
+        raise SystemExit(f"직전 공개에 있던 컬럼이 빠졌다: {bad}. 변경 정책 3번: 지우지 말고 더한다. 꼭 지우면 gold.yml 그 컬럼 meta에 removed: 사유를 적는다")
+
     span = con.execute("select min(event_date), max(event_date) from main.policy_compare where source = 'gh'").fetchone()
+    rel = con.execute("select label, released_on, impact from main.ruleset_release order by seq desc limit 1").fetchone()
+    product = {**PRODUCT, "refresh": PRODUCT["refresh"].format(start=span[0], end=span[1]),
+               "released_label": rel[0], "released_on": str(rel[1]), "released_impact": rel[2]}
+    if empty := [k for k, v in product.items() if not v or v == "None"]:
+        raise SystemExit(f"데이터 상품 카드 값이 비었다: {empty} (scripts/export_site.py PRODUCT, seeds/ruleset_release.csv label·impact)")
     meta = {
         "exported_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "git_commit": git_commit(),
@@ -215,8 +279,10 @@ def main():
         "build_ruleset": built[0] if len(built) == 1 else built,
         "with_entities": args.with_entities,
         "event_date_min": str(span[0]), "event_date_max": str(span[1]),
+        "product": product,
         "tables": tables,
-        "models": descriptions(),
+        "models": {t: {"description": v["description"], "columns": {c: d.get("description") for c, d in v["columns"].items()}}
+                   for t, v in desc.items()},
     }
     (out / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
     total = sum(t["bytes"] for t in tables.values())

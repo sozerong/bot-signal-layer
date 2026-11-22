@@ -53,7 +53,7 @@ Windows Git Bash에서는 앞에 `MSYS_NO_PATHCONV=1`을 붙이고 `$(pwd)` 대�
 - **표면 셋**: `actor_policy_status`(대상 × 날짜 × 정책 → 실유저인가, 빠지게 한 근거, 규칙 묶음 id), `why_excluded`(빠진 대상의 근거, 규칙 버전, 점수, 판정 시각, SQL 지문), `policy_compare_released`(지표 × 정책별 값). 앞의 둘은 컬럼과 형이 바뀌면 빌드가 실패한다.
 - **엑셀, 구글 시트, pandas**: 화면의 "가져가기" 탭에서 표를 고르면 파일 주소와 코드가 나온다. 주소는 고정이라 다시 불러오면 가장 최근 데이터를 받는다.
 - **strict는 실험 대상 선정에 쓰지 않는다**: strict가 balanced 위에 더 빼는 461 ~ 489개 계정은 모두 그날 이벤트가 100건 이상이다. 결과 지표와 같은 양으로 사람을 빼므로 실험이 치우친다. 보고용 상한으로만 쓴다. ([확정 쿼리](docs/measurements.md#m-36))
-- **어느 규칙 묶음의 숫자인가**: `policy_compare_released`와 화면은 공개 묶음([seeds/ruleset_release.csv](warehouse/dbt/seeds/ruleset_release.csv)의 마지막 줄, 지금 `9eff1a5e22a6`)에 고정된다. `actor_policy_status`, `why_excluded`, `real_user_*`는 마지막 빌드의 규칙을 따른다. 규칙 묶음 id는 정책 시드, 근거 SQL, 피처 SQL, 판정 모델을 모두 해시한다.
+- **어느 규칙 묶음의 숫자인가**: `policy_compare_released`와 화면은 공개 묶음([seeds/ruleset_release.csv](warehouse/dbt/seeds/ruleset_release.csv)의 마지막 줄, 지금 v4 `841ebd6f310f`)에 고정된다. `actor_policy_status`, `why_excluded`, `real_user_*`는 마지막 빌드의 규칙을 따른다. 규칙 묶음 id는 정책 시드, 근거 SQL, 피처 SQL, 판정 모델을 모두 해시한다.
 - dbt 안에서는 매크로 `real_users(policy, source, include_ai_agent=false)`와 `default_policy(metric)`를 쓴다 ([warehouse/dbt/macros/real_users.sql](warehouse/dbt/macros/real_users.sql)). 같은 사람이 GitHub 계정과 웹 클라이언트로 따로 세어지므로 `source`는 꼭 준다.
 
 세 쿼리는 [warehouse/dbt/analyses/](warehouse/dbt/analyses/)에 있고 dbt exposure `analyst_three_queries`로 묶었다. 컴파일한 뒤 돌린다:
@@ -112,6 +112,23 @@ docker compose run --rm bot-job python -m scripts.query "select policy, count(*)
 | balanced | 656,971 | 3,152 |
 | lenient | 658,593 | 1,530 |
 | strict | 656,510 | 3,613 |
+
+## 다른 팀에 넘기는 방식
+
+분석가가 표를 찾고, 이해하고, 믿고, 가져가는 과정을 국내 데이터 팀 사례 여섯과 대 보았다. 넘기는 규격은 화면 맨 위의 **데이터 상품 카드**(주인, 문의, 갱신 약속, 마지막 갱신, 버전과 변경 정책, 표와 컬럼)다. ([결정 37](docs/decisions.md))
+
+| 기준 | 사례 | 여기서 한 것 | 하지 않은 것 |
+|---|---|---|---|
+| 찾고 이해하기 | 배민 데이터카탈로그: 컬럼 검색, 미리보기, 리니지 ([글](https://techblog.woowahan.com/21353/)) | SQL 콘솔의 표·컬럼 나무와 찾기, 표마다 처음 100행, [컬럼 리니지](lineage/) | 여러 데이터 상품을 한곳에서 찾는 카탈로그 도구 |
+| 설명이 곧 품질 | 에이블리: 컬럼 설명이 비면 AI도 답하지 못한다 ([글](https://brunch.co.kr/@ably-team/59)) | 공개 컬럼 76개 모두 한글 이름, 단위, 설명, 예시값. 하나라도 비면 내보내기가 실패한다 ([컬럼 사전](warehouse/dbt/models/gold/gold.yml), [보장](docs/guarantees.md)) | 설명이 맞는지는 사람이 본다 |
+| 주인 | 쏘카: 테이블 단위 오너십 ([요약](https://hyang2data.tistory.com/214)) | 카드의 주인과 문의(이슈 양식). Gold 모델 meta owner | 표마다 다른 주인(지금은 한 사람) |
+| 자주 오는 요청을 미리 | 토스증권: 자주 오는 요청을 미리 처리한 테이블로 ([SLASH 24](https://toss.im/slash-24/sessions/8)) | 화면 "자주 쓰는 쿼리"와 이슈 요청 양식. 받은 요청은 쿼리로 더한다 | 사용량을 재서 어떤 요청이 많은지 세기 |
+| 지표 정의는 한 곳 | 당근 KarrotMetrics: 볼 때마다 값이 다른 문제를 중앙 정의로 ([발표](https://speakerdeck.com/bskim/danggeunmakesgwa-hamgge-seongjanghamyeo-deiteo-sinroeseong-jikyeonaegi-gugeul-keulraudeu-webina-2023-dot-03)) | 지표별 기본 정책 [metric_policy](warehouse/dbt/seeds/metric_policy.csv)와 공개 묶음 고정. 같은 지표는 누가 봐도 같은 강도, 같은 규칙 버전이다 | 지표 정의 전용 계층(시맨틱 레이어) |
+| 바꿔도 쿼리를 깨지 않기 | 쏘카: v1과 v2 결과가 같은지 확인한 뒤 교체 ([글](https://tech.socar.kr/data/2022/07/25/analytics-engineering-with-dbt)) | 변경 정책 세 문장. 숫자가 같은 공개는 같음 증명(규칙 버전 탭의 숫자 영향), 컬럼은 더하기만 하고 사유 없이 빠지면 내보내기가 실패한다 | 컬럼 형이 바뀌는 것은 화면 표에서 아직 막지 않는다 |
+
+변경 정책: (1) 숫자가 같은 내부 변경은 같음 증명을 붙여 공개한다. (2) 숫자가 바뀌는 공개는 바뀐 지표와 폭을 먼저 보여 준 뒤 공개한다. (3) 컬럼을 지우거나 이름을 바꾸지 않고 더한다. 꼭 지워야 하면 한 버전 동안 옛 컬럼을 남기고 미리 알린다.
+
+권한, 사용량 추적, 카탈로그 도구는 넣지 않았다. 로그인 없는 정적 공개 사이트라서 지금 단계에서는 지킬 대상이 없다.
 
 ## 깊이: 병목을 재현하고 고친 기록
 
@@ -262,7 +279,7 @@ docker compose run --rm bot-job python -m warehouse.dbt_build compile
 docker compose run --rm bot-job python -m pytest tests -q
 ```
 
-기대: 51개 모두 통과, 약 2분(2026-11-22, 116초). 판정 빠짐 시험이 실제로 빨개지는지 보는 `tests/test_judged_red.py`가 표본으로 Gold를 세 번 만든다 ([오류 기록](docs/failure_analysis.md#f-18)).
+기대: 54개 모두 통과, 약 2분(2026-11-22, 120초). 판정 빠짐 시험이 실제로 빨개지는지 보는 `tests/test_judged_red.py`가 표본으로 Gold를 세 번 만든다 ([오류 기록](docs/failure_analysis.md#f-18)).
 
 ### 알려진 문제
 

@@ -1,11 +1,26 @@
 {
- "exported_at": "2026-11-22T07:17:05+00:00",
- "git_commit": "79ef270",
+ "exported_at": "2026-11-22T09:27:21+00:00",
+ "git_commit": "76ebf82",
  "released_ruleset": "841ebd6f310f",
  "build_ruleset": "841ebd6f310f",
  "with_entities": false,
  "event_date_min": "2024-07-15",
  "event_date_max": "2024-07-21",
+ "product": {
+  "name": "실유저 데이터 실험실",
+  "intro": "GitHub 공개 이벤트 일주일 치에서 봇을 걸러 낸 숫자예요. SQL로 뽑아서 엑셀이나 구글 시트로 가져갈 수 있어요.",
+  "owner": "sozerong (GitHub)",
+  "contact": "https://github.com/sozerong/bot-signal-layer/issues/new?template=requirement.yml",
+  "refresh": "데이터 범위는 2024-07-15 ~ 2024-07-21로 고정되어 있고 정기 갱신은 없어요. 숫자는 규칙 버전을 새로 공개할 때만 바뀌어요.",
+  "change_policy": [
+   "숫자가 같은 내부 변경은 같음 증명을 붙여 공개해요.",
+   "숫자가 바뀌는 공개는 바뀐 지표와 폭을 먼저 보여 준 뒤 공개해요.",
+   "컬럼을 지우거나 이름을 바꾸지 않고 새 컬럼을 더해요. 꼭 지워야 하면 한 버전 동안 옛 컬럼을 남기고 미리 알려요."
+  ],
+  "released_label": "v4",
+  "released_on": "2026-11-22",
+  "released_impact": "숫자 변화 없음 · 웹 원천 추가(GitHub 숫자는 그대로)"
+ },
  "tables": {
   "policy_compare": {
    "grain": "원천 x 날짜 x 지표 x 필터 강도 x 규칙 버전. 지표 값, 원본 대비 변화율, 약하게 대비 추가 변화율, MDE",
@@ -15,75 +30,147 @@
    "columns": [
     {
      "name": "source",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "원천",
+     "unit": "글자",
+     "description": "데이터를 가져온 곳이에요. 화면 파일에는 GitHub(gh)만 있어요",
+     "example": "gh"
     },
     {
      "name": "event_date",
-     "type": "DATE"
+     "type": "DATE",
+     "ko": "날짜",
+     "unit": "날짜",
+     "description": "이벤트가 일어난 날(UTC)이에요",
+     "example": "2024-07-15"
     },
     {
      "name": "metric",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "지표",
+     "unit": "글자",
+     "description": "지표 이름이에요. active_accounts(활동 계정 수), events(이벤트 수), events_per_account(계정당 이벤트), top100_kept(star 상위 100 중 거른 뒤에도 100위 안에 남은 저장소 수), repos_flagged(봇으로 판정된 저장소 수)",
+     "example": "events"
     },
     {
      "name": "kind",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "지표 종류",
+     "unit": "글자",
+     "description": "지표 종류예요. count(셈), mean(평균이라 n, 분산, MDE를 같이 채움), ratio(비율이라 분자와 분모를 따로 채움), detection(봇 판정 수 자체라 기본 정책 규칙 대상이 아님)",
+     "example": "count"
     },
     {
      "name": "treatment",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "필터 강도",
+     "unit": "글자",
+     "description": "봇 필터 강도예요. none(원본), lenient(약하게), balanced(보통), strict(강하게), cap_top1(거르지 않고 계정당 이벤트를 그날 상위 1% 값으로 자르기)",
+     "example": "lenient"
     },
     {
      "name": "value",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "값",
+     "unit": "지표마다 다름",
+     "description": "이 강도에서 계산한 지표 값이에요. 단위는 metric을 따라요(계정 수는 개, 이벤트 수는 건, 계정당 이벤트는 건)",
+     "example": 3527311.0
     },
     {
      "name": "change_vs_none",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "원본 대비",
+     "unit": "비율",
+     "description": "원본 대비 변화예요. value ÷ 같은 날 같은 지표의 none 값 − 1. -0.3이면 원본보다 30% 적어요. none 값이 0이면 NULL이에요",
+     "example": -0.2823
     },
     {
      "name": "extra_vs_lenient",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "약하게 대비 추가",
+     "unit": "비율",
+     "description": "약하게 대비 추가 변화예요. value ÷ lenient 값 − 1. 스스로 밝힌 봇을 뺀 뒤 더 빠지는 몫이에요. lenient 값이 0이면 NULL이에요",
+     "example": 0.0
     },
     {
      "name": "num_value",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "분자",
+     "unit": "건",
+     "description": "ratio 지표의 분자예요. GitHub 지표에는 ratio가 없어 모두 NULL이에요",
+     "example": null
     },
     {
      "name": "den_value",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "분모",
+     "unit": "건",
+     "description": "ratio 지표의 분모예요. GitHub 지표에는 ratio가 없어 모두 NULL이에요",
+     "example": null
     },
     {
      "name": "num_change_vs_none",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "분자 원본 대비",
+     "unit": "비율",
+     "description": "분자의 원본 대비 변화예요(num_value ÷ none 분자 − 1). GitHub에서는 NULL이에요",
+     "example": null
     },
     {
      "name": "den_change_vs_none",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "분모 원본 대비",
+     "unit": "비율",
+     "description": "분모의 원본 대비 변화예요(den_value ÷ none 분모 − 1). GitHub에서는 NULL이에요",
+     "example": null
     },
     {
      "name": "n",
-     "type": "BIGINT"
+     "type": "BIGINT",
+     "ko": "계정 수",
+     "unit": "개",
+     "description": "mean 지표에서 평균을 낸 계정 수예요. 다른 종류는 NULL이에요",
+     "example": 682233
     },
     {
      "name": "mean",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "평균",
+     "unit": "건",
+     "description": "mean 지표의 계정당 이벤트 평균이에요. 다른 종류는 NULL이에요",
+     "example": 4.3157
     },
     {
      "name": "variance",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "분산",
+     "unit": "건²",
+     "description": "mean 지표의 계정당 이벤트 표본 분산이에요. 다른 종류는 NULL이에요",
+     "example": 39.7835
     },
     {
      "name": "rel_mde",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "최소 탐지 효과",
+     "unit": "비율",
+     "description": "최소 탐지 효과예요. 계정을 반반 나눈 실험에서 잡을 수 있는 가장 작은 상대 차이로, 2.8 × √(2 × variance ÷ (n/2)) ÷ mean이에요(유의수준 5% 양측, 검정력 80%). mean 지표만 채워요",
+     "example": 0.0099
     },
     {
      "name": "traffic_x_vs_none",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "필요 트래픽 (원본 대비 배수)",
+     "unit": "배",
+     "description": "같은 MDE를 얻는 데 드는 계정 수를 원본 대비 배수로 본 값이에요. (rel_mde ÷ none의 rel_mde)². 1보다 작으면 원본보다 적은 트래픽으로 같은 실험을 할 수 있어요",
+     "example": 0.0001
     },
     {
      "name": "ruleset_id",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "규칙 묶음 id",
+     "unit": "글자",
+     "description": "판정 규칙 전부(정책 시드, 근거 SQL, 피처 SQL, 판정 모델)를 해시한 12자리 id예요. 규칙이 하나라도 바뀌면 바뀌어요",
+     "example": "fdcdcd213e30"
     }
    ]
   },
@@ -95,71 +182,147 @@
    "columns": [
     {
      "name": "source",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "원천",
+     "unit": "글자",
+     "description": "데이터를 가져온 곳이에요. 화면 파일에는 GitHub(gh)만 있어요",
+     "example": "gh"
     },
     {
      "name": "event_date",
-     "type": "DATE"
+     "type": "DATE",
+     "ko": "날짜",
+     "unit": "날짜",
+     "description": "이벤트가 일어난 날(UTC)이에요",
+     "example": "2024-07-15"
     },
     {
      "name": "metric",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "지표",
+     "unit": "글자",
+     "description": "지표 이름이에요. active_accounts(활동 계정 수), events(이벤트 수), events_per_account(계정당 이벤트), top100_kept(star 상위 100 중 거른 뒤에도 100위 안에 남은 저장소 수), repos_flagged(봇으로 판정된 저장소 수)",
+     "example": "events"
     },
     {
      "name": "kind",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "지표 종류",
+     "unit": "글자",
+     "description": "지표 종류예요. count(셈), mean(평균이라 n, 분산, MDE를 같이 채움), ratio(비율이라 분자와 분모를 따로 채움), detection(봇 판정 수 자체라 기본 정책 규칙 대상이 아님)",
+     "example": "count"
     },
     {
      "name": "treatment",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "필터 강도",
+     "unit": "글자",
+     "description": "봇 필터 강도예요. none(원본), lenient(약하게), balanced(보통), strict(강하게), cap_top1(거르지 않고 계정당 이벤트를 그날 상위 1% 값으로 자르기)",
+     "example": "lenient"
     },
     {
      "name": "base_ruleset",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "공개 버전",
+     "unit": "글자",
+     "description": "비교 기준인 가장 최근 공개 규칙 묶음 id예요",
+     "example": "841ebd6f310f"
     },
     {
      "name": "other_ruleset",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "비교한 버전",
+     "unit": "글자",
+     "description": "policy_compare에 있는 다른 규칙 묶음 id예요. 예전 공개 묶음이거나 공개 전 후보예요",
+     "example": "fdcdcd213e30"
     },
     {
      "name": "base_value",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "공개 버전 값",
+     "unit": "지표마다 다름",
+     "description": "공개 버전으로 계산한 지표 값이에요. 단위는 metric을 따라요",
+     "example": 3527311.0
     },
     {
      "name": "other_value",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "비교한 버전 값",
+     "unit": "지표마다 다름",
+     "description": "비교한 버전으로 계산한 지표 값이에요. 단위는 metric을 따라요",
+     "example": 3527311.0
     },
     {
      "name": "diff",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "차이",
+     "unit": "지표마다 다름",
+     "description": "other_value − base_value예요. 0이면 두 버전의 숫자가 같아요",
+     "example": 0.0
     },
     {
      "name": "rel_change",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "상대 변화",
+     "unit": "비율",
+     "description": "상대 변화예요. other_value ÷ base_value − 1. base_value가 0이면 NULL이에요",
+     "example": 0.0
     }
    ]
   },
   "ruleset_release": {
    "grain": "공개한 규칙 버전 하나",
    "rows": 4,
-   "bytes": 1397,
-   "csv_bytes": 595,
+   "bytes": 1945,
+   "csv_bytes": 833,
    "columns": [
     {
      "name": "ruleset_id",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "규칙 묶음 id",
+     "unit": "글자",
+     "description": "판정 규칙 전부(정책 시드, 근거 SQL, 피처 SQL, 판정 모델)를 해시한 12자리 id예요. 규칙이 하나라도 바뀌면 바뀌어요",
+     "example": "ad4bfe93bcd9"
     },
     {
      "name": "seq",
-     "type": "INTEGER"
+     "type": "INTEGER",
+     "ko": "공개 순번",
+     "unit": "번",
+     "description": "공개 순번이에요. 클수록 최근이고, 화면과 분석가 기본 뷰는 가장 큰 순번을 써요",
+     "example": 1
     },
     {
      "name": "released_on",
-     "type": "DATE"
+     "type": "DATE",
+     "ko": "공개일",
+     "unit": "날짜",
+     "description": "공개한 날이에요",
+     "example": "2026-11-22"
     },
     {
      "name": "note",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "자세한 기록",
+     "unit": "글자",
+     "description": "엔지니어용 공개 기록이에요. 숫자가 같다는 증명과 결정 번호가 들어 있어요. 화면에서는 '자세히'에 접혀 있어요",
+     "example": "첫 공개: lockstep_ratio v2, multi_repo_burst v2, 정책 3개 (결정 13, 15, 24)"
+    },
+    {
+     "name": "label",
+     "type": "VARCHAR",
+     "ko": "버전 이름",
+     "unit": "글자",
+     "description": "분석가가 부르는 버전 이름이에요(v1, v2 …). 화면 맨 위의 '규칙 v4' 같은 표기가 이 값이에요",
+     "example": "v1"
+    },
+    {
+     "name": "impact",
+     "type": "VARCHAR",
+     "ko": "숫자 영향",
+     "unit": "글자",
+     "description": "이 공개로 분석가 숫자가 바뀌는지 한 줄로 적은 것이에요",
+     "example": "첫 공개(비교할 앞 버전 없음)"
     }
    ]
   },
@@ -171,19 +334,35 @@
    "columns": [
     {
      "name": "metric",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "지표",
+     "unit": "글자",
+     "description": "지표 이름이에요. active_accounts(활동 계정 수), events(이벤트 수), events_per_account(계정당 이벤트), top100_kept(star 상위 100 중 거른 뒤에도 100위 안에 남은 저장소 수), repos_flagged(봇으로 판정된 저장소 수)",
+     "example": "events"
     },
     {
      "name": "default_policy",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "추천 강도",
+     "unit": "글자",
+     "description": "이 지표를 볼 때 기본으로 쓰는 필터 강도예요. 화면의 '지표별 추천'이 이 값이에요",
+     "example": "lenient"
     },
     {
      "name": "reason",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "이유",
+     "unit": "글자",
+     "description": "이 강도를 고른 이유예요. 강도 사이 차이를 그 지표의 자연 변동과 비교해요",
+     "example": "규칙 제안 그대로(사람 확인 전, D10 잣대 balanced): balanced와 차이 1.36%가 자연 변동 2.44%보다 작다. strict 13.68%는 채점되지 않은 행동 근거라 보고용 상한"
     },
     {
      "name": "measurement",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "측정 번호",
+     "unit": "글자",
+     "description": "근거가 된 측정 기록 번호예요(docs/measurements.md의 M-번호)",
+     "example": "M-26 M-36"
     }
    ]
   },
@@ -195,123 +374,227 @@
    "columns": [
     {
      "name": "source",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "원천",
+     "unit": "글자",
+     "description": "데이터를 가져온 곳이에요. 화면 파일에는 GitHub(gh)만 있어요",
+     "example": "gh"
     },
     {
      "name": "metric",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "지표",
+     "unit": "글자",
+     "description": "지표 이름이에요. active_accounts(활동 계정 수), events(이벤트 수), events_per_account(계정당 이벤트), top100_kept(star 상위 100 중 거른 뒤에도 100위 안에 남은 저장소 수), repos_flagged(봇으로 판정된 저장소 수)",
+     "example": "top100_kept"
     },
     {
      "name": "natural_var",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "자연 변동",
+     "unit": "비율",
+     "description": "자연 변동이에요. lenient 값이 날짜 사이에 바뀐 폭(절댓값)의 중앙값이에요",
+     "example": 0.0099
     },
     {
      "name": "step_balanced",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "보통의 추가 변화",
+     "unit": "비율",
+     "description": "balanced가 lenient보다 값을 바꾼 폭(절댓값)의 날짜별 중앙값이에요. 자연 변동보다 크면 balanced를 제안해요",
+     "example": 0.67
     },
     {
      "name": "step_strict",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "강하게의 추가 변화",
+     "unit": "비율",
+     "description": "strict가 balanced보다 값을 바꾼 폭(절댓값)의 날짜별 중앙값이에요. strict가 더 빼는 근거는 채점되지 않아 보고용 상한으로만 봐요",
+     "example": 0.0
     },
     {
      "name": "n_days",
-     "type": "BIGINT"
+     "type": "BIGINT",
+     "ko": "날 수",
+     "unit": "일",
+     "description": "중앙값을 낸 날 수예요",
+     "example": 7
     },
     {
      "name": "proposed_policy",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "규칙 제안",
+     "unit": "글자",
+     "description": "규칙이 제안한 강도예요. step_balanced가 natural_var보다 크면 balanced, 아니면 lenient예요. 사람이 보고 metric_policy에 옮겨요",
+     "example": "balanced"
     }
    ]
   },
   "daily_action": {
    "grain": "원천 x 날짜 x 이벤트 종류. 강도별 이벤트 수와 계정 수. 그날 그 종류를 낸 계정이 10개 미만이면 싣지 않아요",
    "rows": 105,
-   "bytes": 5243,
+   "bytes": 5074,
    "csv_bytes": 8271,
    "columns": [
     {
      "name": "source",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "원천",
+     "unit": "글자",
+     "description": "데이터를 가져온 곳이에요. 화면 파일에는 GitHub(gh)만 있어요",
+     "example": "gh"
     },
     {
      "name": "event_date",
-     "type": "DATE"
+     "type": "DATE",
+     "ko": "날짜",
+     "unit": "날짜",
+     "description": "이벤트가 일어난 날(UTC)이에요",
+     "example": "2024-07-19"
     },
     {
      "name": "action",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "이벤트 종류",
+     "unit": "글자",
+     "description": "GitHub 이벤트 종류예요(WatchEvent = star, PushEvent = 코드 올리기 등)",
+     "example": "IssuesEvent"
     },
     {
      "name": "events_none",
-     "type": "BIGINT"
+     "type": "BIGINT",
+     "ko": "이벤트 (원본)",
+     "unit": "건",
+     "description": "거르지 않은 이벤트 수예요",
+     "example": 77243
     },
     {
      "name": "events_lenient",
-     "type": "BIGINT"
+     "type": "BIGINT",
+     "ko": "이벤트 (약하게)",
+     "unit": "건",
+     "description": "약하게 거른 뒤 남은 이벤트 수예요",
+     "example": 74052
     },
     {
      "name": "events_balanced",
-     "type": "BIGINT"
+     "type": "BIGINT",
+     "ko": "이벤트 (보통)",
+     "unit": "건",
+     "description": "보통으로 거른 뒤 남은 이벤트 수예요",
+     "example": 74052
     },
     {
      "name": "events_strict",
-     "type": "BIGINT"
+     "type": "BIGINT",
+     "ko": "이벤트 (강하게)",
+     "unit": "건",
+     "description": "강하게 거른 뒤 남은 이벤트 수예요",
+     "example": 69482
     },
     {
      "name": "accounts_none",
-     "type": "BIGINT"
+     "type": "BIGINT",
+     "ko": "계정 (원본)",
+     "unit": "개",
+     "description": "그날 이 종류를 낸 계정 수예요. 10개 미만이면 행을 싣지 않아요",
+     "example": 33661
     },
     {
      "name": "accounts_lenient",
-     "type": "BIGINT"
+     "type": "BIGINT",
+     "ko": "계정 (약하게)",
+     "unit": "개",
+     "description": "약하게 거른 뒤 남은 계정 수예요",
+     "example": 33559
     },
     {
      "name": "accounts_balanced",
-     "type": "BIGINT"
+     "type": "BIGINT",
+     "ko": "계정 (보통)",
+     "unit": "개",
+     "description": "보통으로 거른 뒤 남은 계정 수예요",
+     "example": 33559
     },
     {
      "name": "accounts_strict",
-     "type": "BIGINT"
+     "type": "BIGINT",
+     "ko": "계정 (강하게)",
+     "unit": "개",
+     "description": "강하게 거른 뒤 남은 계정 수예요",
+     "example": 33508
     }
    ]
   },
   "mde_cap": {
    "grain": "원천 x 날짜 x 필터 강도 x 자르기 백분위(90~100, 0.5 간격). 계정 수, 자른 값, 계정당 이벤트 평균과 분산. MDE 계산기에 써요",
    "rows": 588,
-   "bytes": 11234,
+   "bytes": 11256,
    "csv_bytes": 44141,
    "columns": [
     {
      "name": "source",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "원천",
+     "unit": "글자",
+     "description": "데이터를 가져온 곳이에요. 화면 파일에는 GitHub(gh)만 있어요",
+     "example": "gh"
     },
     {
      "name": "event_date",
-     "type": "DATE"
+     "type": "DATE",
+     "ko": "날짜",
+     "unit": "날짜",
+     "description": "이벤트가 일어난 날(UTC)이에요",
+     "example": "2024-07-16"
     },
     {
      "name": "treatment",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "필터 강도",
+     "unit": "글자",
+     "description": "봇 필터 강도예요. none(원본), lenient(약하게), balanced(보통), strict(강하게)",
+     "example": "strict"
     },
     {
      "name": "q",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "자르기 백분위",
+     "unit": "백분위",
+     "description": "자르기 백분위예요(90 ~ 100, 0.5 간격). 100이면 자르지 않아요",
+     "example": 99.0
     },
     {
      "name": "n",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "계정 수",
+     "unit": "개",
+     "description": "이 강도에서 남은 계정 수예요",
+     "example": 677876.0
     },
     {
      "name": "cap_value",
-     "type": "BIGINT"
+     "type": "BIGINT",
+     "ko": "자른 값",
+     "unit": "건",
+     "description": "계정당 이벤트가 이 값을 넘으면 이 값으로 낮춰요. q가 100이면 NULL이에요",
+     "example": 37
     },
     {
      "name": "mean",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "평균",
+     "unit": "건",
+     "description": "자른 뒤 계정당 이벤트 평균이에요",
+     "example": 4.2002
     },
     {
      "name": "variance",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "분산",
+     "unit": "건²",
+     "description": "자른 뒤 계정당 이벤트 표본 분산이에요",
+     "example": 34.7806
     }
    ]
   },
@@ -323,47 +606,91 @@
    "columns": [
     {
      "name": "evidence_id",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "근거",
+     "unit": "글자",
+     "description": "채점한 근거 이름이에요. fake_star_repo는 저활동 + (lockstep_ratio 또는 burst_5m)를 합친 조합 판정이에요",
+     "example": "low_activity"
     },
     {
      "name": "rule_version",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "근거 버전",
+     "unit": "글자",
+     "description": "근거의 버전이에요(v1, v2 …). 조합 판정은 combo예요",
+     "example": "v1"
     },
     {
      "name": "truth_source",
-     "type": "VARCHAR"
+     "type": "VARCHAR",
+     "ko": "정답 출처",
+     "unit": "글자",
+     "description": "정답을 확인한 방법이에요. repo_deleted는 판정 뒤에 저장소가 지워졌는지(404) 본 것이에요",
+     "example": "repo_deleted"
     },
     {
      "name": "window_end",
-     "type": "DATE"
+     "type": "DATE",
+     "ko": "판정 구간 끝",
+     "unit": "날짜",
+     "description": "판정한 구간의 마지막 날이에요. NULL이면 구간을 모두 합친 전체 행이에요",
+     "example": "2024-07-16"
     },
     {
      "name": "n_hit",
-     "type": "BIGINT"
+     "type": "BIGINT",
+     "ko": "걸린 수",
+     "unit": "개",
+     "description": "이 근거에 걸린 대상 수예요. 정답 확인 여부와 상관없어요",
+     "example": 99217
     },
     {
      "name": "n_hit_with_truth",
-     "type": "BIGINT"
+     "type": "BIGINT",
+     "ko": "정답 확인한 걸린 수",
+     "unit": "개",
+     "description": "걸린 대상 중 정답을 확인한 수예요. 정밀도의 분모예요",
+     "example": 817
     },
     {
      "name": "n_hit_positive",
-     "type": "BIGINT"
+     "type": "BIGINT",
+     "ko": "정답도 봇",
+     "unit": "개",
+     "description": "정답을 확인한 걸린 대상 중 정답도 봇(삭제됨)인 수예요. 정밀도의 분자예요",
+     "example": 397
     },
     {
      "name": "precision",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "정밀도",
+     "unit": "비율",
+     "description": "정밀도예요. n_hit_positive ÷ n_hit_with_truth, 소수 넷째 자리 반올림. 분모가 0이면 NULL이에요",
+     "example": 0.4859
     },
     {
      "name": "n_control_with_truth",
-     "type": "BIGINT"
+     "type": "BIGINT",
+     "ko": "대조군 수",
+     "unit": "개",
+     "description": "이 근거에 안 걸렸는데 정답을 확인한 대상 수예요(대조군)",
+     "example": 21
     },
     {
      "name": "n_control_positive",
-     "type": "BIGINT"
+     "type": "BIGINT",
+     "ko": "대조군 중 봇",
+     "unit": "개",
+     "description": "대조군 중 정답이 봇(삭제됨)인 수예요",
+     "example": 14
     },
     {
      "name": "control_positive_rate",
-     "type": "DOUBLE"
+     "type": "DOUBLE",
+     "ko": "대조군 양성률",
+     "unit": "비율",
+     "description": "대조군 양성률이에요. n_control_positive ÷ n_control_with_truth. 정밀도가 이 값보다 충분히 높아야 근거가 뜻이 있어요",
+     "example": 0.6667
     }
    ]
   }
@@ -462,11 +789,42 @@
   },
   "evaluation": {
    "description": "근거 x 버전 x 정답 출처 x 판정 구간. window_end가 NULL인 행은 구간을 합친 전체 (결정 14)",
-   "columns": {}
+   "columns": {
+    "evidence_id": "채점한 근거 이름이에요. fake_star_repo는 저활동 + (lockstep_ratio 또는 burst_5m)를 합친 조합 판정이에요",
+    "rule_version": "근거의 버전이에요(v1, v2 …). 조합 판정은 combo예요",
+    "truth_source": "정답을 확인한 방법이에요. repo_deleted는 판정 뒤에 저장소가 지워졌는지(404) 본 것이에요",
+    "window_end": "판정한 구간의 마지막 날이에요. NULL이면 구간을 모두 합친 전체 행이에요",
+    "n_hit": "이 근거에 걸린 대상 수예요. 정답 확인 여부와 상관없어요",
+    "n_hit_with_truth": "걸린 대상 중 정답을 확인한 수예요. 정밀도의 분모예요",
+    "n_hit_positive": "정답을 확인한 걸린 대상 중 정답도 봇(삭제됨)인 수예요. 정밀도의 분자예요",
+    "precision": "정밀도예요. n_hit_positive ÷ n_hit_with_truth, 소수 넷째 자리 반올림. 분모가 0이면 NULL이에요",
+    "n_control_with_truth": "이 근거에 안 걸렸는데 정답을 확인한 대상 수예요(대조군)",
+    "n_control_positive": "대조군 중 정답이 봇(삭제됨)인 수예요",
+    "control_positive_rate": "대조군 양성률이에요. n_control_positive ÷ n_control_with_truth. 정밀도가 이 값보다 충분히 높아야 근거가 뜻이 있어요"
+   }
   },
   "policy_compare": {
    "description": "원천 x 날짜 x 지표 x 처리 방식(none, lenient, balanced, strict, cap_top1). 규칙 묶음(ruleset_id)마다 행을 쌓는다 (결정 24)",
-   "columns": {}
+   "columns": {
+    "source": "데이터를 가져온 곳이에요. 화면 파일에는 GitHub(gh)만 있어요",
+    "event_date": "이벤트가 일어난 날(UTC)이에요",
+    "metric": "지표 이름이에요. active_accounts(활동 계정 수), events(이벤트 수), events_per_account(계정당 이벤트), top100_kept(star 상위 100 중 거른 뒤에도 100위 안에 남은 저장소 수), repos_flagged(봇으로 판정된 저장소 수)",
+    "kind": "지표 종류예요. count(셈), mean(평균이라 n, 분산, MDE를 같이 채움), ratio(비율이라 분자와 분모를 따로 채움), detection(봇 판정 수 자체라 기본 정책 규칙 대상이 아님)",
+    "treatment": "봇 필터 강도예요. none(원본), lenient(약하게), balanced(보통), strict(강하게), cap_top1(거르지 않고 계정당 이벤트를 그날 상위 1% 값으로 자르기)",
+    "value": "이 강도에서 계산한 지표 값이에요. 단위는 metric을 따라요(계정 수는 개, 이벤트 수는 건, 계정당 이벤트는 건)",
+    "change_vs_none": "원본 대비 변화예요. value ÷ 같은 날 같은 지표의 none 값 − 1. -0.3이면 원본보다 30% 적어요. none 값이 0이면 NULL이에요",
+    "extra_vs_lenient": "약하게 대비 추가 변화예요. value ÷ lenient 값 − 1. 스스로 밝힌 봇을 뺀 뒤 더 빠지는 몫이에요. lenient 값이 0이면 NULL이에요",
+    "num_value": "ratio 지표의 분자예요. GitHub 지표에는 ratio가 없어 모두 NULL이에요",
+    "den_value": "ratio 지표의 분모예요. GitHub 지표에는 ratio가 없어 모두 NULL이에요",
+    "num_change_vs_none": "분자의 원본 대비 변화예요(num_value ÷ none 분자 − 1). GitHub에서는 NULL이에요",
+    "den_change_vs_none": "분모의 원본 대비 변화예요(den_value ÷ none 분모 − 1). GitHub에서는 NULL이에요",
+    "n": "mean 지표에서 평균을 낸 계정 수예요. 다른 종류는 NULL이에요",
+    "mean": "mean 지표의 계정당 이벤트 평균이에요. 다른 종류는 NULL이에요",
+    "variance": "mean 지표의 계정당 이벤트 표본 분산이에요. 다른 종류는 NULL이에요",
+    "rel_mde": "최소 탐지 효과예요. 계정을 반반 나눈 실험에서 잡을 수 있는 가장 작은 상대 차이로, 2.8 × √(2 × variance ÷ (n/2)) ÷ mean이에요(유의수준 5% 양측, 검정력 80%). mean 지표만 채워요",
+    "traffic_x_vs_none": "같은 MDE를 얻는 데 드는 계정 수를 원본 대비 배수로 본 값이에요. (rel_mde ÷ none의 rel_mde)². 1보다 작으면 원본보다 적은 트래픽으로 같은 실험을 할 수 있어요",
+    "ruleset_id": "판정 규칙 전부(정책 시드, 근거 SQL, 피처 SQL, 판정 모델)를 해시한 12자리 id예요. 규칙이 하나라도 바뀌면 바뀌어요"
+   }
   },
   "policy_compare_released": {
    "description": "분석가 기본 뷰. 가장 최근 공개 규칙 묶음의 policy_compare만",
@@ -474,11 +832,31 @@
   },
   "ruleset_change_log": {
    "description": "기본 규칙 묶음 대 다른 묶음, 지표 x 날짜 x 처리 방식마다 바뀐 폭",
-   "columns": {}
+   "columns": {
+    "source": "데이터를 가져온 곳이에요. 화면 파일에는 GitHub(gh)만 있어요",
+    "event_date": "이벤트가 일어난 날(UTC)이에요",
+    "metric": "지표 이름이에요. active_accounts(활동 계정 수), events(이벤트 수), events_per_account(계정당 이벤트), top100_kept(star 상위 100 중 거른 뒤에도 100위 안에 남은 저장소 수), repos_flagged(봇으로 판정된 저장소 수)",
+    "kind": "지표 종류예요. count(셈), mean(평균이라 n, 분산, MDE를 같이 채움), ratio(비율이라 분자와 분모를 따로 채움), detection(봇 판정 수 자체라 기본 정책 규칙 대상이 아님)",
+    "treatment": "봇 필터 강도예요. none(원본), lenient(약하게), balanced(보통), strict(강하게), cap_top1(거르지 않고 계정당 이벤트를 그날 상위 1% 값으로 자르기)",
+    "base_ruleset": "비교 기준인 가장 최근 공개 규칙 묶음 id예요",
+    "other_ruleset": "policy_compare에 있는 다른 규칙 묶음 id예요. 예전 공개 묶음이거나 공개 전 후보예요",
+    "base_value": "공개 버전으로 계산한 지표 값이에요. 단위는 metric을 따라요",
+    "other_value": "비교한 버전으로 계산한 지표 값이에요. 단위는 metric을 따라요",
+    "diff": "other_value − base_value예요. 0이면 두 버전의 숫자가 같아요",
+    "rel_change": "상대 변화예요. other_value ÷ base_value − 1. base_value가 0이면 NULL이에요"
+   }
   },
   "metric_policy_proposal": {
    "description": "지표별 기본 정책 제안(자연 변동 대비 규칙). 사람이 보고 seeds/metric_policy.csv에 옮긴다",
-   "columns": {}
+   "columns": {
+    "source": "데이터를 가져온 곳이에요. 화면 파일에는 GitHub(gh)만 있어요",
+    "metric": "지표 이름이에요. active_accounts(활동 계정 수), events(이벤트 수), events_per_account(계정당 이벤트), top100_kept(star 상위 100 중 거른 뒤에도 100위 안에 남은 저장소 수), repos_flagged(봇으로 판정된 저장소 수)",
+    "natural_var": "자연 변동이에요. lenient 값이 날짜 사이에 바뀐 폭(절댓값)의 중앙값이에요",
+    "step_balanced": "balanced가 lenient보다 값을 바꾼 폭(절댓값)의 날짜별 중앙값이에요. 자연 변동보다 크면 balanced를 제안해요",
+    "step_strict": "strict가 balanced보다 값을 바꾼 폭(절댓값)의 날짜별 중앙값이에요. strict가 더 빼는 근거는 채점되지 않아 보고용 상한으로만 봐요",
+    "n_days": "중앙값을 낸 날 수예요",
+    "proposed_policy": "규칙이 제안한 강도예요. step_balanced가 natural_var보다 크면 balanced, 아니면 lenient예요. 사람이 보고 metric_policy에 옮겨요"
+   }
   },
   "actor_policy_status": {
    "description": "원천 x 대상 x 날짜 x 정책 -> 실유저 여부, 빠지게 한 근거, AI 에이전트 여부, 규칙 묶음 id. 매크로 real_users가 읽는다",
@@ -512,6 +890,55 @@
     "judged_at": null,
     "sql_sha256": null,
     "ruleset_id": null
+   }
+  },
+  "ruleset_release": {
+   "description": "공개한 규칙 묶음. seq가 가장 큰 줄이 분석가 숫자와 화면의 기준이다 (결정 24). 시드는 규칙 묶음 id 해시에 들지 않는다 (warehouse/dbt_build.py ruleset_parts)",
+   "columns": {
+    "ruleset_id": "판정 규칙 전부(정책 시드, 근거 SQL, 피처 SQL, 판정 모델)를 해시한 12자리 id예요. 규칙이 하나라도 바뀌면 바뀌어요",
+    "seq": "공개 순번이에요. 클수록 최근이고, 화면과 분석가 기본 뷰는 가장 큰 순번을 써요",
+    "released_on": "공개한 날이에요",
+    "note": "엔지니어용 공개 기록이에요. 숫자가 같다는 증명과 결정 번호가 들어 있어요. 화면에서는 '자세히'에 접혀 있어요",
+    "label": "분석가가 부르는 버전 이름이에요(v1, v2 …). 화면 맨 위의 '규칙 v4' 같은 표기가 이 값이에요",
+    "impact": "이 공개로 분석가 숫자가 바뀌는지 한 줄로 적은 것이에요"
+   }
+  },
+  "metric_policy": {
+   "description": "지표별 기본 정책. 사람이 metric_policy_proposal을 보고 정한다 (결정 24 덧붙임)",
+   "columns": {
+    "metric": "지표 이름이에요. active_accounts(활동 계정 수), events(이벤트 수), events_per_account(계정당 이벤트), top100_kept(star 상위 100 중 거른 뒤에도 100위 안에 남은 저장소 수), repos_flagged(봇으로 판정된 저장소 수)",
+    "default_policy": "이 지표를 볼 때 기본으로 쓰는 필터 강도예요. 화면의 '지표별 추천'이 이 값이에요",
+    "reason": "이 강도를 고른 이유예요. 강도 사이 차이를 그 지표의 자연 변동과 비교해요",
+    "measurement": "근거가 된 측정 기록 번호예요(docs/measurements.md의 M-번호)"
+   }
+  },
+  "daily_action": {
+   "description": null,
+   "columns": {
+    "source": "데이터를 가져온 곳이에요. 화면 파일에는 GitHub(gh)만 있어요",
+    "event_date": "이벤트가 일어난 날(UTC)이에요",
+    "action": "GitHub 이벤트 종류예요(WatchEvent = star, PushEvent = 코드 올리기 등)",
+    "events_none": "거르지 않은 이벤트 수예요",
+    "events_lenient": "약하게 거른 뒤 남은 이벤트 수예요",
+    "events_balanced": "보통으로 거른 뒤 남은 이벤트 수예요",
+    "events_strict": "강하게 거른 뒤 남은 이벤트 수예요",
+    "accounts_none": "그날 이 종류를 낸 계정 수예요. 10개 미만이면 행을 싣지 않아요",
+    "accounts_lenient": "약하게 거른 뒤 남은 계정 수예요",
+    "accounts_balanced": "보통으로 거른 뒤 남은 계정 수예요",
+    "accounts_strict": "강하게 거른 뒤 남은 계정 수예요"
+   }
+  },
+  "mde_cap": {
+   "description": null,
+   "columns": {
+    "source": "데이터를 가져온 곳이에요. 화면 파일에는 GitHub(gh)만 있어요",
+    "event_date": "이벤트가 일어난 날(UTC)이에요",
+    "treatment": "봇 필터 강도예요. none(원본), lenient(약하게), balanced(보통), strict(강하게)",
+    "q": "자르기 백분위예요(90 ~ 100, 0.5 간격). 100이면 자르지 않아요",
+    "n": "이 강도에서 남은 계정 수예요",
+    "cap_value": "계정당 이벤트가 이 값을 넘으면 이 값으로 낮춰요. q가 100이면 NULL이에요",
+    "mean": "자른 뒤 계정당 이벤트 평균이에요",
+    "variance": "자른 뒤 계정당 이벤트 표본 분산이에요"
    }
   }
  }
