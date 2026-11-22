@@ -112,8 +112,8 @@
 
 ## 9. 배포
 
-- 워크플로는 `docs/pages_workflow.yml`에 두었고, 사용자가 `.github/workflows/pages.yml`로 옮긴다(원격 도구는 .github/workflows에 쓸 수 없어 사용자가 내용을 보고 옮기게 했다). 손으로 누를 때만 돈다(workflow_dispatch). 공개는 사용자 결정이라 push에 자동으로 붙이지 않는다. 〔근거: 판단: 바깥에 내보내는 일은 되돌리기 어렵다(공개 뒤 남이 받아 갈 수 있다). direction_v6.md D9〕
-- 올리기 전에 workflow가 site/ 안에 대상 단위 파일이 없는지, meta.json의 with_entities가 false인지 다시 본다. 〔근거: 코드: docs/pages_workflow.yml 검사 단계. 판단: 내보내기 검사와 이중으로〕
+- 워크플로는 `.github/workflows/pages.yml`로 옮겼다(2026-11-22, 처음에는 원격 도구가 .github/workflows에 쓸 수 없어 docs/pages_workflow.yml에 두었다). 손으로 누를 때만 돈다(workflow_dispatch). 공개는 사용자 결정이라 push에 자동으로 붙이지 않는다. 〔근거: 판단: 바깥에 내보내는 일은 되돌리기 어렵다(공개 뒤 남이 받아 갈 수 있다). direction_v6.md D9〕
+- 올리기 전에 workflow가 site/ 안에 대상 단위 파일이 없는지, meta.json의 with_entities가 false인지 다시 본다. 〔근거: 코드: .github/workflows/pages.yml 검사 단계. 판단: 내보내기 검사와 이중으로〕
 - 순서: U1 정리 → U2 올리기 → GitHub 설정 Pages에서 원천을 "GitHub Actions"로 → Actions 탭에서 "pages" 실행. 〔근거: 문서: [GitHub Pages 한도와 안내](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits). handoff_v6.md U1, U2〕
 - 저장소가 비공개여도 Pages 사이트는 인터넷에 공개된다. 〔근거: 문서: [What is GitHub Pages](https://help.github.com/articles/what-is-github-pages) "publicly available on the internet, even if the repository for the site is private"〕
 
