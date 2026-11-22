@@ -6,6 +6,9 @@ __pycache__/
 warehouse_local/
 spark-events/
 *.parquet
+# 화면용 집계(docs/site_design.md 6절)는 올리고, 대상 단위 묶음은 로컬에만
+!site/data/*.parquet
+site/data_local/
 
 # dbt 빌드 산출물 (L5). evidence_current.csv는 빌드 때 rules/registry.yml에서 만든다
 warehouse/dbt/target/

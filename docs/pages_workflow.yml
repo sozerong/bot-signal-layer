@@ -1,0 +1,39 @@
+# 데이터 실험실 화면(site/)을 GitHub Pages에 올린다. 공개는 사용자 결정이라 손으로 누를 때만 돈다 (docs/site_design.md 9절)
+name: pages
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      # 대상 단위 봇 판정(계정·저장소 이름)은 공개하지 않는다. 내보내기 검사와 별개로 한 번 더 본다
+      - name: 공개 묶음 검사
+        run: |
+          test -f site/data/meta.json || { echo "site/data/meta.json 없음: scripts/export_site.py를 먼저 돌려 커밋"; exit 1; }
+          for f in suspects why_excluded impact_top; do
+            for g in "site/data/$f.parquet" "site/data/csv/$f.csv"; do
+              test ! -e "$g" || { echo "대상 단위 파일 $g"; exit 1; }
+            done
+          done
+          python3 -c "import json,sys; m=json.load(open('site/data/meta.json')); sys.exit('with_entities=true' if m.get('with_entities') else 0)"
+          test ! -e site/data_local || { echo "site/data_local은 올리지 않는다"; exit 1; }
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

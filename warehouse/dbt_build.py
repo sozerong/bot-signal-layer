@@ -7,13 +7,19 @@
 `+`(아래쪽만) 선택이 시드를 빠뜨리면 Gold가 옛 버전을 읽는다 (failure_analysis.md F-10).
 컴파일만 (리니지용): python -m warehouse.dbt_build compile
 
-규칙 묶음 id(ruleset_id, 결정 24): 시드 evidence_current.csv와 policy_family.csv의 행을 정렬해 해시한 앞 12자리.
-Gold가 판정에 쓰는 규칙 버전과 정책이 이 두 파일에서 정해지므로, 둘이 같으면 같은 id다. dbt 변수 ruleset_id로 넘긴다.
-줄바꿈(CRLF/LF)과 행 순서에 상관없게 행 단위로 정렬해 해시한다 (Windows에서 받은 레포와 클라우드가 같은 id가 되게).
+규칙 묶음 id(ruleset_id, 결정 24, 결정 30): 판정을 정하는 모든 것을 해시한 앞 12자리. dbt 변수 ruleset_id로 넘긴다.
+  - 시드 evidence_current.csv와 policy_family.csv의 행 (규칙 버전과 정책)
+  - 지금 쓰는 근거마다 sql/evidence/<이름>/<버전>.sql 내용
+  - 근거가 읽는 피처 SQL: features_account.sql, registry의 features_repo 버전 파일
+  - 근거를 판정으로 묶는 모델: stg_evidence, evidence_flags, fake_star_repo, entity_verdict
+처음 정의(시드 두 개만)는 근거 SQL을 버전을 올리지 않고 고치면 같은 id로 공개 숫자를 덮었다 (docs/review_logic.md R-1).
+SQL은 주석, 들여쓰기, 줄 끝 공백, 빈 줄, 줄바꿈 종류를 지운 뒤 해시한다. 주석만 고쳐서 id가 바뀌면 공개 줄이 쓸데없이 늘어난다.
+시드는 행을 정렬해 해시한다 (Windows에서 받은 레포와 클라우드가 같은 id가 되게).
 """
 import csv
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -35,11 +41,39 @@ def write_evidence_current():
             w.writerow([k, v["current"], v["family"]])
 
 
-def ruleset_id():
-    h = hashlib.sha256()
+# 판정을 정하는 모델 (docs/review_logic.md R-1). 판정 경로에 모델이 늘면 여기에 더한다
+VERDICT_MODELS = ("staging/stg_evidence.sql", "gold/evidence_flags.sql", "gold/fake_star_repo.sql", "gold/entity_verdict.sql")
+
+
+def _sql_text(path):
+    """뜻이 같은 SQL은 같은 글자가 되게: 주석, 들여쓰기, 줄 끝 공백, 빈 줄, 줄바꿈 종류를 지운다.
+    ponytail: 문자열 안의 ' -- '도 주석으로 지운다. 지금 판정 SQL에는 없고, 생기면 그 부분만 같은 id가 된다"""
+    text = re.sub(r"\{#.*?#\}", "", path.read_text(encoding="utf-8"), flags=re.S)  # dbt(Jinja) 주석
+    lines = (re.sub(r"(^|\s)--(\s.*|)$", "", ln).strip() for ln in text.splitlines())
+    return "\n".join(ln for ln in lines if ln)
+
+
+def ruleset_parts(root=ROOT):
+    """(이름, 내용) 목록. ruleset_id가 해시하는 입력을 그대로 보여 준다 (시험과 기록용)."""
+    dbt, parts = root / "warehouse" / "dbt", []
     for name in ("evidence_current.csv", "policy_family.csv"):
-        rows = sorted(r.strip() for r in (DBT / "seeds" / name).read_text(encoding="utf-8").splitlines()[1:] if r.strip())
-        h.update(("\n".join([name, *rows]) + "\n").encode("utf-8"))
+        rows = sorted(r.strip() for r in (dbt / "seeds" / name).read_text(encoding="utf-8").splitlines()[1:] if r.strip())
+        parts.append((name, "\n".join(rows)))
+    reg = yaml.safe_load((root / "rules" / "registry.yml").read_text(encoding="utf-8"))
+    for k, v in sorted(reg.items()):
+        if "family" in v:
+            parts.append((f"evidence/{k}/{v['current']}", _sql_text(root / "sql" / "evidence" / k / f"{v['current']}.sql")))
+    fr = reg["features_repo"]["current"]
+    feats = ["features_account.sql", "features_repo.sql" if fr == "f1" else f"features_repo_{fr}.sql"]
+    parts += [(f"silver/{f}", _sql_text(root / "sql" / "silver" / f)) for f in feats]
+    parts += [(f"models/{m}", _sql_text(dbt / "models" / m)) for m in VERDICT_MODELS]
+    return parts
+
+
+def ruleset_id(root=ROOT):
+    h = hashlib.sha256()
+    for name, body in ruleset_parts(root):
+        h.update(f"{name}\n{body}\n".encode("utf-8"))
     return h.hexdigest()[:12]
 
 

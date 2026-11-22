@@ -1,0 +1,225 @@
+"""Gold(DuckDB)에서 화면용 Parquet 묶음을 뽑는다 (docs/site_design.md 3절).
+
+GitHub Pages 화면(site/index.html)은 브라우저 안의 DuckDB-Wasm으로 이 파일들을 읽는다.
+분석가가 레포나 Docker 없이 요구사항을 SQL로 시험해 볼 수 있게, 계정 단위 원본 대신 작게 줄인 표만 내보낸다
+(GitHub Pages 사이트 1GB, 파일 100MB 한도 안. 실제 크기는 meta.json에 남긴다).
+
+사용 (bot-job 컨테이너 안, dbt build 뒤):
+  python -m scripts.export_site                      # warehouse_local/gold.duckdb -> site/data/
+  python -m scripts.export_site --db other.duckdb --out /tmp/site_data
+  python -m scripts.export_site --with-entities       # 대상 단위 표까지 -> site/data_local/ (git에 안 올림, 로컬 확인용)
+
+기본값은 집계만 내보낸다. 계정·저장소 이름이 붙은 봇 판정(대상 단위 표)은 공개 사이트에 싣지 않는다
+(GH Archive 원본의 제3자 권리, 대상 단위 봇 판정 비공개 원칙. docs/site_design.md 3절).
+"""
+import argparse
+import datetime as dt
+import json
+import subprocess
+from pathlib import Path
+
+import duckdb
+
+ROOT = Path(__file__).resolve().parents[1]
+
+# 파일 이름 -> (한 행의 뜻, SQL). 표 이름은 dbt가 main 스키마에 만든 이름 그대로다.
+EXPORTS = {
+    "policy_compare": (
+        "원천 x 날짜 x 지표 x 처리 방식 x 규칙 묶음. 지표 값, 거르지 않음 대비 변화율, lenient 대비 추가 변화율, MDE",
+        "select * from main.policy_compare",
+    ),
+    "ruleset_change_log": (
+        "원천 x 날짜 x 지표 x 처리 방식 x 비교 묶음. 기본 묶음 대비 다른 묶음의 값 차이",
+        "select * from main.ruleset_change_log",
+    ),
+    "ruleset_release": ("공개한 규칙 묶음 하나", "select * from main.ruleset_release"),
+    "metric_policy": ("지표 하나와 그 기본 정책, 이유", "select * from main.metric_policy"),
+    "metric_policy_proposal": (
+        "원천 x 지표. 규칙이 제안한 기본 정책과 자연 변동, 단계별 변화",
+        "select * from main.metric_policy_proposal",
+    ),
+    "daily_action": (
+        "원천 x 날짜 x 이벤트 종류. 정책별 이벤트 수와 계정 수. 그날 그 종류를 낸 계정이 10개 미만이면 싣지 않는다",
+        # 계정 몇 개짜리 칸은 정책 사이 차이로 누가 빠졌는지 좁혀진다 (docs/review_logic.md R-5)
+        """
+        select source, event_date, action,
+               count(*) as events_none,
+               count(*) filter (where is_real_lenient)  as events_lenient,
+               count(*) filter (where is_real_balanced) as events_balanced,
+               count(*) filter (where is_real_strict)   as events_strict,
+               count(distinct actor_key) as accounts_none,
+               count(distinct case when is_real_lenient  then actor_key end) as accounts_lenient,
+               count(distinct case when is_real_balanced then actor_key end) as accounts_balanced,
+               count(distinct case when is_real_strict   then actor_key end) as accounts_strict
+        from main.real_user_events
+        group by all
+        having count(distinct actor_key) >= 10
+        """,
+    ),
+    "mde_cap": (
+        "원천 x 날짜 x 처리 방식 x 자르기 백분위(90 ~ 100, 0.5 간격). 계정 수, 자른 값, 계정당 이벤트 평균과 분산. 실험 감도 계산기의 재료",
+        # 예전 acct_dist(계정당 이벤트 n별 계정 수)는 꼬리의 계정 하나짜리 칸이 none에는 있고 strict에는 없어서
+        # 공개 데이터로 그 계정을 찾을 수 있었다 (docs/review_logic.md R-5). 백분위마다 모멘트만 내보낸다
+        """
+        with a as (
+          select source, event_date, actor_key, count(*) as n,
+                 bool_and(is_real_lenient) as l, bool_and(is_real_balanced) as b, bool_and(is_real_strict) as s
+          from main.real_user_events group by source, event_date, actor_key
+        ),
+        d as (
+          select source, event_date, 'none' as treatment, n, count(*) as accounts from a group by all
+          union all select source, event_date, 'lenient',  n, count(*) from a where l group by all
+          union all select source, event_date, 'balanced', n, count(*) from a where b group by all
+          union all select source, event_date, 'strict',   n, count(*) from a where s group by all
+        ),
+        c as (
+          select *, sum(accounts) over (partition by source, event_date, treatment order by n) as cum,
+                    sum(accounts) over (partition by source, event_date, treatment) as tot
+          from d
+        ),
+        qs as (select r / 2.0 as q from range(180, 201) t(r)),
+        -- 가장 가까운 순위 방식: 누적 계정 수가 q% 이상이 되는 첫 n (policy_compare의 자르기와 같다)
+        cap as (
+          select source, event_date, treatment, q, min(n) as cap_value
+          from c, qs where cum >= ceil(q / 100 * tot) group by all
+        )
+        select d.source, d.event_date, d.treatment, cap.q,
+               sum(d.accounts) as n,
+               case when cap.q < 100 then cap.cap_value end as cap_value,
+               sum(least(d.n, cap.cap_value) * d.accounts)::double / sum(d.accounts) as mean,
+               ((sum(pow(least(d.n, cap.cap_value), 2) * d.accounts) - pow(sum(least(d.n, cap.cap_value) * d.accounts), 2) / sum(d.accounts))
+                 / (sum(d.accounts) - 1))::double as variance
+        from d join cap using (source, event_date, treatment)
+        group by all
+        """,
+    ),
+    "suspects": (
+        "원천 x 대상 x 날짜. 어느 한 정책에서라도 실유저가 아닌 대상과 정책별 제외 여부, 이름, 이벤트 수",
+        """
+        with st as (
+          select source, entity_type, entity_key, event_date,
+                 bool_or(policy = 'lenient'  and not is_real) as excluded_lenient,
+                 bool_or(policy = 'balanced' and not is_real) as excluded_balanced,
+                 bool_or(policy = 'strict'   and not is_real) as excluded_strict,
+                 max(case when policy = 'strict' then excluded_by end) as excluded_by_strict
+          from main.actor_policy_status
+          group by all
+          having bool_or(not is_real)
+        ),
+        acct as (
+          select actor_key, event_date, max(name) as name, sum(cnt) as n_events, arg_max(action, cnt) as top_action
+          from (select actor_key, event_date, action, max(actor_name) as name, count(*) as cnt
+                from main.real_user_events group by actor_key, event_date, action)
+          group by actor_key, event_date
+        ),
+        repo as (select repo_key, event_date, max(repo_name) as name, max(stars_all) as n_events from main.impact group by all)
+        select st.*, coalesce(a.name, r.name) as name, coalesce(a.n_events, r.n_events) as n_events,
+               case when st.entity_type = 'gh_repo' then 'WatchEvent' else a.top_action end as top_action
+        from st
+        left join acct a on st.entity_type = 'gh_account' and a.actor_key = st.entity_key and a.event_date = st.event_date
+        left join repo r on st.entity_type = 'gh_repo' and r.repo_key = st.entity_key and r.event_date = st.event_date
+        """,
+    ),
+    "why_excluded": (
+        "원천 x 대상 x 날짜 x 정책 x 근거. 실유저가 아닌 대상에 걸린 근거, 규칙 버전, 점수, 판정 시각, SQL 지문",
+        "select * exclude (metrics), cast(metrics as varchar) as metrics from main.why_excluded",
+    ),
+    "impact_top": (
+        "저장소 x 날짜 (그날 star 상위 200). 정책별 star 수와 순위",
+        """
+        select *,
+               rank() over (partition by event_date order by stars_lenient desc) as rank_lenient,
+               rank() over (partition by event_date order by stars_strict desc)  as rank_strict
+        from main.impact qualify rank_all <= 200
+        """,
+    ),
+    "evaluation": (
+        "근거 x 버전 x 정답 출처 x 판정 구간(전체는 비어 있음). 정밀도와 대조군 양성률",
+        "select * from main.evaluation",
+    ),
+}
+
+
+# 대상(계정·저장소) 이름과 봇 판정이 한 행에 붙는 표. --with-entities일 때만 내보낸다
+ENTITY_TABLES = {"suspects", "why_excluded", "impact_top"}
+# 집계 표에 이런 컬럼이 섞이면 공개 묶음에서 멈춘다
+ENTITY_COLUMNS = {"name", "actor_name", "repo_name", "actor_key", "repo_key", "entity_key", "actor_id", "repo_id"}
+
+
+def git_commit():
+    try:
+        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True,
+                              check=True).stdout.strip()
+    except Exception:  # noqa: BLE001  ponytail: git이 없는 곳(CI 캐시 등)에서도 내보내기는 돈다
+        return None
+
+
+def descriptions():
+    """gold.yml의 모델·컬럼 설명을 화면의 데이터 사전에 넘긴다 (없으면 빈 값)."""
+    try:
+        import yaml
+        doc = yaml.safe_load((ROOT / "warehouse/dbt/models/gold/gold.yml").read_text(encoding="utf-8"))
+        return {m["name"]: {"description": m.get("description"),
+                            "columns": {c["name"]: c.get("description") for c in m.get("columns", []) or []}}
+                for m in doc.get("models", [])}
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--db", default=str(ROOT / "warehouse_local/gold.duckdb"))
+    ap.add_argument("--out", default=None, help="기본: site/data (집계만), --with-entities면 site/data_local")
+    ap.add_argument("--with-entities", action="store_true", help="대상 단위 표까지. 공개 사이트에 올리지 말 것")
+    ap.add_argument("--allow-unreleased", action="store_true", help="빌드 묶음이 공개 묶음과 달라도 내보낸다(로컬 확인용)")
+    args = ap.parse_args()
+    out = Path(args.out or ROOT / ("site/data_local" if args.with_entities else "site/data"))
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "csv").mkdir(exist_ok=True)
+
+    # 읽기 전용으로 연다: 빌드 중이면 잠금 때문에 실패한다 (DuckDB는 쓰는 프로세스 하나 또는 읽기만 하는 여러 프로세스)
+    con = duckdb.connect(args.db, read_only=True)
+    # 화면 한 장에 공개 묶음 숫자(policy_compare_released)와 빌드 묶음 숫자(나머지 표)가 섞이지 않게 (docs/review_logic.md R-14)
+    released = con.execute("select ruleset_id from main.ruleset_release order by seq desc limit 1").fetchone()[0]
+    built = [r[0] for r in con.execute("select distinct ruleset_id from main.actor_policy_status").fetchall()]
+    if built != [released] and not args.allow_unreleased:
+        raise SystemExit(f"빌드 묶음 {built}이 공개 묶음 {released}와 다르다. 공개 줄을 더하거나 공개 묶음으로 다시 빌드한 뒤 내보낸다 (--allow-unreleased는 로컬 확인용)")
+    tables = {}
+    for name, (grain, sql) in EXPORTS.items():
+        path = out / f"{name}.parquet"
+        csv_path = out / "csv" / f"{name}.csv"
+        if name in ENTITY_TABLES and not args.with_entities:
+            path.unlink(missing_ok=True)  # 예전에 실수로 남은 파일도 지운다
+            csv_path.unlink(missing_ok=True)
+            continue
+        con.execute(f"copy ({sql}) to '{path.as_posix()}' (format parquet, compression zstd)")
+        # 엑셀 "웹에서", 구글 시트 IMPORTDATA용 정적 CSV (UTF-8, BOM 없음: 기계가 읽는 주소. 사람이 받는 CSV는 화면이 BOM을 붙인다)
+        con.execute(f"copy (select * from '{path.as_posix()}') to '{csv_path.as_posix()}' (header, delimiter ',')")
+        cols = con.execute(f"describe select * from '{path.as_posix()}'").fetchall()
+        rows = con.execute(f"select count(*) from '{path.as_posix()}'").fetchone()[0]
+        leaked = ENTITY_COLUMNS & {c[0] for c in cols}
+        assert args.with_entities or not leaked, f"{name}에 대상 단위 컬럼 {leaked}"
+        tables[name] = {"grain": grain, "rows": rows, "bytes": path.stat().st_size, "csv_bytes": csv_path.stat().st_size,
+                        "columns": [{"name": c[0], "type": c[1]} for c in cols]}
+        print(f"{name}: {rows:,}행, {path.stat().st_size:,}바이트")
+
+    span = con.execute("select min(event_date), max(event_date) from main.policy_compare").fetchone()
+    meta = {
+        "exported_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+        "git_commit": git_commit(),
+        "released_ruleset": released,
+        "build_ruleset": built[0] if len(built) == 1 else built,
+        "with_entities": args.with_entities,
+        "event_date_min": str(span[0]), "event_date_max": str(span[1]),
+        "tables": tables,
+        "models": descriptions(),
+    }
+    (out / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
+    total = sum(t["bytes"] for t in tables.values())
+    print(f"합계 {total:,}바이트 -> {out}")
+    # GitHub Pages: 파일 하나 100MB, 사이트 1GB (docs/site_design.md 1절)
+    assert all(max(t["bytes"], t["csv_bytes"]) < 100 * 1024 * 1024 for t in tables.values()), "100MB 넘는 파일이 있다"
+
+
+if __name__ == "__main__":
+    main()
