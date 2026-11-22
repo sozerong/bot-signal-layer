@@ -378,7 +378,7 @@ const LEVELS = [
   { v: "strict", d: "하루 20시간 넘게 활동하거나 한 시간에 저장소 100곳 넘게 건드린 계정까지 빼요. 채점하지 않았으니 최대치로만 보세요" },
 ];
 // 화면 이름. 값(none/lenient/balanced/strict)은 SQL의 treatment 값이라 바꾸지 않고 옆에 같이 보여 준다 (docs/site_design.md 12절)
-const LABEL = { default: "지표별 추천", none: "원본", lenient: "약하게", balanced: "보통", strict: "강하게" };
+const LABEL = { default: "지표별 추천", none: "원본", lenient: "약하게", balanced: "보통", strict: "강하게", cap_top1: "상위 1% 자르기" };
 const plab = (p) => (LABEL[p] && p !== "default" ? `${LABEL[p]} (${p})` : LABEL[p] || p);
 const ro = (w) => { const c = (w.charCodeAt(w.length - 1) - 0xac00) % 28; return c === 0 || c === 8 ? "로" : "으로"; }; // 받침 따라 로/으로
 // 각 단계 밑의 막대: 그날 이벤트 중 남는 몫 (summary()가 채운다)

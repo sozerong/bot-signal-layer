@@ -164,3 +164,4 @@
 - 데이터 사전 "한 행의 뜻"은 meta.json에서 온다. 같은 말로 scripts/export_site.py와 지금 site/data/meta.json을 함께 고쳤다(데이터 값은 그대로). 〔근거: 코드: export_site.py EXPORTS〕
 - 그대로 둔 것: id, data- 속성, 내부 값(none/lenient/balanced/strict), SQL 문, README와 기록 문서의 정책 이름. 기록은 그때 쓴 말 그대로 둔다. 〔근거: 판단. glossary.md에 화면 이름 대응을 더했다〕
 - 확인: 공개 모드, 전체 모드(로컬 데이터), 실데이터 시험 모두 통과, 콘솔 오류 없음. 〔근거: 측정: 2026-11-22 Playwright test_site.py, test_site.py --full, test_real.py〕
+- 점검 반영(handoff_v8 1절): 강도별 비교 표의 다섯째 줄 `cap_top1`이 영문 그대로 보였다. 이름표에 "상위 1% 자르기"를 더해 "상위 1% 자르기 (cap_top1)"로 보인다(MDE 계산기와 같은 말). 내부 값은 그대로다. 〔근거: 코드: site/index.html LABEL. 공개 주소 점검 L14(M-43). warehouse/dbt/models/gold/policy_compare.sql 2행 cap_top1 뜻〕
