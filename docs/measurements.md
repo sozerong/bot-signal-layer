@@ -1350,4 +1350,25 @@ payload 키는 24개 시간 모두 같았다: WatchEvent `[action]`, ForkEvent `
 - 주소 확인: `https://sozerong.github.io/bot-signal-layer/` 200(64,416바이트), `data/meta.json` 200, `data/policy_compare.parquet` 200, `data/csv/policy_compare.csv` 200(text/csv), 대상 단위 `data/suspects.parquet` 404(올리지 않음). 〔근거: 실행: curl -w http_code〕
 - 화면 시험(내장 브라우저, 실제 주소): 요약이 "규칙 묶음 841ebd6f310f 기준"과 7일 숫자를 보이고, SQL 콘솔에서 `select ruleset_id, seq from ruleset_release order by seq`가 4행을 61ms에 돌려준다. 콘솔 오류 0. 로컬과 다른 점(경로, 헤더)은 보이지 않았다. 〔근거: 실행: 내장 브라우저 화면과 콘솔〕
 - 하지 못한 것: 내려받기 단추(엑셀, CSV)는 누르지 않았다. 파일 내려받기는 따로 허락을 받는 일이라, 같은 파일이 주소에서 200으로 오는 것까지만 봤다. 〔근거: 판단: 내려받기는 허락이 필요한 동작. 위 curl 줄〕
-- 첫 CI 이미지 빌드 3분은 캐시가 없어서다. 다음 push부터는 이미지 캐시로 줄 것으로 본다 [확인 필요: 다음 push의 이미지 단계 시간]. 〔근거: 코드: .github/workflows/ci.yml 이미지 캐시. 판단〕
+- 첫 CI 이미지 빌드 3분은 캐시가 없어서다. 갱신: 다음 push(README 주소, run 45000511697)는 성공, 전체 3분 31초(07:56:55 ~ 08:00:26Z), 이미지 53초(3분 1초 → 53초), 표본 실행 32초, pytest 1분 43초. 이미지 캐시가 들었다. 〔근거: gh api runs/45000511697/jobs 단계 시각. 코드: .github/workflows/ci.yml cache-from type=gha〕
+
+**공개 사이트 직접 시험** (2026-11-22 08:0xZ, 내장 브라우저, 실제 주소) 〔근거: 사용자 2026-11-22 "여기 너가 들어가서 테스트 직접 해봐"〕
+
+| 시험 | 결과 | 근거 |
+|---|---|---|
+| 요약: 거름 강도 strict, 날짜 07-15로 바꾸기 | 이벤트 3,009,012건, 활동 계정 656,510개로 바뀜. Gold와 같다 | 〔근거: 화면 글. README q-표, ruleset_change_log base_value〕 |
+| 탭 8개 열기 (요약, SQL 콘솔, 요구사항, 가져가기, 정책 비교, 실험 감도, 규칙 묶음, 데이터 사전) | 모두 내용이 뜨고 페이지 오류 0 | 〔근거: window error·unhandledrejection 수집 0〕 |
+| 요구사항 카드 8개 실행 | 모두 성공, 2 ~ 35행, 3 ~ 5ms. 정밀도 카드 32행(GH 근거만, 웹 채점 없음) | 〔근거: 카드별 결과 줄 수와 시간〕 |
+| SQL 콘솔 정상 질의 | `select source, count(*) … policy_compare` → gh 966행 하나(웹 줄 없음), 2ms | 〔근거: 화면 결과〕 |
+| SQL 콘솔 틀린 질의 (없는 컬럼, 없는 표 suspects) | "SQL을 실행하지 못했습니다. 고친 뒤 다시 실행하세요."와 DuckDB 원문 오류(Binder, Catalog)를 함께 보인다 | 〔근거: 화면 결과〕 |
+| 쓰기 질의 (create table) | 보는 사람 브라우저 메모리 안에서만 만들어진다(다시 불러오면 사라짐). 공개 파일은 바뀌지 않는다 | 〔근거: 두 번째 실행 "already exists". 판단: DuckDB-Wasm은 브라우저 안 메모리 DB〕 |
+| 내려받기 엑셀, CSV, JSON, Parquet, 표 복사 | 네 파일이 만들어진다(xlsx 5,520B, csv 86B, json 178B, parquet 467B), 표 복사는 탭 구분 83자 | 〔근거: 파일 저장을 가로채 이름·형식·크기만 확인. 실제 파일은 저장하지 않았다〕 |
+| 가져가기: 모든 표를 엑셀 하나로 | `실유저_데이터_2024-07-15_2024-07-21.xlsx` 1,322,729B | 〔근거: 같은 가로채기〕 |
+| 가져가기 주소 | 엑셀·시트용 주소가 `https://sozerong.github.io/bot-signal-layer/data/csv/…`로 새 이름이다. 그 주소는 200 text/csv | 〔근거: 화면 글, curl〕 |
+| 바닥글 이슈 양식 링크 | `github.com/sozerong/bot-signal-layer/issues/new?template=requirement.yml` | 〔근거: #foot a href〕 |
+| 휴대폰 폭 375px, 탭 8개 | 가로 넘침 0px. 탭 줄은 그 안에서 옆으로 민다 | 〔근거: scrollWidth − innerWidth = 0〕 |
+| 어두운 화면 | 글과 막대가 읽힌다 | 〔근거: 스크린샷〕 |
+
+- 작은 흠 하나: 데이터를 읽기 전 1 ~ 2초 동안 탭 줄 끝에 "왜 빠졌나" 탭이 보였다가, 공개 묶음에 대상 단위 표가 없어 사라진다. 기능 문제는 없고, 처음부터 숨겨 두면 깜박임이 없어진다(고치지 않음). 〔근거: 어두운 화면 첫 스크린샷. 코드: site/index.html t-why〕
+- 하지 못한 것: 첫 방문 불러오기 시간은 브라우저 캐시가 있어 재지 못했다. 〔근거: performance 항목 transferSize 0〕
+
