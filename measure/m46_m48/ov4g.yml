@@ -1,0 +1,6 @@
+services:
+  bot-job:
+    mem_limit: 4g
+    memswap_limit: 4g
+    environment:
+      SPARK_DRIVER_MEMORY: 3072m

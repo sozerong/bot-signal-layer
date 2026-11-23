@@ -373,3 +373,15 @@
 - 태그: `화면` 〔근거: 판단〕
 - 원인: 설명을 `meta.models[뷰 이름].columns || meta.models[원래 표].columns`로 찾았다. gold.yml에 뷰 항목(설명만 있고 컬럼 없음)이 있어 앞쪽이 빈 객체 `{}`로 참이 되어 뒤쪽으로 넘어가지 않았다. 컬럼 사전 전에는 모든 표가 비어 있어서 드러나지 않았다. 〔근거: 코드: site/index.html schema()〕
 - 처방: `_released`를 떼고 원래 표 이름으로 바로 찾는다(두 이름의 컬럼이 같다). 〔근거: 코드: policy_compare_released.sql `select *`〕
+
+
+<a id="f-28"></a>
+## F-28. AQE 켬·끔 실험의 다섯 번째 실행(끔 두 번째)에서 Spark JVM이 죽었다 (4g 상한, 다시 돌리지 않음) [기록만] 〔근거: 실행: logs/m46_m48/log_g3_aqe.txt, spark_runs.txt 2026-11-23T03:44Z 줄〕
+
+- 태그: `Spark`, `메모리` 〔근거: 판단〕
+- 증상: `g3_aqe.py`가 데움, 켬, 끔, 켬을 마치고 다섯 번째(끔)를 시작한 뒤 파이썬 쪽이 `Py4JNetworkError: Answer from Java side is empty`, 이어서 `ConnectionRefusedError`로 끝났다. 앱 종료 줄 없이 끝나 이벤트 로그가 `.inprogress`로 남았다. rc=1, 벽시계 31초. 〔근거: 실행: log_g3_aqe.txt 12 ~ 43행. ls spark-events〕
+- 관측: cgroup 최대 사용량이 상한과 같은 4,294,967,296바이트, failcnt 0. 로그에 `java.lang.OutOfMemoryError` 줄은 없다. 〔근거: 실행: log_g3_aqe.txt MEM 줄. grep OutOfMemory 결과 없음〕
+- 원인 후보: (가) 컨테이너 상한을 넘어 커널이 JVM을 죽였다. 힙 3,072m 밖의 메모리(메타스페이스, 코드 캐시, 셔플·네트워크 버퍼, 파이썬)가 실행을 거듭하며 쌓였고, AQE를 끄면 태스크가 1,208개로 늘어 순간 메모리가 더 든다. 첫 끔(3번째 실행)은 살아남았다. (나) 힙 안 OOM이면 로그에 OutOfMemoryError가 찍히므로 가능성이 낮다. 〔근거: 판단. M-48 덧붙임 표 태스크 칸. 확인 필요: `docker inspect`의 OOMKilled는 `--rm`이라 남지 않았다. 다시 하면 `--rm` 없이 돌려 OOMKilled를 본다〕
+- 원인이 자명하지 않았던 이유: 같은 설정의 끔 실행이 앞에서 한 번 성공했고, failcnt가 0이라 상한에 걸린 기록처럼 보이지 않는다. 같은 날 features_account 실험(g2_facc)도 최대 사용량이 상한에 닿았는데 끝까지 갔다(페이지 캐시는 상한 근처에서 회수된다). 〔근거: M-48 덧붙임 표 2행. 실행: spark_runs.txt g2_facc 줄〕
+- 처방: 없음(오류는 기록만 하고 고치지 않는다). 남은 실행 4번으로 비교했다. 〔근거: 사용자 메모 "오류는 기록만". M-48 덧붙임〕
+- 다시 할 때: 앱 하나에서 실행 횟수를 줄이거나(데움, 켬, 끔), 끔을 따로 새 앱으로 돌리고, `--rm` 없이 OOMKilled를 확인한다. 〔근거: 판단〕

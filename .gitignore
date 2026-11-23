@@ -31,3 +31,9 @@ docs/mentoring_*.md
 docs/review_mentor.md
 docs/review_logic.md
 docs/daangn_review.md
+docs/night_report_*.md
+docs/next_actions_*.md
+docs/resume_fact_check.md
+
+# 측정 실행 출력 (스크립트는 measure/에 둔다)
+logs/
